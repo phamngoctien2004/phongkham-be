@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface DepartmentService {
     List<DepartmentResponse> getAllDepartment();
+    Department findById(Integer id);
 }

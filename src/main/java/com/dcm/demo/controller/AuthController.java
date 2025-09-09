@@ -1,6 +1,7 @@
 package com.dcm.demo.controller;
 
 import com.dcm.demo.dto.request.LoginRequest;
+import com.dcm.demo.dto.request.OtpRequest;
 import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.service.interfaces.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -21,4 +22,12 @@ public class AuthController {
                 new ApiResponse<>(authService.login(loginRequest),"Login successful")
         );
     }
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody OtpRequest request) {
+        authService.sendOtp(request);
+        return ResponseEntity.ok(
+                new ApiResponse<>("", "Send OTP successful")
+        );
+    }
 }
+

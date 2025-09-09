@@ -52,6 +52,6 @@ public class LabOrder {
     private LocalDateTime queueTime;
 
     public enum TestStatus {
-        CHO_THUC_HIEN, DANG_THUC_HIEN, HOAN_THANH, HUY_BO
+        CHO_THUC_HIEN, HOAN_THANH, HUY_BO
     }
 }
