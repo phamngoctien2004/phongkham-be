@@ -1,0 +1,65 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: demo
+
+  firebase:
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:127.0.0.1}:3306/conchoviethung
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: tienolympia2020@gmail.com
+    password: blgrmrhmzuososbs
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  web:
+    resources:
+      static-locations: classpath:/static/, file:/var/app/static/
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 200MB
+
+jwt:
+  secret: ${JWT_SECRET}
+  access_ttl: 60
+  refresh_ttl: 43200
+
+app:
+  static:
+    upload-dir: /home/tien/Pictures
+logging:
+  level:
+    org.springframework.security: ${LOG_LEVEL_SECURITY:DEBUG}
+
+springdoc:
+  swagger-ui:
+    path: /docs
+
+url:
+  fe: ${FE_URL:http://localhost:3000}
