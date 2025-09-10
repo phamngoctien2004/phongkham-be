@@ -37,6 +37,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getById(Integer id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    @Override
     public UserResponse findById(Integer id) {
         return userMapper.toResponse(
                 userRepository.findById(id)
@@ -61,11 +66,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(request.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOTFOUND));
         user.setEmail(request.getEmail());
-        user.setFullName(request.getFullName());
-        user.setAddress(request.getAddress());
-        user.setCccd(request.getCccd());
-        user.setBirth(request.getBirth());
-        user.setGender(request.getGender());
+
         return userMapper.toResponse(userRepository.save(user));
     }
 
@@ -82,6 +83,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Integer id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public User save(User user) {
+        return userRepository.save(user);
     }
 
     @Override

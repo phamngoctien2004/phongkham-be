@@ -21,4 +21,5 @@ public class PatientResponse {
     private LocalDate birth;
     private User.Gender gender;
     private String profileImage;
+    private String relationship;
 }

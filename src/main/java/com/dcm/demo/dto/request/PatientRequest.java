@@ -8,7 +8,9 @@ import java.time.LocalDate;
 
 @Data
 public class PatientRequest {
-    private int id;
+    private Integer id;
+    private String phone;
+    private String email;
     private String fullName;
     private String address;
     private String cccd;
@@ -18,4 +20,7 @@ public class PatientRequest {
     private BigDecimal weight;
     private BigDecimal height;
     private String profileImage;
+
+//  lien ket tai khoan
+    private Integer userId;
 }

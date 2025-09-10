@@ -28,7 +28,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 //           tao user
             user = userService.createUserEntity(userRequest);
         }else{
-            medicalRecord.setPatient(user.getPatient());
+//            medicalRecord.setPatient(user.getPatient());
         }
 
         if (request.getAppointmentId() != null) {

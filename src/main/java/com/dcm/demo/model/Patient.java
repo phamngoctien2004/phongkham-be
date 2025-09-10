@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,10 +22,6 @@ public class Patient {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_benh_nhan")
     private Integer id;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_nguoi_dung")
-    private User user;
 
     @Column(name = "ma_benh_nhan", unique = true, length = 20)
     private String code;
@@ -65,9 +62,18 @@ public class Patient {
     private LocalDateTime registrationDate;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Relationship> relationships;
+    private List<Relationship> relationships = new ArrayList<>();
     @Override
     public String toString() {
         return "";
+    }
+
+    public void addLink(Relationship r) {
+        relationships.add(r);
+        r.setPatient(this);
+    }
+    public void removeLink(Relationship r) {
+        relationships.remove(r);
+        r.setPatient(null);
     }
 }

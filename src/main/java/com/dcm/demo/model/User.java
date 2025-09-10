@@ -2,6 +2,7 @@ package com.dcm.demo.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,6 +16,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
 
     @Id
@@ -28,14 +30,15 @@ public class User {
     @Column(name = "mat_khau")
     private String password;
 
+    @Column(name = "sdt")
+    private String phone;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "vai_tro", nullable = false)
     private Role role;
 
-    @Column(name = "anh_nguoi_dung", length = 500)
-    private String profileImage;
-
     @Column(name = "trang_thai")
+    @Builder.Default
     private Boolean status = true;
 
     @CreationTimestamp
