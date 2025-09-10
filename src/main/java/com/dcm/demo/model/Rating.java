@@ -26,4 +26,8 @@ public class Rating {
 
     @Column(name = "nhan_xet", columnDefinition = "TEXT")
     private String comment;
+    @Override
+    public String toString() {
+        return "";
+    }
 }

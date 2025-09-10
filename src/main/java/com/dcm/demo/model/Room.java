@@ -26,4 +26,8 @@ public class Room {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_khoa")
     private Department department;
+    @Override
+    public String toString() {
+        return "";
+    }
 }

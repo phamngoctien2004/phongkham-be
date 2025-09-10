@@ -64,4 +64,8 @@ public class Invoice {
     public enum PaymentStatus {
         CHUA_THANH_TOAN, HOAN_THANH
     }
+    @Override
+    public String toString() {
+        return "";
+    }
 }

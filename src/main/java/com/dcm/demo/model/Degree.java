@@ -24,4 +24,8 @@ public class Degree {
 
     @Column(name = "phi_kham", nullable = false, precision = 12, scale = 0)
     private BigDecimal examinationFee;
+    @Override
+    public String toString() {
+        return "";
+    }
 }

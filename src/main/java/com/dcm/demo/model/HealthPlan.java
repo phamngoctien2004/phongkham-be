@@ -44,5 +44,8 @@ public class HealthPlan {
     public enum ServiceType {
         DICH_VU, XET_NGHIEM, CHUAN_DOAN_HINH_ANH, KHAC, CHUYEN_KHOA
     }
-
+    @Override
+    public String toString() {
+        return "";
+    }
 }

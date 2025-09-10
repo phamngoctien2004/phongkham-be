@@ -43,4 +43,8 @@ public class LabResult {
     public enum ResultStatus {
         HOAN_THANH, CAN_KIEM_TRA_LAI
     }
+    @Override
+    public String toString() {
+        return "";
+    }
 }

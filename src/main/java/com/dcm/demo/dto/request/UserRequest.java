@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -16,11 +17,6 @@ public class UserRequest {
     private int id;
     private String email;
     private String password;
-    private String fullName;
     private String phone;
-    private String address;
-    private String cccd;
-    private LocalDate birth;
-    private User.Gender gender;
     private User.Role role;
 }

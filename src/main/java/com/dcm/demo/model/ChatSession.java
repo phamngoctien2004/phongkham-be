@@ -34,4 +34,8 @@ public class ChatSession {
 
     @Column(name = "ngay_ket_thuc")
     private LocalDateTime endDate;
+    @Override
+    public String toString() {
+        return "";
+    }
 }

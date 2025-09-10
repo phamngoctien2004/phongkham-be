@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "benh_nhan")
@@ -15,18 +17,36 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Patient {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_benh_nhan")
-    private Integer patientId;
+    private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_nguoi_dung")
     private User user;
 
     @Column(name = "ma_benh_nhan", unique = true, length = 20)
-    private String patientCode;
+    private String code;
+
+    @Column(name = "ho_ten", nullable = false)
+    private String fullName;
+
+    @Column(name = "sdt", length = 20)
+    private String phone;
+
+    @Column(name = "dia_chi", columnDefinition = "TEXT")
+    private String address;
+
+    @Column(name = "CCCD", columnDefinition = "TEXT")
+    private String cccd;
+
+    @Column(name = "ngay_sinh")
+    private LocalDate birth;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gioi_tinh")
+    private User.Gender gender;
 
     @Column(name = "nhom_mau", length = 10)
     private String bloodType;
@@ -37,7 +57,17 @@ public class Patient {
     @Column(name = "can_nang", precision = 5, scale = 2)
     private BigDecimal weight; // in kg
 
+    @Column(name = "anh_nguoi_dung", length = 500)
+    private String profileImage;
+
     @CreationTimestamp
     @Column(name = "ngay_dang_ky")
     private LocalDateTime registrationDate;
+
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Relationship> relationships;
+    @Override
+    public String toString() {
+        return "";
+    }
 }

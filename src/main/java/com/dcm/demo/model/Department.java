@@ -33,4 +33,8 @@ public class Department {
 
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
     private List<Doctor> doctors;
+    @Override
+    public String toString() {
+        return "";
+    }
 }

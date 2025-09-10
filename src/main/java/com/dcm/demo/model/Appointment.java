@@ -27,14 +27,6 @@ public class Appointment {
     private Doctor doctor;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_phong_kham")
-    private Room room;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_khoa")
-    private Department department;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_dich_vu_kham")
     private HealthPlan healthPlan;
 
@@ -75,6 +67,10 @@ public class Appointment {
     private User confirmedBy;
 
     public enum AppointmentStatus {
-        CHO_XAC_NHAN, HOAN_THANH, KHONG_DEN
+        CHO_XAC_NHAN, DA_XAC_NHAN, KHONG_DEN
+    }
+    @Override
+    public String toString() {
+        return "";
     }
 }

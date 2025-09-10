@@ -30,4 +30,8 @@ public class PrescriptionDetail {
 
     @Column(name = "huong_dan_su_dung", columnDefinition = "TEXT")
     private String usageInstructions;
+    @Override
+    public String toString() {
+        return "";
+    }
 }

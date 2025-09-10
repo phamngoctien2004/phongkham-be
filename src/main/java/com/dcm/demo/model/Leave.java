@@ -41,4 +41,8 @@ public class Leave {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nguoi_duyet")
     private User approver;
+    @Override
+    public String toString() {
+        return "";
+    }
 }

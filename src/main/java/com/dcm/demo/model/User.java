@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "nguoi_dung")
@@ -27,25 +28,6 @@ public class User {
     @Column(name = "mat_khau")
     private String password;
 
-    @Column(name = "ho_ten", nullable = false)
-    private String fullName;
-
-    @Column(name = "sdt", length = 20)
-    private String phone;
-
-    @Column(name = "dia_chi", columnDefinition = "TEXT")
-    private String address;
-
-    @Column(name = "CCCD", columnDefinition = "TEXT")
-    private String cccd;
-
-    @Column(name = "ngay_sinh")
-    private LocalDate birth;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "gioi_tinh")
-    private Gender gender;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "vai_tro", nullable = false)
     private Role role;
@@ -60,11 +42,18 @@ public class User {
     @Column(name = "ngay_tao")
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Relationship> relationships;
+
     public enum Gender {
         NAM, NU
     }
 
     public enum Role {
         BENH_NHAN, BAC_SI, LE_TAN, ADMIN
+    }
+    @Override
+    public String toString() {
+        return "";
     }
 }

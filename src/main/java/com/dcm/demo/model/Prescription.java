@@ -37,4 +37,8 @@ public class Prescription {
 
     @Column(name = "huong_dan_chung", columnDefinition = "TEXT")
     private String generalInstructions;
+    @Override
+    public String toString() {
+        return "";
+    }
 }

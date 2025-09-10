@@ -10,14 +10,8 @@ import java.time.LocalDateTime;
 public class UserResponse {
     private Integer id;
     private String email;
-    private String fullName;
     private String phone;
-    private String address;
-    private String cccd;
-    private LocalDate birth;
-    private User.Gender gender;
     private User.Role role;
-    private String profileImage;
     private Boolean status;
     private LocalDateTime createdAt;
 }

@@ -38,4 +38,8 @@ public class ChatMessage {
     @CreationTimestamp
     @Column(name = "thoi_gian_gui")
     private LocalDateTime sentTime;
+    @Override
+    public String toString() {
+        return "";
+    }
 }

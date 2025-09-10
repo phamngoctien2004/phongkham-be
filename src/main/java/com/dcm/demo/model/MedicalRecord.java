@@ -19,7 +19,10 @@ public class MedicalRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_phieu_kham")
-    private Integer recordId;
+    private Integer id;
+
+    @Column(name = "ma_phieu_kham", unique = true, length = 20)
+    private String code;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_benh_nhan")
@@ -33,15 +36,12 @@ public class MedicalRecord {
     @JoinColumn(name = "id_bac_si", nullable = false)
     private Doctor doctor;
 
-    @Column(name = "ma_phieu_kham", unique = true, length = 20)
-    private String recordCode;
-
     @CreationTimestamp
     @Column(name = "ngay_kham")
-    private LocalDateTime examinationDate;
+    private LocalDateTime date;
 
     @Column(name = "trieu_chung_chinh", columnDefinition = "TEXT")
-    private String mainSymptoms;
+    private String symptoms;
 
     @Column(name = "kham_lam_sang", columnDefinition = "TEXT")
     private String clinicalExamination;
@@ -53,13 +53,13 @@ public class MedicalRecord {
     private String treatmentPlan;
 
     @Column(name = "ghi_chu_bac_si", columnDefinition = "TEXT")
-    private String doctorNotes;
+    private String note;
 
     @Column(name = "phi_kham", precision = 15, scale = 2)
-    private BigDecimal examinationFee = BigDecimal.ZERO;
+    private BigDecimal fee = BigDecimal.ZERO;
 
     @Column(name = "tong_chi_phi", precision = 15, scale = 2)
-    private BigDecimal totalCost = BigDecimal.ZERO;
+    private BigDecimal total = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")
@@ -67,5 +67,9 @@ public class MedicalRecord {
 
     public enum RecordStatus {
         DANG_KHAM, CHO_XET_NGHIEM, HOAN_THANH, HUY
+    }
+    @Override
+    public String toString() {
+        return "";
     }
 }

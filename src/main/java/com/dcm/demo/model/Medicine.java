@@ -25,4 +25,8 @@ public class Medicine {
 
     @Column(name = "dang_bao_che", length = 100)
     private String dosageForm;
+    @Override
+    public String toString() {
+        return "";
+    }
 }

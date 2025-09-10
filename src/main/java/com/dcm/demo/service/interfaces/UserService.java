@@ -11,9 +11,12 @@ import java.util.List;
 public interface UserService {
     User getUserByEmailOrPhone(String emailOrPhone);
     UserResponse findById(Integer id);
+    User findByPhone(String phone);
     //  create & update
     UserResponse createUser(UserRequest user);
 
+
+    User createUserEntity(UserRequest user);
     UserResponse updateUser(UserRequest user);
 
     void changePassword(ChangePasswordRequest request);
@@ -23,5 +26,5 @@ public interface UserService {
     //  delete
     void deleteUser(Integer id);
 
-
+    User getCurrentUser();
 }

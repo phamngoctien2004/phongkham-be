@@ -36,4 +36,8 @@ public class Blog {
 
     @Column(name = "trang_thai", length = 50)
     private String status;
+    @Override
+    public String toString() {
+        return "";
+    }
 }
