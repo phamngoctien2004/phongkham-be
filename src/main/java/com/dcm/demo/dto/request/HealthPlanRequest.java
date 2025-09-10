@@ -3,6 +3,6 @@ package com.dcm.demo.dto.request;
 import lombok.Data;
 
 @Data
-public class ExamRequest {
+public class HealthPlanRequest {
 
 }

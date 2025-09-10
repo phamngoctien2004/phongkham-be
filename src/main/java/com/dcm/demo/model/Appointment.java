@@ -33,6 +33,11 @@ public class Appointment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_khoa")
     private Department department;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_dich_vu_kham")
+    private HealthPlan healthPlan;
+
     @Column(name = "ho_ten", nullable = false)
     private String fullName;
 
@@ -70,6 +75,6 @@ public class Appointment {
     private User confirmedBy;
 
     public enum AppointmentStatus {
-        CHO_XAC_NHAN, DA_XAC_NHAN, HOAN_THANH, KHONG_DEN
+        CHO_XAC_NHAN, HOAN_THANH, KHONG_DEN
     }
 }

@@ -5,10 +5,12 @@ import com.dcm.demo.mapper.AppointmentMapper;
 import com.dcm.demo.model.Appointment;
 import com.dcm.demo.model.Department;
 import com.dcm.demo.model.Doctor;
+import com.dcm.demo.model.HealthPlan;
 import com.dcm.demo.repository.AppointmentRepository;
 import com.dcm.demo.service.interfaces.AppointmentService;
 import com.dcm.demo.service.interfaces.DepartmentService;
 import com.dcm.demo.service.interfaces.DoctorService;
+import com.dcm.demo.service.interfaces.HealthPlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,18 +21,27 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentMapper mapper;
     private final DoctorService doctorService;
     private final DepartmentService departmentService;
+    private final HealthPlanService healthPlanService;
     @Override
     public void createAppointment(AppointmentRequest request) {
         Appointment appointment = mapper.toEntity(request);
+
+        if(request.getHealthPlanId() != null){
+            HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
+            appointment.setHealthPlan(healthPlan);
+        }
         if(request.getDoctorId() != null){
             Doctor doctor = doctorService.findById(request.getDoctorId());
             Department department = doctor.getDepartment();
             appointment.setDoctor(doctor);
             appointment.setDepartment(department);
-        }else{
+        }
+        if(request.getDepartmentId() != null){
             Department department = departmentService.findById(request.getDepartmentId());
             appointment.setDepartment(department);
         }
+
+        repository.save(appointment);
         System.out.println("ok");
     }
 }

@@ -1,6 +1,7 @@
 package com.dcm.demo.controller;
 
 import com.dcm.demo.dto.request.AppointmentRequest;
+import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.service.interfaces.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AppointmentController {
     private final AppointmentService appointmentService;
-    @PostMapping("/book")
+    @PostMapping("")
     public ResponseEntity<?> bookAppointment(@RequestBody AppointmentRequest request) {
         appointmentService.createAppointment(request);
-        return ResponseEntity.ok("Appointment booked successfully");
+        return ResponseEntity.ok(
+                new ApiResponse<>("", "Appointment booked successfully")
+        );
     }
 }

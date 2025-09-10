@@ -11,8 +11,10 @@ public class AppointmentRequest {
     private String fullName;
     private String phone;
     private User.Gender gender;
+    private LocalDate birth;
     private String email;
     private String address;
+    private Integer healthPlanId;
     private Integer doctorId;
     private Integer departmentId;
     private LocalDate date; // ngay kham

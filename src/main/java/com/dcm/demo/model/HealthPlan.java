@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExaminationService {
+public class HealthPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_dich_vu")
@@ -26,7 +26,7 @@ public class ExaminationService {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "loai")
-    private ServiceType type = ServiceType.KHAM;
+    private ServiceType type = ServiceType.DICH_VU;
 
     @Column(name = "gia", precision = 15, scale = 2)
     private BigDecimal price = BigDecimal.ZERO;
@@ -37,7 +37,12 @@ public class ExaminationService {
     @Column(name = "trang_thai")
     private Boolean status = true;
 
+    @OneToOne
+    @JoinColumn(name = "id_phong")
+    private Room room;
+
     public enum ServiceType {
-        KHAM, XET_NGHIEM, CHUAN_DOAN_HINH_ANH, KHAC
+        DICH_VU, XET_NGHIEM, CHUAN_DOAN_HINH_ANH, KHAC, CHUYEN_KHOA
     }
+
 }

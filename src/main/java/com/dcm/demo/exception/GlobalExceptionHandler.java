@@ -1,5 +1,6 @@
 package com.dcm.demo.exception;
 
+import com.dcm.demo.dto.response.ApiResponse;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AppException.class)
     public ResponseEntity<?> handleAppException(AppException appException) {
         ErrorCode error = appException.getErrorCode();
-        return new ResponseEntity<>(error.getMessage(), error.getHttpStatus());
+        return new ResponseEntity<>(
+                new ApiResponse<>("", error.getMessage()), error.getHttpStatus());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
