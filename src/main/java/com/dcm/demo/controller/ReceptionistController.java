@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ReceptionistController {
     private final AppointmentService appointmentService;
-    private final PatientService patientService;
     private final MedicalRecordService medicalRecordService;
     @PostMapping("/confirm")
     public ResponseEntity<?> changeStatusAppointment(@RequestBody AcceptAppointmentRequest request) {
@@ -26,17 +25,6 @@ public class ReceptionistController {
         );
     }
 
-    @PostMapping("/patient")
-    public ResponseEntity<?> createPatient(@RequestBody PatientRequest request) {
-        return ResponseEntity.ok(
-                new ApiResponse<>(patientService.create(request), "Create patient successfully")
-        );
-    }
-    @GetMapping("/patient")
-    public ResponseEntity<?> getPatientsByPhone(@RequestParam String phone) {
-        return ResponseEntity.ok(
-                new ApiResponse<>(patientService.findAllPatientByPhone(phone), "Find patient successfully")
-        );
-    }
+
 
 }
