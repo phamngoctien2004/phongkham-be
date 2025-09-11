@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "dich_vu_kham")
@@ -41,6 +42,13 @@ public class HealthPlan {
     @JoinColumn(name = "id_phong")
     private Room room;
 
+//    danh sach chi tiet cua goi kham
+    @OneToMany(mappedBy = "service")
+    private List<healthPlanDetail> healthPlanDetails;
+
+//    danh sach xet nghiep thuoc cac goi kham nao
+    @OneToMany(mappedBy = "serviceDetail")
+    private List<healthPlanDetail> belongHealthPlan;
     public enum ServiceType {
         DICH_VU, XET_NGHIEM, CHUAN_DOAN_HINH_ANH, KHAC, CHUYEN_KHOA
     }

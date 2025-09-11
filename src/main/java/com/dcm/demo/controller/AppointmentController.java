@@ -5,10 +5,7 @@ import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.service.interfaces.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -20,6 +17,12 @@ public class AppointmentController {
         appointmentService.createAppointment(request);
         return ResponseEntity.ok(
                 new ApiResponse<>("", "Appointment booked successfully")
+        );
+    }
+    @GetMapping("/phone")
+    public ResponseEntity<?> getAppointmentsByPhone(@RequestParam String phone) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(appointmentService.findByPhone(phone), "success")
         );
     }
 }

@@ -45,7 +45,6 @@ public class PatientServiceImpl implements PatientService {
         );
     }
 
-
     //    tao user va account
     @Override
     public PatientResponse createPatientAndAccount(PatientRequest request) {
@@ -54,7 +53,6 @@ public class PatientServiceImpl implements PatientService {
                 .phone(request.getPhone())
                 .role(User.Role.BENH_NHAN)
                 .build();
-//      insert user
         User newUser = userService.save(user);
 
         return patientMapper.toResponse(

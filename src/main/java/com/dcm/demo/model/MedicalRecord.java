@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "phieu_kham_benh")
@@ -15,7 +16,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MedicalRecord {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_phieu_kham")
@@ -28,9 +28,16 @@ public class MedicalRecord {
     @JoinColumn(name = "id_benh_nhan")
     private Patient patient;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_dat_lich")
-    private Appointment appointment;
+    @OneToMany(mappedBy = "medicalRecord")
+    private List<LabOrder>  labOrders;
+
+    @ManyToOne
+    @JoinColumn(name = "id_goi_kham")
+    private HealthPlan healthPlan;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "id_dat_lich")
+//    private Appointment appointment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_bac_si", nullable = false)
@@ -72,4 +79,5 @@ public class MedicalRecord {
     public String toString() {
         return "";
     }
+
 }

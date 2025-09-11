@@ -1,7 +1,10 @@
 package com.dcm.demo.service.interfaces;
 
-import com.dcm.demo.dto.request.CreateMedicalRecord;
+import com.dcm.demo.dto.request.MedicalRequest;
 
 public interface MedicalRecordService {
-    void createMedicalRecord(CreateMedicalRecord request);
+    void create(MedicalRequest request);
+    void update(MedicalRequest request);
+
+
 }

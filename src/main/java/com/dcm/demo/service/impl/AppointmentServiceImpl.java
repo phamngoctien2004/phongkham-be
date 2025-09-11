@@ -1,6 +1,9 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.AppointmentRequest;
+import com.dcm.demo.dto.response.AppointmentResponse;
+import com.dcm.demo.dto.response.DoctorResponse;
+import com.dcm.demo.dto.response.HealthPlanResponse;
 import com.dcm.demo.mapper.AppointmentMapper;
 import com.dcm.demo.model.Appointment;
 import com.dcm.demo.model.Doctor;
@@ -11,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AppointmentServiceImpl implements AppointmentService {
@@ -20,16 +25,17 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final DepartmentService departmentService;
     private final HealthPlanService healthPlanService;
     private final UserService userService;
+
     @Override
     @Transactional
     public void createAppointment(AppointmentRequest request) {
         Appointment appointment = mapper.toEntity(request);
 
-        if(request.getHealthPlanId() != null){
+        if (request.getHealthPlanId() != null) {
             HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
             appointment.setHealthPlan(healthPlan);
         }
-        if(request.getDoctorId() != null){
+        if (request.getDoctorId() != null) {
             Doctor doctor = doctorService.findById(request.getDoctorId());
             appointment.setDoctor(doctor);
         }
@@ -49,10 +55,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 //        appointment.setConfirmedBy(user);
 
         repository.save(appointment);
-        if("DA_XAC_NHAN".equals(status.name())){
+        if ("DA_XAC_NHAN".equals(status.name())) {
             return "Appointment confirmed successfully";
         }
-        if("HOAN_THANH".equals(status.name())){
+        if ("HOAN_THANH".equals(status.name())) {
             return "Appointment completed successfully";
         }
         return "Appointment cancelled successfully";
@@ -61,5 +67,29 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public Appointment findById(Integer id) {
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Appointment not found"));
+    }
+
+    @Override
+    public List<AppointmentResponse> findByPhone(String phone) {
+        List<Appointment> appointments = repository.findByPhoneAndStatus(phone, Appointment.AppointmentStatus.CHO_XAC_NHAN);
+
+        return appointments.stream().map((appointment -> {
+            AppointmentResponse response = mapper.toResponse(appointment);
+
+            Doctor doctor = appointment.getDoctor();
+            DoctorResponse doctorResponse = new DoctorResponse();
+            doctorResponse.setId(doctor.getId());
+            doctorResponse.setFullName(doctor.getFullName());
+
+            HealthPlan healthPlan = appointment.getHealthPlan();
+            HealthPlanResponse healthPlanResponse = new HealthPlanResponse();
+            healthPlanResponse.setId(healthPlan.getId());
+            healthPlanResponse.setName(healthPlan.getName());
+
+            response.setDoctorResponse(doctorResponse);
+            response.setHealthPlanResponse(healthPlanResponse);
+            return response;
+        })).toList();
+
     }
 }
