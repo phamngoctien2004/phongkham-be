@@ -5,14 +5,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Date;
 
 @Entity
-@Table(name = "lich_lam_viec_bac_si")
+@Table(name = "lich_lam_chinh_thuc")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Schedule {
+public class ScheduleOfficial {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -22,9 +24,8 @@ public class Schedule {
     @JoinColumn(name = "id_bac_si", nullable = false)
     private Doctor doctor;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "thu_trong_tuan", nullable = false)
-    private Schedule.DayOfWeek day;
+    @Column(name = "ngay_lam")
+    private LocalDate date;
 
     @Column(name = "khung_gio_bat_dau", nullable = false)
     private LocalTime startTime;
@@ -32,7 +33,12 @@ public class Schedule {
     @Column(name = "khung_gio_ket_thuc", nullable = false)
     private LocalTime endTime;
 
-    public enum DayOfWeek {
-        T2, T3, T4, T5, T6, T7, CN
-    }
+    @Column(name = "so_luong")
+    private int max = 2;
+
+    @Column(name = "da_xac_nhan")
+    private int booked = 0;
+
+    @Column(name = "trang_thai")
+    private boolean status = true;
 }

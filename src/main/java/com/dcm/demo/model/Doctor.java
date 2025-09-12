@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "bac_si")
@@ -58,6 +60,10 @@ public class Doctor {
 
     @Column(name = "trang_thai")
     private Boolean status = true;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "doctor")
+    private List<ScheduleOfficial> scheduleOfficials = new ArrayList<>();
+
     @Override
     public String toString() {
         return "";

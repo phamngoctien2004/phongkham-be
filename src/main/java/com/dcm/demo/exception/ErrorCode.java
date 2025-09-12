@@ -25,7 +25,7 @@ public enum ErrorCode {
     FILE_TOO_LARGE("FILE_TOO_LARGE", "File size < 10MB", HttpStatus.BAD_REQUEST),
     FILE_UPLOAD_FAILED("FILE_UPLOAD_FAILED", "upload failed", HttpStatus.BAD_REQUEST),
     FILE_INVALID_FORMAT("FILE_INVALID_FORMAT", "Invalid file format", HttpStatus.BAD_REQUEST),
-    ;
+    SLOT_INVALID("SLOT_INVALID", "Slot is not valid", HttpStatus.BAD_REQUEST),;
     private final String code;
     private final String message;
     private final HttpStatus httpStatus;

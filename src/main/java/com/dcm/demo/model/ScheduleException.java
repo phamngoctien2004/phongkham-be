@@ -6,43 +6,62 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "nghi_phep")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Leave {
+public class ScheduleException {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_nghi_phep")
-    private Integer leaveId;
+    @Column(name = "id")
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_bac_si")
     private Doctor doctor;
 
-    @Column(name = "batdau_nghi")
-    private LocalDate startDate;
+    @Column(name = "ngay_nghi")
+    private LocalDate date;
 
-    @Column(name = "ketthuc_nghi")
-    private LocalDate endDate;
+    @Column(name = "bat_dau")
+    private LocalTime startTime;
+
+    @Column(name = "ket_thuc")
+    private LocalTime endTime;
 
     @Column(name = "ly_do_nghi")
     private String reason;
 
+    @Column(name = "loai_nghi")
+    @Enumerated(EnumType.STRING)
+    private ScheduleException.type type;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai_nghi")
-    private Integer leaveStatus; // 0: Pending, 1: Approved, 2: Rejected
+    private ScheduleException.leaveStatus leaveStatus;
 
     @Column(name = "ngay_gui")
     private LocalDate submitDate;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nguoi_duyet")
     private User approver;
+
     @Override
     public String toString() {
         return "";
+    }
+
+    public enum type {
+        CA_NGAY, THEO_CA
+    }
+
+    public enum leaveStatus {
+        CHO_DUYET, DA_DUYET, TU_CHOI
     }
 }
