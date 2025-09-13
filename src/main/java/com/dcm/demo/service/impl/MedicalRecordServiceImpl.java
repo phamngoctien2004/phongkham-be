@@ -42,19 +42,18 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         medicalRecord.setTreatmentPlan(request.getTreatmentPlan());
         medicalRecord.setNote(request.getNote());
 
-        if (request.getDoctorId() != null) {
-            Doctor doctor = doctorService.findById(request.getDoctorId());
-            BigDecimal fee = doctor.getDegree().getExaminationFee();
-            medicalRecord.setFee(fee);
-            medicalRecord.setTotal(fee);
+        Doctor doctor = doctorService.findById(request.getDoctorId());
+        BigDecimal fee = doctor.getDegree().getExaminationFee();
+        medicalRecord.setFee(fee);
+        medicalRecord.setTotal(fee);
 
-            medicalRecord.setDoctor(doctor);
-        }
+        medicalRecord.setDoctor(doctor);
+
 
         if (request.getHealthPlanId() != null) {
             HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
             medicalRecord.setHealthPlan(healthPlan);
-            medicalRecord.setTotal(request.getFee().add(healthPlan.getPrice()));
+            medicalRecord.setTotal(fee.add(healthPlan.getPrice()));
         }
 
         repository.save(medicalRecord);

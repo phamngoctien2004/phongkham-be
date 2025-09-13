@@ -1,17 +1,24 @@
 package com.dcm.demo.controller;
 
+import com.dcm.demo.dto.request.FilterSlotRequest;
+import com.dcm.demo.dto.request.ScheduleExceptionRequest;
 import com.dcm.demo.dto.request.ScheduleRequest;
 import com.dcm.demo.dto.response.ApiResponse;
+import com.dcm.demo.model.Schedule;
 import com.dcm.demo.service.interfaces.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/schedules")
 @RequiredArgsConstructor
 public class ScheduleController {
     private final ScheduleService scheduleService;
+
+    @GetMapping("")
 
     @PostMapping
     public ResponseEntity<?> createSchedule(@RequestBody ScheduleRequest request) {
@@ -27,21 +34,23 @@ public class ScheduleController {
         );
     }
 
+    @GetMapping("/slots")
+    public ResponseEntity<?> filterSlots(
+            @RequestParam(required = false) Integer doctorId,
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) Schedule.DayOfWeek day
+    ) {
 
-//  lich lam chinh thuc
-    @PostMapping("/generate-schedule")
-    public ResponseEntity<?> generate(@RequestParam String day) {
-        scheduleService.generateScheduleOfficial(java.time.LocalDate.parse(day));
         return ResponseEntity.ok(
-                new ApiResponse<>("", "generate schedule official success")
+                new ApiResponse<>(scheduleService.filterSlots(doctorId,departmentId,day), "filter slots success")
         );
     }
-    @PutMapping("/add-exception/{id}")
+
+    @PutMapping("/leave/{id}")
     public ResponseEntity<?> updateSchedule(@PathVariable Integer id) {
-        scheduleService.updateScheduleOfficial(id);
+        scheduleService.acceptLeave(id);
         return ResponseEntity.ok(
                 new ApiResponse<>("", "update schedule success")
         );
     }
-
 }

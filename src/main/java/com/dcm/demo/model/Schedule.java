@@ -22,6 +22,9 @@ public class Schedule {
     @JoinColumn(name = "id_bac_si", nullable = false)
     private Doctor doctor;
 
+    @Column(name = "id_khoa")
+    private Integer departmentId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "thu_trong_tuan", nullable = false)
     private Schedule.DayOfWeek day;
@@ -32,6 +35,8 @@ public class Schedule {
     @Column(name = "khung_gio_ket_thuc", nullable = false)
     private LocalTime endTime;
 
+    @Column(name="trang_thai", nullable = false)
+    private Boolean status = true;
     public enum DayOfWeek {
         T2, T3, T4, T5, T6, T7, CN
     }
