@@ -29,6 +29,9 @@ public class Schedule {
     @Column(name = "thu_trong_tuan", nullable = false)
     private Schedule.DayOfWeek day;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ca_lam_viec", nullable = false)
+    private Schedule.Shift shift;
     @Column(name = "khung_gio_bat_dau", nullable = false)
     private LocalTime startTime;
 
@@ -39,5 +42,8 @@ public class Schedule {
     private Boolean status = true;
     public enum DayOfWeek {
         T2, T3, T4, T5, T6, T7, CN
+    }
+    public enum Shift {
+        SANG, CHIEU, TOI
     }
 }

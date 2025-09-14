@@ -18,9 +18,9 @@ public class DoctorResponse {
     private LocalDate birth;
     private User.Gender gender;
     private String profileImage;
-    private Degree degree;
+    private Degree degreeResponse;
     private Integer exp;
     private String position;
-    private UserResponse user;
-    private DepartmentResponse department;
+    private UserResponse userResponse;
+    private DepartmentResponse departmentResponse;
 }

@@ -15,7 +15,7 @@ public class HealthPlanServiceImpl implements HealthPlanService {
     private final ExaminationServiceRepository repository;
     private final HealthPlanMapper mapper;
     @Override
-    public List<HealthPlanResponse> getAllExamService() {
+    public List<HealthPlanResponse> getAllService() {
         return repository.findAll().stream()
                 .map(mapper::toResponse)
                 .toList();

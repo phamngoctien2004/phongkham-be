@@ -1,5 +1,6 @@
 package com.dcm.demo.dto.request;
 
+import com.dcm.demo.model.Appointment;
 import com.dcm.demo.model.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -9,6 +10,7 @@ import java.time.LocalTime;
 
 @Data
 public class AppointmentRequest {
+    private Integer id;
     private String fullName;
     private String phone;
     private User.Gender gender;
@@ -21,4 +23,5 @@ public class AppointmentRequest {
     private LocalDate date; // ngay kham
     private LocalTime time;
     private String symptoms;
+    private Appointment.AppointmentStatus status;
 }

@@ -45,20 +45,20 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public String changeStatusAppointment(Integer appointmentId, Appointment.AppointmentStatus status) {
-        Appointment appointment = repository.findById(appointmentId)
+    public String changeStatusAppointment(AppointmentRequest request) {
+        Appointment appointment = repository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
-        appointment.setStatus(status);
+        appointment.setStatus(request.getStatus());
 
 //      nguoi xac nhan (khi nao co jwt moi chay duoc)
 //        User user = userService.getCurrentUser();
 //        appointment.setConfirmedBy(user);
 
         repository.save(appointment);
-        if ("DA_XAC_NHAN".equals(status.name())) {
+        if ("DA_XAC_NHAN".equals(request.getStatus().name())) {
             return "Appointment confirmed successfully";
         }
-        if ("HOAN_THANH".equals(status.name())) {
+        if ("HOAN_THANH".equals(request.getStatus().name())) {
             return "Appointment completed successfully";
         }
         return "Appointment cancelled successfully";
@@ -79,15 +79,17 @@ public class AppointmentServiceImpl implements AppointmentService {
             Doctor doctor = appointment.getDoctor();
             DoctorResponse doctorResponse = new DoctorResponse();
             doctorResponse.setId(doctor.getId());
-            doctorResponse.setFullName(doctor.getFullName());
+            doctorResponse.setPosition(doctor.getPosition());
 
-            HealthPlan healthPlan = appointment.getHealthPlan();
-            HealthPlanResponse healthPlanResponse = new HealthPlanResponse();
-            healthPlanResponse.setId(healthPlan.getId());
-            healthPlanResponse.setName(healthPlan.getName());
+            if(appointment.getHealthPlan() != null) {
+                HealthPlan healthPlan = appointment.getHealthPlan();
+                HealthPlanResponse healthPlanResponse = new HealthPlanResponse();
+                healthPlanResponse.setId(healthPlan.getId());
+                healthPlanResponse.setName(healthPlan.getName());
+                response.setHealthPlanResponse(healthPlanResponse);
+            }
 
             response.setDoctorResponse(doctorResponse);
-            response.setHealthPlanResponse(healthPlanResponse);
             return response;
         })).toList();
 

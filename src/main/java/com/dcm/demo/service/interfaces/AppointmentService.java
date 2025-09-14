@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface AppointmentService {
     void createAppointment(AppointmentRequest request);
-    String changeStatusAppointment(Integer appointmentId, Appointment.AppointmentStatus status);
+    String changeStatusAppointment(AppointmentRequest request);
     Appointment findById(Integer id);
     List<AppointmentResponse> findByPhone(String phone);
 }

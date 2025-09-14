@@ -6,6 +6,6 @@ import com.dcm.demo.model.HealthPlan;
 import java.util.List;
 
 public interface HealthPlanService {
-    List<HealthPlanResponse> getAllExamService();
+    List<HealthPlanResponse> getAllService();
     HealthPlan findById(Integer id);
 }

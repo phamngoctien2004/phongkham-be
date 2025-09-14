@@ -53,4 +53,17 @@ public class ScheduleController {
                 new ApiResponse<>("", "update schedule success")
         );
     }
+
+    @GetMapping("/available")
+    public ResponseEntity<?> getAvailableSlots(
+            @RequestParam  LocalDate startDate,
+            @RequestParam  LocalDate endDate,
+            @RequestParam Integer departmentId,
+            @RequestParam Integer doctorId,
+            @RequestParam Schedule.Shift shift
+    ) {
+        return ResponseEntity.ok(
+                "a"
+        );
+    }
 }

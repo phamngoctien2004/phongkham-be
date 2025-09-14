@@ -10,5 +10,5 @@ public class HealthPlanResponse {
     private String code;
     private String name;
     private double price;
-    private double description;
+    private String description;
 }

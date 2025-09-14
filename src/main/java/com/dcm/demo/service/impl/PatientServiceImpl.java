@@ -48,6 +48,10 @@ public class PatientServiceImpl implements PatientService {
     //    tao user va account
     @Override
     public PatientResponse createPatientAndAccount(PatientRequest request) {
+        User UserExist = userService.findByPhone(request.getPhone());
+        if (UserExist != null) {
+            throw new RuntimeException("Số điện thoại đã tồn tại");
+        }
         User user = User.builder()
                 .email(request.getEmail())
                 .phone(request.getPhone())
