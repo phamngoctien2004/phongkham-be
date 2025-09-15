@@ -1,7 +1,5 @@
 package com.dcm.demo.service.interfaces;
 
-import com.dcm.demo.dto.request.FilterSlotRequest;
-import com.dcm.demo.dto.request.ScheduleExceptionRequest;
 import com.dcm.demo.dto.request.ScheduleRequest;
 import com.dcm.demo.dto.response.ScheduleResponse;
 import com.dcm.demo.dto.response.SlotResponse;
@@ -15,7 +13,8 @@ public interface ScheduleService {
     ScheduleResponse create(ScheduleRequest scheduleRequest);
 
     void delete(Integer id);
-    List<SlotResponse> filterSlots(Integer doctorId, Integer departmentId, Schedule.DayOfWeek day);
 
     void acceptLeave(Integer id);
+
+    List<SlotResponse> filterSchedules(Integer departmentId, Integer doctorId, LocalDate startDate, LocalDate endDate, Schedule.Shift shift);
 }

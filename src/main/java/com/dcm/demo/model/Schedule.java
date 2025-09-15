@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Entity
@@ -27,7 +28,7 @@ public class Schedule {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "thu_trong_tuan", nullable = false)
-    private Schedule.DayOfWeek day;
+    private DayOfWeek day;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ca_lam_viec", nullable = false)
@@ -38,11 +39,6 @@ public class Schedule {
     @Column(name = "khung_gio_ket_thuc", nullable = false)
     private LocalTime endTime;
 
-    @Column(name="trang_thai", nullable = false)
-    private Boolean status = true;
-    public enum DayOfWeek {
-        T2, T3, T4, T5, T6, T7, CN
-    }
     public enum Shift {
         SANG, CHIEU, TOI
     }

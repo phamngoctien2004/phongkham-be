@@ -1,16 +1,20 @@
 package com.dcm.demo.dto.response;
 
+import com.dcm.demo.model.Schedule;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
-import java.time.LocalTime;
+import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class SlotResponse {
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private LocalDate date;
+    private String dateName;
+    private int totalSlot;
+    private List<DoctorResponse> doctors;
 }
+

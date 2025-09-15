@@ -1,6 +1,7 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.ScheduleRequest;
+import com.dcm.demo.dto.response.DoctorResponse;
 import com.dcm.demo.dto.response.ScheduleResponse;
 import com.dcm.demo.dto.response.SlotResponse;
 import com.dcm.demo.exception.AppException;
@@ -19,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -54,19 +58,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         repository.deleteById(id);
     }
 
-    @Override
-    public List<SlotResponse> filterSlots(Integer doctorId, Integer departmentId, Schedule.DayOfWeek day) {
-        return repository.findByOption(
-                doctorId,
-                departmentId,
-                day
-        ).stream().map(it -> {
-            SlotResponse slot = new SlotResponse();
-            slot.setStartTime(it.getStartTime());
-            slot.setEndTime(it.getEndTime());
-            return slot;
-        }).toList();
-    }
 
     @Override
     @Transactional
@@ -76,27 +67,75 @@ public class ScheduleServiceImpl implements ScheduleService {
         scheduleException.setLeaveStatus(ScheduleException.leaveStatus.DA_DUYET);
         seRepository.save(scheduleException);
 
-        Doctor doctor =  scheduleException.getDoctor();
-        var day = mapDayOfWeek(scheduleException.getDate().getDayOfWeek());
+        Doctor doctor = scheduleException.getDoctor();
+        DayOfWeek day = scheduleException.getDate().getDayOfWeek();
         Schedule schedule = repository.findByDayAndDoctorIdAndStartTimeAndEndTime(
-                Schedule.DayOfWeek.valueOf(day),
-                scheduleException.getDoctor().getId(),
-                scheduleException.getStartTime(),
-                scheduleException.getEndTime())
+                        day,
+                        scheduleException.getDoctor().getId(),
+                        scheduleException.getStartTime(),
+                        scheduleException.getEndTime())
                 .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOTFOUND));
-        schedule.setStatus(false);
         repository.save(schedule);
     }
-    public  String mapDayOfWeek(DayOfWeek dayOfWeek) {
-        return switch (dayOfWeek) {
-            case MONDAY    -> "T2";
-            case TUESDAY   -> "T3";
-            case WEDNESDAY -> "T4";
-            case THURSDAY  -> "T5";
-            case FRIDAY    -> "T6";
-            case SATURDAY  -> "T7";
-            case SUNDAY    -> "CN";
-        };
+
+    @Override
+    public List<SlotResponse> filterSchedules(
+            Integer departmentId,
+            Integer doctorId,
+            LocalDate startDate,
+            LocalDate endDate,
+            Schedule.Shift shift
+    ) {
+        List<SlotResponse> results = new ArrayList<>();
+        LocalDate currentDate = startDate;
+        while (!currentDate.isAfter(endDate)) {
+            List<Schedule> schedules = repository.findByOption(
+                    doctorId,
+                    departmentId,
+                    currentDate.getDayOfWeek(),
+                    shift
+            );
+
+            SlotResponse slotResponse = buildSlotResponse(schedules, currentDate);
+            results.add(slotResponse);
+            currentDate = currentDate.plusDays(1);
+        }
+
+        return results;
+    }
+
+    private SlotResponse buildSlotResponse(List<Schedule> schedules, LocalDate currentDate) {
+        List<DoctorResponse> doctorResponses = schedules.stream().map(schedule -> {
+            Doctor doctor = schedule.getDoctor();
+            DoctorResponse doctorResponse = new DoctorResponse();
+            doctorResponse.setId(doctor.getId());
+            doctorResponse.setFullName(doctor.getFullName());
+            doctorResponse.setPosition(doctor.getPosition());
+            doctorResponse.setShift(schedule.getShift());
+            doctorResponse.setAvailable(isSlotAvailable(schedule, currentDate));
+            return doctorResponse;
+        }).toList();
+        SlotResponse slotResponse = new SlotResponse();
+        slotResponse.setDate(currentDate);
+        slotResponse.setDateName(currentDate.getDayOfWeek().name());
+        slotResponse.setDoctors(doctorResponses);
+        slotResponse.setTotalSlot(doctorResponses.size());
+        return slotResponse;
+    }
+
+    private boolean isSlotAvailable(Schedule schedule, LocalDate date) {
+        List<ScheduleException> exceptions = seRepository.findByDateAndDoctorIdAndLeaveStatus(
+                date, schedule.getDoctor().getId(), ScheduleException.leaveStatus.DA_DUYET
+        );
+
+        for (ScheduleException exception : exceptions) {
+            LocalTime startTime = exception.getStartTime();
+            LocalTime endTime = exception.getEndTime();
+            if (startTime.isBefore(schedule.getEndTime()) && endTime.isAfter(schedule.getStartTime())) {
+                return false; // Slot is not available
+            }
+        }
+        return true; // Slot is available
     }
 
 }

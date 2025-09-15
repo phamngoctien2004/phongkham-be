@@ -36,17 +36,12 @@ public class ScheduleException {
     @Column(name = "ly_do_nghi")
     private String reason;
 
-    @Column(name = "loai_nghi")
-    @Enumerated(EnumType.STRING)
-    private ScheduleException.type type;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai_nghi")
     private ScheduleException.leaveStatus leaveStatus;
 
     @Column(name = "ngay_gui")
     private LocalDate submitDate;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nguoi_duyet")

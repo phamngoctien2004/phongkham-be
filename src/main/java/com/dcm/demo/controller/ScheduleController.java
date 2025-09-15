@@ -1,7 +1,5 @@
 package com.dcm.demo.controller;
 
-import com.dcm.demo.dto.request.FilterSlotRequest;
-import com.dcm.demo.dto.request.ScheduleExceptionRequest;
 import com.dcm.demo.dto.request.ScheduleRequest;
 import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.model.Schedule;
@@ -26,6 +24,7 @@ public class ScheduleController {
                 new ApiResponse<>(scheduleService.create(request), "create schedule success")
         );
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSchedule(@PathVariable Integer id) {
         scheduleService.delete(id);
@@ -34,17 +33,6 @@ public class ScheduleController {
         );
     }
 
-    @GetMapping("/slots")
-    public ResponseEntity<?> filterSlots(
-            @RequestParam(required = false) Integer doctorId,
-            @RequestParam(required = false) Integer departmentId,
-            @RequestParam(required = false) Schedule.DayOfWeek day
-    ) {
-
-        return ResponseEntity.ok(
-                new ApiResponse<>(scheduleService.filterSlots(doctorId,departmentId,day), "filter slots success")
-        );
-    }
 
     @PutMapping("/leave/{id}")
     public ResponseEntity<?> updateSchedule(@PathVariable Integer id) {
@@ -56,14 +44,20 @@ public class ScheduleController {
 
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableSlots(
-            @RequestParam  LocalDate startDate,
-            @RequestParam  LocalDate endDate,
-            @RequestParam Integer departmentId,
-            @RequestParam Integer doctorId,
-            @RequestParam Schedule.Shift shift
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate,
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) Integer doctorId,
+            @RequestParam(required = false) Schedule.Shift shift
     ) {
         return ResponseEntity.ok(
-                "a"
+                new ApiResponse<>(scheduleService.filterSchedules(
+                        departmentId,
+                        doctorId,
+                        startDate,
+                        endDate,
+                        shift
+                ), "get available slots success")
         );
     }
 }

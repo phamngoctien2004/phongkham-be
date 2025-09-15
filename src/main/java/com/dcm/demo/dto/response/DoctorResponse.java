@@ -1,6 +1,7 @@
 package com.dcm.demo.dto.response;
 
 import com.dcm.demo.model.Degree;
+import com.dcm.demo.model.Schedule;
 import com.dcm.demo.model.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
@@ -23,4 +24,6 @@ public class DoctorResponse {
     private String position;
     private UserResponse userResponse;
     private DepartmentResponse departmentResponse;
+    private boolean available = true;
+    private Schedule.Shift shift;
 }
