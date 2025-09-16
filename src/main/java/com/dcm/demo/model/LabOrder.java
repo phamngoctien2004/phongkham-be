@@ -19,19 +19,22 @@ public class LabOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_chi_dinh")
-    private Integer orderId;
+    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_phieu_kham", nullable = false)
     private MedicalRecord medicalRecord;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_dich_vu")
     private HealthPlan healthPlan;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_bac_si_chi_dinh", nullable = false)
     private Doctor orderingDoctor;
+    @ManyToOne
+    @JoinColumn(name = "id_bac_si_thuc_hien", nullable = false)
+    private Doctor performingDoctor;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")

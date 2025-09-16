@@ -2,6 +2,7 @@ package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.PatientRequest;
 import com.dcm.demo.dto.response.PatientResponse;
+import com.dcm.demo.dto.response.PatientsDto;
 import com.dcm.demo.mapper.PatientMapper;
 import com.dcm.demo.mapper.UserMapper;
 import com.dcm.demo.model.Patient;
@@ -76,18 +77,23 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     @Transactional
-    public List<PatientResponse> findAllPatientByPhone(String phone) {
+    public PatientsDto findAllPatientByPhone(String phone) {
         User user = userService.findByPhone(phone);
         if (user != null) {
             List<Relationship> relationships = user.getRelationships();
 
-            return relationships.stream()
+            PatientsDto patientsDto = new PatientsDto();
+            List<PatientResponse> patients = relationships.stream()
                     .map((it) -> {
                         PatientResponse response = patientMapper.toResponse(it.getPatient());
                         response.setRelationship(it.getRelational());
                         return response;
                     }).toList();
+
+            patientsDto.setPatients(patients);
+            patientsDto.setOwnerId(user.getId());
+             return patientsDto;
         }
-        return List.of();
+        return null;
     }
 }

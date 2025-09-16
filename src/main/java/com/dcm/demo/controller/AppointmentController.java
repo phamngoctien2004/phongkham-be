@@ -20,6 +20,12 @@ public class AppointmentController {
                 new ApiResponse<>("", "Appointment booked successfully")
         );
     }
+//    @GetMapping
+//    public ResponseEntity<?> getAllAppointments(@RequestParam(required = false)) {
+//        return ResponseEntity.ok(
+//                new ApiResponse<>(appointmentService.getAllAppointments(), "success")
+//        );
+//    }
     @GetMapping("/phone")
     public ResponseEntity<?> getAppointmentsByPhone(@RequestParam String phone) {
         return ResponseEntity.ok(

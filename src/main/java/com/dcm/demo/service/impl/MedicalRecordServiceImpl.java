@@ -76,4 +76,9 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         repository.save(medicalRecord);
     }
 
+    @Override
+    public MedicalRecord findById(Integer id) {
+        return repository.findById(id).orElseThrow(() -> new RuntimeException("Medical record not found"));
+    }
+
 }
