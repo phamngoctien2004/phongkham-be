@@ -30,6 +30,10 @@ public class Appointment {
     @JoinColumn(name = "id_dich_vu_kham")
     private HealthPlan healthPlan;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_khoa")
+    private Department department;
+
     @Column(name = "ho_ten", nullable = false)
     private String fullName;
 

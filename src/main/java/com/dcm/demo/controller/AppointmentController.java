@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/api/appointments")
 @RequiredArgsConstructor
@@ -20,16 +22,11 @@ public class AppointmentController {
                 new ApiResponse<>("", "Appointment booked successfully")
         );
     }
-//    @GetMapping
-//    public ResponseEntity<?> getAllAppointments(@RequestParam(required = false)) {
-//        return ResponseEntity.ok(
-//                new ApiResponse<>(appointmentService.getAllAppointments(), "success")
-//        );
-//    }
+
     @GetMapping("/phone")
-    public ResponseEntity<?> getAppointmentsByPhone(@RequestParam String phone) {
+    public ResponseEntity<?> getAppointmentsByPhone(@RequestParam(value = "phone", required = false) String filter) {
         return ResponseEntity.ok(
-                new ApiResponse<>(appointmentService.findByPhone(phone), "success")
+                new ApiResponse<>(appointmentService.findByPhone(filter), "success")
         );
     }
     @PutMapping("/confirm")

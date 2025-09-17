@@ -23,6 +23,6 @@ public class HealthPlanServiceImpl implements HealthPlanService {
 
     @Override
     public HealthPlan findById(Integer id) {
-        return repository.findById(id).orElse(null);
+        return repository.findById(id).orElseThrow(() -> new RuntimeException("Health plan not found"));
     }
 }

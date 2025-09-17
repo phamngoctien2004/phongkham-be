@@ -17,7 +17,7 @@ public class AppointmentResponse {
     private String address;
     private HealthPlanResponse healthPlanResponse;
     private DoctorResponse doctorResponse;
-    private Integer departmentId;
+    private DepartmentResponse departmentResponse;
     private LocalDate date; // ngay kham
     private LocalTime time;
     private String symptoms;

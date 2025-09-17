@@ -2,10 +2,12 @@ package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.AppointmentRequest;
 import com.dcm.demo.dto.response.AppointmentResponse;
+import com.dcm.demo.dto.response.DepartmentResponse;
 import com.dcm.demo.dto.response.DoctorResponse;
 import com.dcm.demo.dto.response.HealthPlanResponse;
 import com.dcm.demo.mapper.AppointmentMapper;
 import com.dcm.demo.model.Appointment;
+import com.dcm.demo.model.Department;
 import com.dcm.demo.model.Doctor;
 import com.dcm.demo.model.HealthPlan;
 import com.dcm.demo.repository.AppointmentRepository;
@@ -39,7 +41,11 @@ public class AppointmentServiceImpl implements AppointmentService {
             Doctor doctor = doctorService.findById(request.getDoctorId());
             appointment.setDoctor(doctor);
         }
-
+        if(request.getDepartmentId() != null) {
+            Department department = departmentService.findById(request.getDepartmentId());
+            appointment.setDepartment(department);
+        }
+        appointment.setStatus(Appointment.AppointmentStatus.CHO_XAC_NHAN);
         repository.save(appointment);
         System.out.println("ok");
     }
@@ -76,10 +82,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointments.stream().map((appointment -> {
             AppointmentResponse response = mapper.toResponse(appointment);
 
-            Doctor doctor = appointment.getDoctor();
-            DoctorResponse doctorResponse = new DoctorResponse();
-            doctorResponse.setId(doctor.getId());
-            doctorResponse.setPosition(doctor.getPosition());
+            if(appointment.getDoctor() != null) {
+                Doctor doctor = appointment.getDoctor();
+                DoctorResponse doctorResponse = new DoctorResponse();
+                doctorResponse.setId(doctor.getId());
+                doctorResponse.setPosition(doctor.getPosition());
+                response.setDoctorResponse(doctorResponse);
+            }
 
             if(appointment.getHealthPlan() != null) {
                 HealthPlan healthPlan = appointment.getHealthPlan();
@@ -88,8 +97,13 @@ public class AppointmentServiceImpl implements AppointmentService {
                 healthPlanResponse.setName(healthPlan.getName());
                 response.setHealthPlanResponse(healthPlanResponse);
             }
-
-            response.setDoctorResponse(doctorResponse);
+            if(appointment.getDepartment() != null) {
+                Department department = appointment.getDepartment();
+                DepartmentResponse departmentResponse = new DepartmentResponse();
+                departmentResponse.setId(department.getId());
+                departmentResponse.setName(department.getName());
+                response.setDepartmentResponse(departmentResponse);
+            }
             return response;
         })).toList();
 
