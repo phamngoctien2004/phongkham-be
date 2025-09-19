@@ -21,4 +21,12 @@ public class FilterHelper {
             return cb.or(predicates.toArray(new Predicate[0]));
         };
     }
+    public static <T> Specification<T> equal(String field, Object value){
+        return (root, query, cb) -> {
+            if(value == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get(field), value);
+        };
+    }
 }

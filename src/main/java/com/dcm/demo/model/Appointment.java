@@ -70,6 +70,10 @@ public class Appointment {
     @JoinColumn(name = "nguoi_xac_nhan")
     private User confirmedBy;
 
+    @ManyToOne
+    @JoinColumn(name = "id_benh_nhan")
+    private Patient patient;
+
     public enum AppointmentStatus {
         CHO_XAC_NHAN, DA_XAC_NHAN, KHONG_DEN
     }

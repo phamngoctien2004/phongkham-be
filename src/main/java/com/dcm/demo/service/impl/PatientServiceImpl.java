@@ -3,6 +3,7 @@ package com.dcm.demo.service.impl;
 import com.dcm.demo.dto.request.PatientRequest;
 import com.dcm.demo.dto.response.PatientResponse;
 import com.dcm.demo.dto.response.PatientsDto;
+import com.dcm.demo.helpers.FilterHelper;
 import com.dcm.demo.mapper.PatientMapper;
 import com.dcm.demo.mapper.UserMapper;
 import com.dcm.demo.model.Patient;
@@ -12,6 +13,7 @@ import com.dcm.demo.repository.PatientRepository;
 import com.dcm.demo.service.interfaces.PatientService;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,51 +30,78 @@ public class PatientServiceImpl implements PatientService {
     @Override
     @Transactional
     public PatientResponse create(PatientRequest request) {
-        if (request.getUserId() != null) {
-            User user = userService.getById(request.getUserId());
-            if (user != null) {
-                return createPatient(request, user);
-            }
-        }
-
         return createPatientAndAccount(request);
     }
+    @Override
+    public PatientResponse update(PatientRequest request) {
+        Patient patient = repository.findById(request.getId())
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        patient.setPhone(request.getPhone());
+        patient.setFullName(request.getFullName());
+        patient.setAddress(request.getAddress());
+        patient.setGender(request.getGender());
+        patient.setCccd(request.getCccd());
+        patient.setBirth(request.getBirth());
+        patient.setBloodType(request.getBloodType());
+        patient.setWeight(request.getWeight());
+        patient.setHeight(request.getHeight());
 
+        return patientMapper.toResponse(
+                repository.save(patient)
+        );
+    }
     //    tao new user co lien ket voi tai khoan
     @Override
     public PatientResponse createPatient(PatientRequest request, User user) {
+        Patient patient = buildPatient(request);
+        this.buildRelationship(patient, user);
         return patientMapper.toResponse(
-                repository.save(buildPatient(request, user))
+                repository.save(patient)
         );
     }
 
     //    tao user va account
     @Override
     public PatientResponse createPatientAndAccount(PatientRequest request) {
-        User UserExist = userService.findByPhone(request.getPhone());
-        if (UserExist != null) {
-            throw new RuntimeException("Số điện thoại đã tồn tại");
+//        User UserExist = userService.findByPhone(phoneCreateAccount);
+//        if (UserExist != null) {
+//            throw new RuntimeException("Số điện thoại đã tồn tại");
+//        }
+//        User user = User.builder()
+//                .email(request.getEmail())
+//                .phone(phoneCreateAccount)
+//                .role(User.Role.BENH_NHAN)
+//                .build();
+//        User newUser = userService.save(user);
+
+        Patient patient = buildPatient(request);
+
+        if(request.getPhone() != null){
+            User newUser = userService.createAccountByPhone(request.getPhone());
+            this.buildRelationship(patient, newUser);
         }
-        User user = User.builder()
-                .email(request.getEmail())
-                .phone(request.getPhone())
-                .role(User.Role.BENH_NHAN)
-                .build();
-        User newUser = userService.save(user);
+
+        if(request.getPhoneLink() != null){
+            User userLink = userService.createAccountByPhone(request.getPhoneLink());
+            this.buildRelationship(patient, userLink);
+        }
 
         return patientMapper.toResponse(
-                repository.save(buildPatient(request, newUser))
+                repository.save(patient)
         );
     }
 
-    private Patient buildPatient(PatientRequest request, User user) {
+    private Patient buildPatient(PatientRequest request) {
         Patient patient = patientMapper.toEntity(request);
         patient.setCode("BN" + System.currentTimeMillis());
+        return patient;
+    }
+
+    private void buildRelationship(Patient patient, User user){
         Relationship relationship = new Relationship();
         relationship.setUser(user);
         relationship.setPatient(patient);
         patient.getRelationships().add(relationship);
-        return patient;
     }
 
     @Override
@@ -96,4 +125,28 @@ public class PatientServiceImpl implements PatientService {
         }
         return null;
     }
+
+    @Override
+    public Patient findByPhone(String phone) {
+        return repository.findByPhone(phone).orElse(null);
+    }
+
+    @Override
+    public PatientResponse findById(Integer id) {
+        return patientMapper.toResponse(
+                repository.findById(id).orElseThrow(() -> new RuntimeException("Patient not found"))
+        );
+    }
+
+    @Override
+    public List<PatientResponse> findAll(String keyword) {
+        Specification<Patient> spec = FilterHelper.contain(keyword, List.of(
+                "phone", "cccd", "fullName"
+        ));
+        return repository.findAll(spec).stream()
+                .map(patientMapper::toResponse)
+                .toList();
+    }
+
+
 }

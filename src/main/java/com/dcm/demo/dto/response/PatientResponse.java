@@ -9,13 +9,14 @@ import java.time.LocalDateTime;
 
 @Data
 public class PatientResponse {
-    private String id;
+    private Integer id;
     private String code;
     private String bloodType;
     private BigDecimal weight;
     private BigDecimal height;
     private LocalDateTime registrationDate;
     private String fullName;
+    private String phone;
     private String address;
     private String cccd;
     private LocalDate birth;

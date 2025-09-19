@@ -20,7 +20,7 @@ public class PatientRequest {
     private BigDecimal weight;
     private BigDecimal height;
     private String profileImage;
-
 //  lien ket tai khoan
-    private Integer userId;
+
+    private String  phoneLink;
 }

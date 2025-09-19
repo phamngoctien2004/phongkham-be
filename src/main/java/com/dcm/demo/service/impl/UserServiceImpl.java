@@ -56,6 +56,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User createAccountByPhone(String phone) {
+        User existUser = userRepository.findByPhone(phone).orElse(null);
+        if(existUser != null){
+            return existUser;
+        }
+        User user = new User();
+        user.setPhone(phone);
+        user.setRole(User.Role.BENH_NHAN);
+        return userRepository.save(user);
+    }
+
+    @Override
     public User createUserEntity(UserRequest user) {
         User userEntity = userMapper.toEntity(user);
         return userRepository.save(userEntity);

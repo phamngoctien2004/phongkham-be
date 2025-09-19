@@ -17,7 +17,7 @@ public interface UserService {
     //  create & update
     UserResponse createUser(UserRequest user);
 
-
+    User createAccountByPhone(String phone);
     User createUserEntity(UserRequest user);
     UserResponse updateUser(UserRequest user);
 

@@ -1,22 +1,22 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.AppointmentRequest;
-import com.dcm.demo.dto.response.AppointmentResponse;
-import com.dcm.demo.dto.response.DepartmentResponse;
-import com.dcm.demo.dto.response.DoctorResponse;
-import com.dcm.demo.dto.response.HealthPlanResponse;
+import com.dcm.demo.dto.request.PatientRequest;
+import com.dcm.demo.dto.response.*;
+import com.dcm.demo.helpers.FilterHelper;
 import com.dcm.demo.mapper.AppointmentMapper;
-import com.dcm.demo.model.Appointment;
-import com.dcm.demo.model.Department;
-import com.dcm.demo.model.Doctor;
-import com.dcm.demo.model.HealthPlan;
+import com.dcm.demo.model.*;
 import com.dcm.demo.repository.AppointmentRepository;
 import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -26,9 +26,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final DoctorService doctorService;
     private final DepartmentService departmentService;
     private final HealthPlanService healthPlanService;
-    private final UserService userService;
+    private final PatientService patientService;
+    private final EmailService emailService;
 
     @Override
+    @Async
     @Transactional
     public void createAppointment(AppointmentRequest request) {
         Appointment appointment = mapper.toEntity(request);
@@ -41,10 +43,27 @@ public class AppointmentServiceImpl implements AppointmentService {
             Doctor doctor = doctorService.findById(request.getDoctorId());
             appointment.setDoctor(doctor);
         }
-        if(request.getDepartmentId() != null) {
+        if (request.getDepartmentId() != null) {
             Department department = departmentService.findById(request.getDepartmentId());
             appointment.setDepartment(department);
         }
+
+        Integer patientId = request.getPatientId();
+
+        if (request.getPatientId() == null) {
+//          kiem tra tai khoan da ton tai
+            Patient patient = patientService.findByPhone(request.getPhone());
+            if (patient == null) {
+                PatientResponse patientResponse = patientService.createPatientAndAccount(buildPatientRequest(request));
+                patientId = patientResponse.getId();
+            } else {
+                patientId = patient.getId();
+            }
+            sendEmailAppointmentSuccess(request.getPhone(), request.getEmail());
+        }
+        Patient patient = new Patient();
+        patient.setId(patientId);
+        appointment.setPatient(patient);
         appointment.setStatus(Appointment.AppointmentStatus.CHO_XAC_NHAN);
         repository.save(appointment);
         System.out.println("ok");
@@ -59,7 +78,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 //      nguoi xac nhan (khi nao co jwt moi chay duoc)
 //        User user = userService.getCurrentUser();
 //        appointment.setConfirmedBy(user);
-
         repository.save(appointment);
         if ("DA_XAC_NHAN".equals(request.getStatus().name())) {
             return "Appointment confirmed successfully";
@@ -76,13 +94,23 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public List<AppointmentResponse> findByPhone(String phone) {
-        List<Appointment> appointments = repository.findByPhoneAndStatus(phone, Appointment.AppointmentStatus.CHO_XAC_NHAN);
+    public List<AppointmentResponse> findByPhone(String phone, LocalDate date, Appointment.AppointmentStatus status) {
+        Specification<Appointment> spec = FilterHelper.contain(phone, List.of(
+                "phone"
+        ));
+        if(date != null) {
+            spec = spec.and(FilterHelper.equal("date", date));
+        }
+        if(status != null) {
+            spec = spec.and(FilterHelper.equal("status", status));
+        }
+        List<Appointment> appointments = repository.findAll(spec);
 
         return appointments.stream().map((appointment -> {
             AppointmentResponse response = mapper.toResponse(appointment);
-
-            if(appointment.getDoctor() != null) {
+            response.setStatus(appointment.getStatus());
+            response.setPatientId(appointment.getPatient().getId());
+            if (appointment.getDoctor() != null) {
                 Doctor doctor = appointment.getDoctor();
                 DoctorResponse doctorResponse = new DoctorResponse();
                 doctorResponse.setId(doctor.getId());
@@ -90,14 +118,14 @@ public class AppointmentServiceImpl implements AppointmentService {
                 response.setDoctorResponse(doctorResponse);
             }
 
-            if(appointment.getHealthPlan() != null) {
+            if (appointment.getHealthPlan() != null) {
                 HealthPlan healthPlan = appointment.getHealthPlan();
                 HealthPlanResponse healthPlanResponse = new HealthPlanResponse();
                 healthPlanResponse.setId(healthPlan.getId());
                 healthPlanResponse.setName(healthPlan.getName());
                 response.setHealthPlanResponse(healthPlanResponse);
             }
-            if(appointment.getDepartment() != null) {
+            if (appointment.getDepartment() != null) {
                 Department department = appointment.getDepartment();
                 DepartmentResponse departmentResponse = new DepartmentResponse();
                 departmentResponse.setId(department.getId());
@@ -106,6 +134,32 @@ public class AppointmentServiceImpl implements AppointmentService {
             }
             return response;
         })).toList();
-
     }
+
+    @Override
+    public List<AppointmentResponse> findAllByDate() {
+        return List.of();
+    }
+
+    private PatientRequest buildPatientRequest(AppointmentRequest request) {
+        PatientRequest patientRequest = new PatientRequest();
+        patientRequest.setFullName(request.getFullName());
+        patientRequest.setPhone(request.getPhone());
+        patientRequest.setEmail(request.getEmail());
+        patientRequest.setAddress(request.getAddress());
+        patientRequest.setGender(request.getGender());
+        patientRequest.setBirth(request.getBirth());
+        return patientRequest;
+    }
+
+    void sendEmailAppointmentSuccess(String phone, String email) {
+        String subject = "Appointment Confirmation";
+        String template = "welcome";
+        Map<String, Object> dataContext = Map.of(
+                "phoneNumber", phone
+        );
+        emailService.sendTemplate(email, subject, template, dataContext);
+    }
+
+
 }

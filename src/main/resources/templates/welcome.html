@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chào mừng đến với Phòng khám</title>
+    <!-- Chỉ giữ media query tối thiểu; phần còn lại inline để an toàn -->
+    <style>
+        /* Mobile tweak (nhiều client vẫn OK) */
+        @media screen and (max-width:600px){
+            .container{width:100%!important}
+            .px-24{padding-left:16px!important;padding-right:16px!important}
+            .btn{display:block!important;width:100%!important;text-align:center!important;margin:0 0 10px 0!important}
+        }
+        /* Dark mode friendly */
+        @media (prefers-color-scheme: dark){
+            body{background:#0b0f14!important}
+        }
+    </style>
+</head>
+<body style="margin:0;padding:0;background:#f5f7fa;">
+<!-- Wrapper -->
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f5f7fa;">
+    <tr>
+        <td align="center" style="padding:24px;">
+            <!-- Container -->
+            <table role="presentation" cellpadding="0" cellspacing="0" width="600" class="container" style="width:600px;max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+                <!-- Header -->
+                <tr>
+                    <td align="center" style="background:#16a34a;color:#ffffff;padding:24px 16px;">
+                        <div style="font-size:24px;font-weight:700;line-height:1.2;">🏥 Phòng Khám Y Tế</div>
+                        <div style="font-size:14px;opacity:.95;margin-top:6px;">Chăm sóc sức khỏe toàn diện cho bạn và gia đình</div>
+                    </td>
+                </tr>
+
+                <!-- Greeting -->
+                <tr>
+                    <td class="px-24" style="padding:24px 24px 0 24px;color:#111827;font-family:Arial,Helvetica,sans-serif;">
+                        <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Chào mừng bạn đến với Phòng khám của chúng tôi!</div>
+                        <div style="font-size:15px;line-height:1.6;color:#374151;">
+                            Cảm ơn bạn đã tin tưởng và đăng ký sử dụng dịch vụ của chúng tôi.
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Account Info -->
+                <tr>
+                    <td class="px-24" style="padding:16px 24px 0 24px;">
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f0fdf4;border:1px solid #d1fae5;border-radius:10px;">
+                            <tr>
+                                <td style="padding:16px 18px;font-family:Arial,Helvetica,sans-serif;">
+                                    <div style="font-size:16px;font-weight:700;color:#065f46;margin-bottom:6px;">📱 Thông tin tài khoản của bạn</div>
+                                    <div style="font-size:14px;color:#374151;margin-bottom:10px;">Bạn có thể đăng nhập vào website hoặc ứng dụng di động với:</div>
+                                    <div style="font-size:20px;font-weight:700;color:#111827;letter-spacing:.3px;" th:text="${phoneNumber}">0395527081</div>
+                                    <div style="font-size:12px;color:#6b7280;margin-top:6px;"><em>Số điện thoại này chính là tên đăng nhập của bạn</em></div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Features -->
+                <tr>
+                    <td class="px-24" style="padding:20px 24px 0 24px;">
+                        <div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:#111827;margin-bottom:8px;">
+                            🌟 Những gì bạn có thể làm:
+                        </div>
+
+                        <!-- Feature card -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;">
+                            <tr><td style="padding:4px 0;"></td></tr>
+                            <!-- item -->
+                            <tr>
+                                <td style="padding:10px 18px;">
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td width="28" style="font-size:18px;">📅</td>
+                                            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#374151;">
+                                                <div style="font-weight:700;color:#111827">Đặt lịch khám</div>
+                                                <div>Đặt lịch hẹn trực tuyến một cách dễ dàng và nhanh chóng</div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <!-- item -->
+                            <tr>
+                                <td style="padding:10px 18px;border-top:1px dashed #e5e7eb;">
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td width="28" style="font-size:18px;">👨‍⚕️</td>
+                                            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#374151;">
+                                                <div style="font-weight:700;color:#111827">Chọn bác sĩ</div>
+                                                <div>Lựa chọn bác sĩ phù hợp với chuyên khoa và thời gian</div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <!-- item -->
+                            <tr>
+                                <td style="padding:10px 18px;border-top:1px dashed #e5e7eb;">
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td width="28" style="font-size:18px;">📋</td>
+                                            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#374151;">
+                                                <div style="font-weight:700;color:#111827">Xem kết quả</div>
+                                                <div>Theo dõi kết quả xét nghiệm và lịch sử khám bệnh</div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <!-- item -->
+                            <tr>
+                                <td style="padding:10px 18px;border-top:1px dashed #e5e7eb;">
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td width="28" style="font-size:18px;">💊</td>
+                                            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#374151;">
+                                                <div style="font-weight:700;color:#111827">Đơn thuốc</div>
+                                                <div>Xem đơn thuốc và hướng dẫn sử dụng chi tiết</div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr><td style="padding:4px 0;"></td></tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- CTA buttons -->
+                <tr>
+                    <td class="px-24" align="left" style="padding:20px 24px 0 24px;">
+                        <!-- Button primary (bulletproof, có VML cho Outlook) -->
+                        <!--[if mso]>
+                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="[[WEBSITE_URL]]" arcsize="12%" stroke="f" fillcolor="#16a34a" style="height:40px;v-text-anchor:middle;width:200px;">
+                          <w:anchorlock/>
+                          <center style="color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;">🌐 Truy cập Website</center>
+                        </v:roundrect>
+                        <![endif]-->
+                        <a class="btn" href="[[WEBSITE_URL]]" style="display:inline-block;background:#16a34a;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:700;font-family:Arial,Helvetica,sans-serif;margin-right:8px;">🌐 Truy cập Website</a>
+                        <!--<![endif]-->
+
+                        <a class="btn" href="[[APP_URL]]" style="display:inline-block;background:#f97316;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:700;font-family:Arial,Helvetica,sans-serif;">📱 Tải ứng dụng</a>
+                    </td>
+                </tr>
+
+                <!-- Support -->
+                <tr>
+                    <td class="px-24" style="padding:20px 24px 0 24px;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:10px;">
+                            <tr>
+                                <td style="padding:16px 18px;font-family:Arial,Helvetica,sans-serif;">
+                                    <div style="font-size:16px;font-weight:700;color:#111827;margin-bottom:6px;">📞 Hỗ trợ khách hàng</div>
+                                    <ul style="margin:6px 0 0 18px;padding:0;color:#374151;font-size:14px;line-height:1.6;">
+                                        <li>Hotline: <strong>1900-xxxx</strong></li>
+                                        <li>Email: <strong>support@phongkham.com</strong></li>
+                                        <li>Giờ hỗ trợ: <strong>8:00 - 20:00 (Thứ 2 - Chủ nhật)</strong></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td align="center" style="padding:22px 16px 26px 16px;background:#f9fafb;font-family:Arial,Helvetica,sans-serif;color:#6b7280;font-size:12px;line-height:1.6;">
+                        <div><strong style="color:#111827;">Phòng Khám Y Tế</strong></div>
+                        <div>📍 123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh • 📞 (028) 1234 5678</div>
+                        <div>🌐 <a href="[[SITE_URL]]" style="color:#16a34a;text-decoration:none;">www.phongkham.com</a> • 📧 <a href="mailto:info@phongkham.com" style="color:#16a34a;text-decoration:none;">info@phongkham.com</a></div>
+                        <div style="margin-top:8px;opacity:.8;">© 2025 Phòng Khám Y Tế. Tất cả quyền được bảo lưu.</div>
+                    </td>
+                </tr>
+            </table>
+            <!-- /Container -->
+        </td>
+    </tr>
+</table>
+</body>
+</html>

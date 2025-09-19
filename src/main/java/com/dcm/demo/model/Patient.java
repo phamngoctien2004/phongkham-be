@@ -67,6 +67,7 @@ public class Patient {
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MedicalRecord> medicalRecords = new ArrayList<>();
 
+
     @Override
     public String toString() {
         return "";

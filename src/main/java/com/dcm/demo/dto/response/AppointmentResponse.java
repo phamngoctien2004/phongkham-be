@@ -1,5 +1,6 @@
 package com.dcm.demo.dto.response;
 
+import com.dcm.demo.model.Appointment;
 import com.dcm.demo.model.User;
 import lombok.Data;
 
@@ -20,5 +21,7 @@ public class AppointmentResponse {
     private DepartmentResponse departmentResponse;
     private LocalDate date; // ngay kham
     private LocalTime time;
+    private Appointment.AppointmentStatus status;
     private String symptoms;
+    private Integer patientId;
 }

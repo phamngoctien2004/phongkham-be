@@ -4,11 +4,13 @@ import com.dcm.demo.dto.request.AppointmentRequest;
 import com.dcm.demo.dto.response.AppointmentResponse;
 import com.dcm.demo.model.Appointment;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface AppointmentService {
     void createAppointment(AppointmentRequest request);
     String changeStatusAppointment(AppointmentRequest request);
     Appointment findById(Integer id);
-    List<AppointmentResponse> findByPhone(String phone);
+    List<AppointmentResponse> findByPhone(String value, LocalDate date, Appointment.AppointmentStatus status);
+    List<AppointmentResponse> findAllByDate();
 }

@@ -18,10 +18,25 @@ public class PatientController {
                 new ApiResponse<>(patientService.create(request), "Create patient successfully")
         );
     }
-    @GetMapping("")
-    public ResponseEntity<?> getPatientsByPhone(@RequestParam String phone) {
+
+
+    @GetMapping
+    public ResponseEntity<?> getPatientsByPhone(@RequestParam(required = false) String keyword) {
         return ResponseEntity.ok(
-                new ApiResponse<>(patientService.findAllPatientByPhone(phone), "Find patient successfully")
+                new ApiResponse<>(patientService.findAll(keyword), "Find patient successfully")
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getPatientById(@PathVariable Integer id) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(patientService.findById(id), "Find patient successfully")
+        );
+    }
+    @PutMapping
+    public ResponseEntity<?> updatePatient(@RequestBody PatientRequest request) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(patientService.update(request), "Update patient successfully")
         );
     }
 }

@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -51,6 +50,7 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Doctor doctor;
 
+
     public enum Gender {
         NAM, NU
     }
@@ -58,6 +58,7 @@ public class User {
     public enum Role {
         BENH_NHAN, BAC_SI, LE_TAN, ADMIN
     }
+
     @Override
     public String toString() {
         return "";
