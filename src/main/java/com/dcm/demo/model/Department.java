@@ -33,6 +33,9 @@ public class Department {
 
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
     private List<Doctor> doctors;
+
+    @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+    private List<Room> rooms;
     @Override
     public String toString() {
         return "";

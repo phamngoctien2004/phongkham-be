@@ -8,6 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "hoa_don_thanh_toan")
@@ -19,7 +21,7 @@ public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_hoa_don")
-    private Integer invoiceId;
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_benh_nhan", nullable = false)
@@ -30,13 +32,13 @@ public class Invoice {
     private MedicalRecord medicalRecord;
 
     @Column(name = "ma_hoa_don", unique = true, length = 50)
-    private String invoiceCode;
+    private String code;
 
     @Column(name = "tong_tien", nullable = false, precision = 15, scale = 2)
-    private BigDecimal totalAmount;
+    private BigDecimal totalAmount = BigDecimal.ZERO;
 
     @Column(name = "so_tien_thanh_toan", nullable = false, precision = 15, scale = 2)
-    private BigDecimal paidAmount;
+    private BigDecimal paidAmount = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "phuong_thuc")
@@ -55,8 +57,12 @@ public class Invoice {
     private PaymentStatus status = PaymentStatus.CHUA_THANH_TOAN;
 
     @Column(name = "ghi_chu", columnDefinition = "TEXT")
-    private String notes;
+    private String note;
 
+    @Column(name = "payos_order")
+    private Long payosOrder;
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InvoiceDetail> invoiceDetails = new ArrayList<>();
     public enum PaymentMethod {
         TIEN_MAT, THE_ATM, CHUYEN_KHOAN, QR_CODE
     }

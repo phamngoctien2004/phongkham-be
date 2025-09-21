@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -24,6 +25,9 @@ public class DoctorResponse {
     private String position;
     private UserResponse userResponse;
     private DepartmentResponse departmentResponse;
+    private BigDecimal examinationFee;
     private boolean available = true;
     private Schedule.Shift shift;
+    private String roomNumber;
+    private String roomName;
 }

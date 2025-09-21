@@ -75,7 +75,7 @@ public class Appointment {
     private Patient patient;
 
     public enum AppointmentStatus {
-        CHO_XAC_NHAN, DA_XAC_NHAN, KHONG_DEN
+        CHO_XAC_NHAN, DA_XAC_NHAN, KHONG_DEN, DA_DEN
     }
     @Override
     public String toString() {
