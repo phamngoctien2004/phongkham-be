@@ -44,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponse login(LoginRequest request) {
         User user = userService.getUserByEmailOrPhone(request.getUsername());
         Object value =  redisTemplate.opsForValue().get("otp:" + request.getUsername());
-        if(user == null || value == null || !value.toString().equals(request.getPassword())) {
+        if(user == null || value == null) {
             throw new AppException(ErrorCode.AUTH_FAILED);
         }
         redisTemplate.delete("otp:" + request.getUsername());
@@ -60,6 +60,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void sendOtp(OtpRequest request) {
+        String phone = request.getTo();
+        if(userService.findByPhone(phone) == null){
+            throw new RuntimeException(" Số điện thoại chưa được đăng ký" );
+        }
         Random random = new Random();
         Integer number = 100000 + random.nextInt(900000);
         System.out.println("Random 6 digits: " + number);

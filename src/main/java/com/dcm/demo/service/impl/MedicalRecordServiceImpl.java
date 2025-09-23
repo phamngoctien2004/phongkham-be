@@ -1,22 +1,22 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.MedicalRequest;
+import com.dcm.demo.dto.response.MedicalResponse;
+import com.dcm.demo.dto.response.PatientResponse;
 import com.dcm.demo.exception.AppException;
 import com.dcm.demo.exception.ErrorCode;
-import com.dcm.demo.model.Doctor;
-import com.dcm.demo.model.HealthPlan;
-import com.dcm.demo.model.MedicalRecord;
-import com.dcm.demo.model.Patient;
+import com.dcm.demo.mapper.MedicalMapper;
+import com.dcm.demo.model.*;
 import com.dcm.demo.repository.MedicalRecordRepository;
-import com.dcm.demo.service.interfaces.DoctorService;
-import com.dcm.demo.service.interfaces.HealthPlanService;
-import com.dcm.demo.service.interfaces.MedicalRecordService;
-import com.dcm.demo.service.interfaces.PatientService;
+import com.dcm.demo.repository.RelationshipRepository;
+import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +24,10 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final MedicalRecordRepository repository;
     private final DoctorService doctorService;
     private final PatientService patientService;
+    private final UserService userService;
+    private final RelationshipRepository relationshipRepository;
     private final HealthPlanService healthPlanService;
-
+    private final MedicalMapper mapper;
     @Override
     @Transactional
     public void create(MedicalRequest request) {
@@ -74,6 +76,27 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         medicalRecord.setTreatmentPlan(request.getTreatmentPlan());
         medicalRecord.setNote(request.getNote());
         repository.save(medicalRecord);
+    }
+
+    @Override
+    public List<MedicalResponse> getRelationMedicalRecord(String cccd) {
+        User user = userService.getCurrentUser();
+        Patient patient = patientService.findByCccd(cccd);
+//        check relationship
+        relationshipRepository.findByPatientIdAndUserId(patient.getId(), user.getId())
+                .orElseThrow(() -> new RuntimeException("Not found relationship"));
+
+        return repository.findByPatientIdOrderByDateDesc(patient.getId()).stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<MedicalResponse> me() {
+        PatientResponse currentPatient = patientService.me();
+        return repository.findByPatientIdOrderByDateDesc(currentPatient.getId()).stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
     @Override

@@ -14,8 +14,10 @@ public interface PatientService {
     PatientResponse createPatientAndAccount(PatientRequest request);
     PatientResponse createPatient(PatientRequest request, User user);
     Patient findByPhone(String phone);
+    Patient findByCccd(String cccd);
     PatientResponse findById(Integer id);
     List<PatientResponse> findAll(String keyword);
+
     PatientResponse me();
     List<PatientResponse> all();
 }

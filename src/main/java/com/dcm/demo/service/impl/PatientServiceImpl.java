@@ -110,6 +110,10 @@ public class PatientServiceImpl implements PatientService {
         return repository.findByPhone(phone).orElse(null);
     }
 
+    @Override
+    public Patient findByCccd(String cccd) {
+        return repository.findByCccd(cccd).orElseThrow(() -> new RuntimeException("Patient not found"));
+    }
 
 
     @Override
