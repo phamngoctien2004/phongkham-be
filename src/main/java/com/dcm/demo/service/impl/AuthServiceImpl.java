@@ -3,13 +3,17 @@ package com.dcm.demo.service.impl;
 import com.dcm.demo.dto.request.LoginRequest;
 import com.dcm.demo.dto.request.OtpRequest;
 import com.dcm.demo.dto.response.LoginResponse;
+import com.dcm.demo.dto.response.UserResponse;
 import com.dcm.demo.exception.AppException;
 import com.dcm.demo.exception.ErrorCode;
 import com.dcm.demo.mapper.UserMapper;
+import com.dcm.demo.model.Patient;
 import com.dcm.demo.model.User;
 import com.dcm.demo.service.interfaces.AuthService;
 import com.dcm.demo.service.interfaces.JwtService;
+import com.dcm.demo.service.interfaces.PatientService;
 import com.dcm.demo.service.interfaces.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
@@ -22,9 +26,11 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final JwtService jwtService;
+    private final PatientService patientService;
     private UserMapper userMapper;
     private final RedisTemplate<String, Object> redisTemplate;
     @Value("${ID_PHONE}")
@@ -32,12 +38,7 @@ public class AuthServiceImpl implements AuthService {
     @Value("${API_KEY_PHONE}")
     private String phone_api_key;
 
-    public AuthServiceImpl(UserService userService, JwtService jwtService, RedisTemplate<String, Object> redisTemplate, UserMapper userMapper) {
-        this.userService = userService;
-        this.jwtService = jwtService;
-        this.redisTemplate = redisTemplate;
-        this.userMapper = userMapper;
-    }
+
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -47,9 +48,13 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(ErrorCode.AUTH_FAILED);
         }
         redisTemplate.delete("otp:" + request.getUsername());
+
+        Patient patient = patientService.findByPhone(user.getPhone());
+        UserResponse userResponse = userMapper.toResponse(user);
+        userResponse.setName(patient.getFullName());
         return new LoginResponse(
                 jwtService.generate(user.getId(), user.getRole().name(), 60),
-                userMapper.toResponse(user)
+                userResponse
         );
     }
 

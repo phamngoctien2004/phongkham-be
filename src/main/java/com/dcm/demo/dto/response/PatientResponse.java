@@ -23,4 +23,5 @@ public class PatientResponse {
     private User.Gender gender;
     private String profileImage;
     private String relationship;
+    private String email;
 }

@@ -13,9 +13,9 @@ public interface PatientService {
     PatientResponse update(PatientRequest request);
     PatientResponse createPatientAndAccount(PatientRequest request);
     PatientResponse createPatient(PatientRequest request, User user);
-    PatientsDto findAllPatientByAccountId(Integer id);
     Patient findByPhone(String phone);
-    PatientsDto findAllPatientByPhone(String phone);
     PatientResponse findById(Integer id);
     List<PatientResponse> findAll(String keyword);
+    PatientResponse me();
+    List<PatientResponse> all();
 }

@@ -104,42 +104,12 @@ public class PatientServiceImpl implements PatientService {
         patient.getRelationships().add(relationship);
     }
 
-    @Override
-    @Transactional
-    public PatientsDto findAllPatientByAccountId(Integer id) {
-        User user = userService.getById(id);
-        return getPatientsDto(user);
-    }
 
     @Override
     public Patient findByPhone(String phone) {
         return repository.findByPhone(phone).orElse(null);
     }
 
-    @Override
-    public PatientsDto findAllPatientByPhone(String phone) {
-        User user = userService.findByPhone(phone);
-        return getPatientsDto(user);
-    }
-
-    private PatientsDto getPatientsDto(User user) {
-        if (user != null) {
-            List<Relationship> relationships = user.getRelationships();
-
-            PatientsDto patientsDto = new PatientsDto();
-            List<PatientResponse> patients = relationships.stream()
-                    .map((it) -> {
-                        PatientResponse response = patientMapper.toResponse(it.getPatient());
-                        response.setRelationship(it.getRelational());
-                        return response;
-                    }).toList();
-
-            patientsDto.setPatients(patients);
-            patientsDto.setOwnerId(user.getId());
-            return patientsDto;
-        }
-        return null;
-    }
 
 
     @Override
@@ -157,6 +127,40 @@ public class PatientServiceImpl implements PatientService {
         return repository.findAll(spec).stream()
                 .map(patientMapper::toResponse)
                 .toList();
+    }
+
+    @Override
+    public PatientResponse me() {
+        User user = userService.getCurrentUser();
+        if(user == null){
+            throw new RuntimeException("User not found");
+        }
+        Patient patient = repository.findByPhone(user.getPhone()).orElseThrow(() -> new RuntimeException("Patient not found"));
+        PatientResponse response = patientMapper.toResponse(patient);
+        response.setEmail(user.getEmail());
+        return response;
+    }
+
+    @Override
+    public List<PatientResponse> all() {
+        User user = userService.getCurrentUser();
+        if (user != null) {
+            List<Relationship> relationships = user.getRelationships();
+
+            PatientsDto patientsDto = new PatientsDto();
+
+            return relationships.stream()
+                    .map((it) -> {
+                        Patient patient = it.getPatient();
+                        if(!user.getPhone().equals(patient.getPhone())){
+                            PatientResponse response = patientMapper.toResponse(patient);
+                            response.setRelationship(it.getRelational());
+                            return response;
+                        }
+                        return null;
+                    }).toList();
+        }
+        return null;
     }
 
 
