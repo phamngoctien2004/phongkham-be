@@ -106,8 +106,23 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     @Transactional
+    public PatientsDto findAllPatientByAccountId(Integer id) {
+        User user = userService.getById(id);
+        return getPatientsDto(user);
+    }
+
+    @Override
+    public Patient findByPhone(String phone) {
+        return repository.findByPhone(phone).orElse(null);
+    }
+
+    @Override
     public PatientsDto findAllPatientByPhone(String phone) {
         User user = userService.findByPhone(phone);
+        return getPatientsDto(user);
+    }
+
+    private PatientsDto getPatientsDto(User user) {
         if (user != null) {
             List<Relationship> relationships = user.getRelationships();
 
@@ -121,15 +136,11 @@ public class PatientServiceImpl implements PatientService {
 
             patientsDto.setPatients(patients);
             patientsDto.setOwnerId(user.getId());
-             return patientsDto;
+            return patientsDto;
         }
         return null;
     }
 
-    @Override
-    public Patient findByPhone(String phone) {
-        return repository.findByPhone(phone).orElse(null);
-    }
 
     @Override
     public PatientResponse findById(Integer id) {
