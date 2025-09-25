@@ -3,6 +3,7 @@ package com.dcm.demo.service.impl;
 import com.dcm.demo.dto.request.LabOrderRequest;
 import com.dcm.demo.dto.response.LabOrderResponse;
 import com.dcm.demo.mapper.HealthPlanMapper;
+import com.dcm.demo.mapper.LabOrderMapper;
 import com.dcm.demo.model.Doctor;
 import com.dcm.demo.model.HealthPlan;
 import com.dcm.demo.model.LabOrder;
@@ -27,6 +28,23 @@ public class LabOrderServiceImpl implements LabOrderService {
     private final HealthPlanService healthPlanService;
     private final HealthPlanMapper healthPlanMapper;
     private final MedicalRecordService medicalRecordService;
+    private final LabOrderMapper mapper;
+
+    @Override
+    public List<LabOrderResponse> getAll() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public LabOrderResponse findByRecordCode(String code) {
+        return repository.findByMedicalRecordCode(code)
+                .map(mapper::toResponse)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu chỉ định"));
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<LabOrderResponse> createLabOrder(List<LabOrderRequest> requests) {

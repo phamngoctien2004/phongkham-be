@@ -6,10 +6,7 @@ import com.dcm.demo.model.LabOrder;
 import com.dcm.demo.service.interfaces.LabOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,6 +16,14 @@ import java.util.List;
 public class LabOrderController {
     private final LabOrderService labOrderService;
 
+    @GetMapping
+
+    @GetMapping("/{code}")
+    public ResponseEntity<?> getByRecordCode(@PathVariable String code) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(labOrderService.findByRecordCode(code), "Get lab order by record code successfully")
+        );
+    }
     @PostMapping
     public ResponseEntity<?> create(@RequestBody List<LabOrderRequest> request) {
         return ResponseEntity.ok(
