@@ -9,6 +9,7 @@ import java.util.List;
 public interface MedicalRecordService {
     void create(MedicalRequest request);
     void update(MedicalRequest request);
+    byte[] exportPdf(Integer id);
     List<MedicalResponse> me();
     List<MedicalResponse> getRelationMedicalRecord(String cccd);
     MedicalRecord findById(Integer id);

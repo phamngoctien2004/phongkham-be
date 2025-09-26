@@ -15,8 +15,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +32,33 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final RelationshipRepository relationshipRepository;
     private final HealthPlanService healthPlanService;
     private final MedicalMapper mapper;
+    private final FileService fileService;
+
+    @Override
+    public byte[] exportPdf(Integer id) {
+        MedicalRecord medicalRecord = repository.findById(id).orElseThrow(
+                () -> new AppException(ErrorCode.RECORD_NOTFOUND)
+        );
+        Patient patient = medicalRecord.getPatient();
+        HealthPlan healthPlan = medicalRecord.getHealthPlan();
+        Doctor doctor = medicalRecord.getDoctor();
+        String healName = healthPlan != null ? healthPlan.getName() : "Goi kham thuong";
+        BigDecimal healPrice = healthPlan != null ? healthPlan.getPrice() : doctor.getDegree().getExaminationFee();
+        LocalDate now = LocalDate.now();
+        Map<String, Object> params = Map.of(
+                "tenBenhNhan", patient.getFullName(),
+                "diaChi", patient.getAddress(),
+                "thanhToan", "Tien Mat",
+                "total", medicalRecord.getTotal(),
+                "today", now
+        );
+        List<Map<String, Object>> items = List.of(
+                Map.of("name", healName, "price", healPrice)
+        );
+
+        return fileService.render("pdfs/invoice", params, items);
+    }
+
     @Override
     @Transactional
     public void create(MedicalRequest request) {

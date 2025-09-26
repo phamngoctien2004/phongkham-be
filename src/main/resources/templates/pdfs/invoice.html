@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Hóa đơn GTGT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Liberation Serif', serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #000;
+        }
+
+        .container {
+            border: 2px solid #000;
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+        }
+
+        /* Header */
+        .header {
+            border-bottom: 2px solid #000;
+            padding: 15px;
+            position: relative;
+            min-height: 120px;
+        }
+
+        .header-content {
+            text-align: center;
+            padding: 0 150px;
+        }
+
+        .logo-section {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            width: 100px;
+            height: 100px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            border: 3px solid #4169E1;
+            border-radius: 40px;
+            background: #fff;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .logo-inner {
+            width: 40px;
+            height: 40px;
+            background: #FF0000;
+            border-radius: 20px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .logo-text {
+            text-align: center;
+            font-size: 8px;
+            color: #4169E1;
+            margin-top: 5px;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4169E1;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #4169E1;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .invoice-info {
+            margin: 10px 0;
+            font-size: 11px;
+        }
+
+        .serial-section {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            text-align: left;
+            font-size: 11px;
+        }
+
+        .serial-info {
+            margin-bottom: 10px;
+        }
+
+        /* Content sections */
+        .section {
+            padding: 15px;
+            border-bottom: 1px solid #000;
+        }
+
+        .info-row {
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #4169E1;
+            float: left;
+            width: 200px;
+        }
+
+        .value {
+            margin-left: 200px;
+        }
+
+        /* Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .items-table th,
+        .items-table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .items-table th {
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+
+        .text-left {
+            text-align: left !important;
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+
+        /* Total section */
+        .total-section {
+            padding: 15px;
+            border-bottom: 1px solid #000;
+        }
+
+        .total-row {
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .total-label {
+            font-weight: bold;
+            float: left;
+            width: 350px;
+        }
+
+        .total-value {
+            margin-left: 350px;
+            font-weight: bold;
+            color: #4169E1;
+            font-size: 14px;
+        }
+
+        /* Signatures */
+        .signatures {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .signature-row {
+            width: 100%;
+            display: table;
+        }
+
+        .signature-box {
+            display: table-cell;
+            width: 33.33%;
+            text-align: center;
+            vertical-align: top;
+            padding: 0 10px;
+        }
+
+        .signature-title {
+            font-weight: bold;
+            color: #4169E1;
+            margin-bottom: 60px;
+        }
+
+        .clearfix {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-section">
+            <div class="logo">
+                <div class="logo-inner"></div>
+            </div>
+            <div class="logo-text">LOGO</div>
+        </div>
+
+        <div class="header-content">
+            <div class="title">HÓA ĐƠN GIÁ TRỊ GIA TĂNG</div>
+            <div class="subtitle">(VAT INVOICE)</div>
+            <div class="invoice-info">
+                Bản thể hiện của hóa đơn điện tử<br>
+                <em>(Electronic invoice display)</em>
+            </div>
+            <div>
+                Ngày <strong th:text="${#temporals.format(today, 'dd')}"></strong>
+                tháng <strong th:text="${#temporals.format(today, 'MM')}"></strong>
+                năm <strong th:text="${#temporals.format(today, 'yyyy')}"></strong>
+            </div>
+
+        </div>
+
+        <div class="serial-section">
+            <div class="serial-info">
+                <strong>Ký hiệu <em>(Serial)</em>:</strong><br>
+                YK/25E
+            </div>
+            <div class="serial-info">
+                <strong>Số <em>(No.)</em>:</strong><br>
+                00001
+            </div>
+        </div>
+    </div>
+
+    <!-- Seller Info -->
+    <div class="section">
+        <div class="info-row">
+            <div class="label">Đơn vị bán hàng:</div>
+            <div class="value">Phòng khám đa khoa Mạnh Sĩ</div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="info-row">
+            <div class="label">Mã số thuế:</div>
+            <div class="value">3301645896</div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="info-row">
+            <div class="label">Địa chỉ:</div>
+            <div class="value">Hà Nội Việt Nam</div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="info-row">
+            <div class="label">Điện thoại:</div>
+            <div class="value">0234.3826.888 | Fax: 0234.3826.999</div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="info-row">
+            <div class="label">Số tài khoản:</div>
+            <div class="value">114002687406 - Ngân hàng TMCP Công Thương Việt Nam</div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <!-- Customer Info -->
+    <div class="section">
+        <div class="info-row">
+            <div class="label">Họ tên người mua hàng:</div>
+            <div class="value">Nguyễn Văn An</div>
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="info-row">
+            <div class="label">Mã số thuế:</div>
+            <div class="value">0123456789</div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="info-row">
+            <div class="label">Địa chỉ:</div>
+            <div class="value">123 Đường ABC, Quận 1, TP.HCM</div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="info-row">
+            <div class="label">Hình thức thanh toán:</div>
+            <div class="value">Tiền mặt</div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <table class="items-table">
+        <thead>
+        <tr>
+            <th style="width: 8%;">STT</th>
+            <th style="width: 40%;">Tên hàng hóa, dịch vụ</th>
+            <th style="width: 12%;">Đơn vị tính</th>
+            <th style="width: 10%;">Số lượng</th>
+            <th style="width: 15%;">Đơn giá</th>
+            <th style="width: 15%;">Thành tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item, iStat : ${items}">
+            <td th:text="${iStat.index + 1}">1</td>
+            <td class="text-left" th:text="${item.name}">Dịch vụ khám tổng quát</td>
+            <td>Lần</td>
+            <td>1</td>
+            <td class="text-right" th:text="${#numbers.formatDecimal(item.price,0,'COMMA',0,'POINT')}">200,000</td>
+            <td class="text-right" th:text="${#numbers.formatDecimal(item.price,0,'COMMA',0,'POINT')}">200,000</td>
+        </tr>
+
+        <tr>
+            <td>&#160;</td>
+            <td>&#160;</td>
+            <td>&#160;</td>
+            <td>&#160;</td>
+            <td>&#160;</td>
+            <td>&#160;</td>
+        </tr>
+        <tr>
+            <td>&#160;</td>
+            <td>&#160;</td>
+            <td>&#160;</td>
+            <td>&#160;</td>
+            <td>&#160;</td>
+            <td>&#160;</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="total-section">
+        <div class="total-row">
+            <div class="total-label">Tổng tiền hàng:</div>
+            <div class="total-value" th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">800,000 VNĐ</div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="total-row">
+            <div class="total-label">Thuế GTGT:</div>
+            <div class="total-value"></div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="total-row">
+            <div class="total-label">Tổng cộng tiền thanh toán:</div>
+            <div class="total-value" th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')}">880,000 VNĐ</div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="total-row">
+            <div class="total-label">Số tiền viết bằng chữ:</div>
+            <div class="total-value">Tám trăm tám mươi nghìn đồng chẵn</div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <!-- Signatures -->
+    <div class="signatures">
+        <div class="signature-row">
+            <div class="signature-box">
+                <div class="signature-title">NGƯỜI MUA HÀNG<br>(Customer)</div>
+                <div>(Ký, ghi rõ họ tên)</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-title">NGƯỜI LẬP PHIẾU<br>(Prepared by)</div>
+                <div>(Ký, ghi rõ họ tên)</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-title">NGƯỜI BÁN HÀNG<br>(Seller)</div>
+                <div>(Ký, đóng dấu, ghi rõ họ tên)</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

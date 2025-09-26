@@ -40,7 +40,7 @@ public class SecurityConfig {
 
     private final String[] WhiteList = {
             "/api/auth/**",
-//            "/api/**",
+            "/api/**",
             "/avatars/**"
     };
 
@@ -79,7 +79,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cors = new CorsConfiguration();
-        cors.setAllowedOrigins(List.of("http://localhost:3000", "https://dashboard.phongkhamnhvh.com", "http://127.0.0.1:5500   "));
+        cors.setAllowedOrigins(List.of("http://localhost:3000", "https://dashboard.phongkhamnhvh.com", "http://localhost:5173"));
         cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         cors.addAllowedHeader("*");
         cors.setAllowCredentials(true);

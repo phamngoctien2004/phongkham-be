@@ -16,7 +16,6 @@ import java.util.List;
 public class LabOrderController {
     private final LabOrderService labOrderService;
 
-    @GetMapping
 
     @GetMapping("/{code}")
     public ResponseEntity<?> getByRecordCode(@PathVariable String code) {
