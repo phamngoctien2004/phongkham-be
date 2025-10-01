@@ -4,20 +4,14 @@ import com.dcm.demo.dto.request.LabOrderRequest;
 import com.dcm.demo.dto.response.LabOrderResponse;
 import com.dcm.demo.mapper.HealthPlanMapper;
 import com.dcm.demo.mapper.LabOrderMapper;
-import com.dcm.demo.model.Doctor;
-import com.dcm.demo.model.HealthPlan;
-import com.dcm.demo.model.LabOrder;
-import com.dcm.demo.model.MedicalRecord;
+import com.dcm.demo.model.*;
 import com.dcm.demo.repository.LabOrderRepository;
-import com.dcm.demo.service.interfaces.HealthPlanService;
-import com.dcm.demo.service.interfaces.LabOrderService;
-import com.dcm.demo.service.interfaces.MedicalRecordService;
-import com.dcm.demo.service.interfaces.UserService;
+import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -28,13 +22,15 @@ public class LabOrderServiceImpl implements LabOrderService {
     private final HealthPlanService healthPlanService;
     private final HealthPlanMapper healthPlanMapper;
     private final MedicalRecordService medicalRecordService;
+    private final DoctorService doctorService;
     private final LabOrderMapper mapper;
+    private final InvoiceService invoiceService;
 
     @Override
     public List<LabOrderResponse> getAll() {
         return repository.findAll()
                 .stream()
-                .map(mapper::toResponse)
+                .map(this::buildResponse)
                 .toList();
     }
 
@@ -45,54 +41,88 @@ public class LabOrderServiceImpl implements LabOrderService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu chỉ định"));
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public List<LabOrderResponse> createLabOrder(List<LabOrderRequest> requests) {
-        List<LabOrderResponse> responses = new ArrayList<>();
-        for(LabOrderRequest request : requests) {
-            LabOrder labOrder = new LabOrder();
-
-            MedicalRecord medicalRecord = medicalRecordService.findById(request.getRecordId());
-            medicalRecord.setId(request.getRecordId());
-            labOrder.setMedicalRecord(medicalRecord);
-
-            HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
-            if (healthPlan == null) {
-                throw new RuntimeException("Dịch vụ không tồn tại");
-            }
-            labOrder.setHealthPlan(healthPlan);
-
-            Doctor doctor = new Doctor();
-            doctor.setId(request.getDoctorId());
-            labOrder.setPerformingDoctor(doctor);
-
-            labOrder.setPrice(healthPlan.getPrice());
-
-//        khi nao mo security thi mo cai nay
-//        User user = userService.getCurrentUser();
-            labOrder.setOrderingDoctor(doctor);
-
-            responses.add(buildResponse(repository.save(labOrder)));
-        }
-        return responses;
-    }
 
     public LabOrderResponse buildResponse(LabOrder labOrder) {
+        HealthPlan healthPlan = labOrder.getHealthPlan();
         return LabOrderResponse.builder()
                 .id(labOrder.getId())
                 .recordId(labOrder.getMedicalRecord().getId())
-                .healthPlanResponse(healthPlanMapper.toResponse(labOrder.getHealthPlan()))
+                .healthPlanId(healthPlan.getId())
+                .healthPlanName(healthPlan.getName())
                 .price(labOrder.getPrice())
-                .doctorOrdered(labOrder.getOrderingDoctor().getPosition())
-                .doctorPerformed(labOrder.getPerformingDoctor().getPosition())
+                .doctorOrdered(labOrder.getOrderingDoctor() != null ? labOrder.getOrderingDoctor().getPosition() : null)
+                .doctorPerformed(labOrder.getPerformingDoctor() != null ? labOrder.getPerformingDoctor().getPosition() : null)
+                .room(labOrder.getRoom())
                 .status(labOrder.getStatus())
-                .createdAt(labOrder.getQueueTime())
+                .diagnosis(labOrder.getDiagnosis())
+                .orderDate(labOrder.getOrderDate())
                 .expectedResultDate(labOrder.getExpectedResultDate())
                 .build();
     }
 
     @Override
     public LabOrder findById(Integer id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu chỉ định"));
+        return repository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu chỉ định2"));
+    }
+
+    @Override
+    public LabOrderResponse findResponseById(Integer id) {
+        return buildResponse(repository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu chỉ định3")));
+    }
+
+    @Override
+    public void createLabOrderFromHealthPlan(MedicalRecord medicalRecord, Integer healthPlanId) {
+        if (healthPlanId == null) {
+            HealthPlan healthPlan = healthPlanService.findById(1);
+            buildEntity(medicalRecord, medicalRecord.getDoctor(), healthPlan, medicalRecord.getFee(), null);
+            return;
+        }
+        HealthPlan healthPlan = healthPlanService.findById(healthPlanId);
+        List<healthPlanDetail> healthPlanDetails = healthPlan.getHealthPlanDetails();
+
+        if (healthPlanDetails != null && !healthPlanDetails.isEmpty()) {
+            HealthPlan temp = healthPlanService.findById(1);
+
+            buildEntity(medicalRecord, medicalRecord.getDoctor(), temp, BigDecimal.ZERO, null);
+            healthPlanDetails.forEach(detail -> {
+                buildEntity(medicalRecord, null, detail.getServiceDetail(), detail.getServiceDetail().getPrice(), null);
+            });
+            return;
+        }
+        buildEntity(medicalRecord, null, healthPlan, healthPlan.getPrice(), null);
+    }
+
+    @Override
+    @Transactional
+    public void createLabOrder(LabOrderRequest request) {
+        MedicalRecord medicalRecord = medicalRecordService.findById(request.getRecordId());
+        BigDecimal total = BigDecimal.ZERO;
+        HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
+        Doctor doctor = doctorService.findById(request.getPerformingDoctor());
+        total = total.add(healthPlan.getPrice());
+        buildEntity(medicalRecord, doctor, healthPlan, healthPlan.getPrice(), request.getDiagnosis());
+        medicalRecordService.updateTotal(medicalRecord, total);
+    }
+
+    @Override
+    public void updateLabOrder(LabOrderRequest request) {
+        LabOrder labOrder = findById(request.getId());
+        Doctor doctor = new Doctor();
+        doctor.setId(request.getPerformingDoctor());
+        labOrder.setPerformingDoctor(doctor);
+        repository.save(labOrder);
+    }
+
+    private void buildEntity(MedicalRecord medicalRecord, Doctor doctor, HealthPlan healthPlan, BigDecimal price, String diagnosis) {
+        LabOrder labOrder = new LabOrder();
+        labOrder.setMedicalRecord(medicalRecord);
+        labOrder.setHealthPlan(healthPlan);
+        labOrder.setOrderingDoctor(medicalRecord.getDoctor());
+        labOrder.setPerformingDoctor(doctor);
+        labOrder.setPrice(price);
+        labOrder.setDiagnosis(diagnosis);
+        Room room = healthPlan.getRoom();
+        labOrder.setRoom(room.getRoomName() + " - " + room.getRoomNumber());
+        repository.save(labOrder);
     }
 }

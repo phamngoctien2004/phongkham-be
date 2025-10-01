@@ -6,6 +6,7 @@ import com.dcm.demo.dto.response.LoginResponse;
 
 public interface AuthService {
     LoginResponse login(LoginRequest request);
+    LoginResponse loginDashboard(LoginRequest request);
     void sendOtp(OtpRequest request);
 }
 

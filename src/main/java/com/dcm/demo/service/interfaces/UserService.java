@@ -7,13 +7,14 @@ import com.dcm.demo.dto.response.UserResponse;
 import com.dcm.demo.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
     User getUserByEmailOrPhone(String emailOrPhone);
     UserResponse findById(Integer id);
     User findByPhone(String phone);
     User getById(Integer id);
-
+    User findByEmail(String email);
     //  create & update
     UserResponse createUser(UserRequest user);
 

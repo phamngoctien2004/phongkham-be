@@ -39,7 +39,7 @@ public class MedicalRecord {
 //    @JoinColumn(name = "id_dat_lich")
 //    private Appointment appointment;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "id_bac_si", nullable = false)
     private Doctor doctor;
 

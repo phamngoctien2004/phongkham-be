@@ -9,5 +9,4 @@ import java.util.Optional;
 @Repository
 public interface LabOrderRepository extends JpaRepository<LabOrder, Integer> {
     Optional<LabOrder> findByMedicalRecordCode (String code);
-
 }

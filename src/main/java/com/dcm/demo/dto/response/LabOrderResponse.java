@@ -17,11 +17,16 @@ import java.time.LocalDateTime;
 public class LabOrderResponse {
     private Integer id;
     private Integer recordId;
-    private HealthPlanResponse healthPlanResponse;
+    private Integer healthPlanId;
+    private String healthPlanName;
+    private String room;
     private String doctorPerformed;
+    private Integer doctorPerformedId;
     private String doctorOrdered;
     private LabOrder.TestStatus status;
+    private String statusPayment;
     private BigDecimal price;
-    private LocalDateTime createdAt;
+    private LocalDateTime orderDate;
+    private String diagnosis;
     private LocalDateTime expectedResultDate;
 }

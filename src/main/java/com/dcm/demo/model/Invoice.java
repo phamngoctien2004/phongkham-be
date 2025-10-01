@@ -64,11 +64,11 @@ public class Invoice {
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceDetail> invoiceDetails = new ArrayList<>();
     public enum PaymentMethod {
-        TIEN_MAT, THE_ATM, CHUYEN_KHOAN, QR_CODE
+        TIEN_MAT, CHUYEN_KHOAN
     }
 
     public enum PaymentStatus {
-        CHUA_THANH_TOAN, HOAN_THANH
+        CHUA_THANH_TOAN, DA_THANH_TOAN, THANH_TOAN_MOT_PHAN
     }
     @Override
     public String toString() {

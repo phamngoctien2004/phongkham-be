@@ -28,6 +28,12 @@ public class AuthController {
                 new ApiResponse<>("", "Send OTP successful")
         );
     }
+    @PostMapping("/dashboard/login")
+    public ResponseEntity<?> dashboardLogin(@RequestBody LoginRequest loginRequest) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(authService.loginDashboard(loginRequest),"Login successful")
+        );
+    }
 
     @GetMapping("/test")
     public ResponseEntity<?> test() {

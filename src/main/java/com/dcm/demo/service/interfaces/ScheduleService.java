@@ -6,6 +6,7 @@ import com.dcm.demo.dto.response.SlotResponse;
 import com.dcm.demo.model.Schedule;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public interface ScheduleService {
@@ -15,6 +16,6 @@ public interface ScheduleService {
     void delete(Integer id);
 
     void acceptLeave(Integer id);
-
+    Schedule.Shift getShift(LocalTime time);
     List<SlotResponse> filterSchedules(Integer departmentId, Integer doctorId, LocalDate startDate, LocalDate endDate, Schedule.Shift shift);
 }

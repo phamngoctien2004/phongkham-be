@@ -16,4 +16,5 @@ public class MedicalRequest {
     private String diagnosis;
     private String treatmentPlan;
     private String note;
+    private Integer invoiceId;
 }

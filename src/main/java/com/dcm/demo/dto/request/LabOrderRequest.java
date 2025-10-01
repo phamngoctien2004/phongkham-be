@@ -7,5 +7,6 @@ public class LabOrderRequest {
     private Integer id;
     private Integer recordId;
     private Integer healthPlanId;
-    private Integer doctorId;
+    private Integer performingDoctor;
+    private String diagnosis;
 }

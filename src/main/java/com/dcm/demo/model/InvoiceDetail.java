@@ -27,8 +27,16 @@ public class InvoiceDetail {
     @Column(name = "so_tien_thanh_toan")
     private BigDecimal paidAmount = BigDecimal.ZERO;
     @Column(name = "phuong_thuc_thanh_toan")
+    @Enumerated(EnumType.STRING)
     private Invoice.PaymentMethod paymentMethod;
-
+    @Column(name = "trang_thai")
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.CHUA_THANH_TOAN;
     @Column(name = "mo_ta")
     private String description;
+
+    public enum Status{
+        DA_THANH_TOAN,
+        CHUA_THANH_TOAN
+    }
 }

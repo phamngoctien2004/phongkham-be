@@ -30,4 +30,9 @@ public class PaymentController {
         // Logic to get payment status
         return new ApiResponse<>(invoiceService.checkStatusPayment(invoiceId), "Payment status retrieved successfully");
     }
+    @GetMapping("/test")
+    public ApiResponse<?> test() {
+        // Logic to get payment status
+        return new ApiResponse<>(invoiceService.getServicesUnPay(26), "Payment status retrieved successfully");
+    }
 }

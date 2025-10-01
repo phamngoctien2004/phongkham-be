@@ -1,8 +1,11 @@
 package com.dcm.demo.dto.response;
 
+import com.dcm.demo.model.MedicalRecord;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class MedicalResponse {
@@ -14,4 +17,11 @@ public class MedicalResponse {
     private String treatmentPlan;
     private String note;
     private BigDecimal total;
+    private String patientName;
+    private LocalDateTime date;
+    private MedicalRecord.RecordStatus status;
+
+    private List<LabOrderResponse> labOrdersResponses;
+
+
 }

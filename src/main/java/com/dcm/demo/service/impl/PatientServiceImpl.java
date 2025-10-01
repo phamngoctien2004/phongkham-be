@@ -32,7 +32,9 @@ public class PatientServiceImpl implements PatientService {
     public PatientResponse create(PatientRequest request) {
         return createPatientAndAccount(request);
     }
+
     @Override
+    @Transactional
     public PatientResponse update(PatientRequest request) {
         Patient patient = repository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
@@ -46,10 +48,17 @@ public class PatientServiceImpl implements PatientService {
         patient.setWeight(request.getWeight());
         patient.setHeight(request.getHeight());
 
+        if (patient.getPhone() != null) {
+            User user = userService.findByPhone(patient.getPhone());
+            user.setEmail(request.getEmail());
+            user.setPhone(request.getPhone());
+            userService.save(user);
+        }
         return patientMapper.toResponse(
                 repository.save(patient)
         );
     }
+
     //    tao new user co lien ket voi tai khoan
     @Override
     public PatientResponse createPatient(PatientRequest request, User user) {
@@ -76,12 +85,12 @@ public class PatientServiceImpl implements PatientService {
 
         Patient patient = buildPatient(request);
 
-        if(request.getPhone() != null){
+        if (request.getPhone() != null) {
             User newUser = userService.createAccountByPhone(request.getPhone());
             this.buildRelationship(patient, newUser);
         }
 
-        if(request.getPhoneLink() != null){
+        if (request.getPhoneLink() != null) {
             User userLink = userService.createAccountByPhone(request.getPhoneLink());
             this.buildRelationship(patient, userLink);
         }
@@ -97,7 +106,7 @@ public class PatientServiceImpl implements PatientService {
         return patient;
     }
 
-    private void buildRelationship(Patient patient, User user){
+    private void buildRelationship(Patient patient, User user) {
         Relationship relationship = new Relationship();
         relationship.setUser(user);
         relationship.setPatient(patient);
@@ -136,7 +145,7 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public PatientResponse me() {
         User user = userService.getCurrentUser();
-        if(user == null){
+        if (user == null) {
             throw new RuntimeException("User not found");
         }
         Patient patient = repository.findByPhone(user.getPhone()).orElseThrow(() -> new RuntimeException("Patient not found"));
@@ -156,7 +165,7 @@ public class PatientServiceImpl implements PatientService {
             return relationships.stream()
                     .map((it) -> {
                         Patient patient = it.getPatient();
-                        if(!user.getPhone().equals(patient.getPhone())){
+                        if (!user.getPhone().equals(patient.getPhone())) {
                             PatientResponse response = patientMapper.toResponse(patient);
                             response.setRelationship(it.getRelational());
                             return response;

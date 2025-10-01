@@ -29,10 +29,10 @@ public class LabOrder {
     @JoinColumn(name = "id_dich_vu")
     private HealthPlan healthPlan;
 
-    @ManyToOne
+    @ManyToOne(fetch =  FetchType.LAZY)
     @JoinColumn(name = "id_bac_si_chi_dinh", nullable = false)
     private Doctor orderingDoctor;
-    @ManyToOne
+    @ManyToOne(fetch =  FetchType.LAZY)
     @JoinColumn(name = "id_bac_si_thuc_hien", nullable = false)
     private Doctor performingDoctor;
 
@@ -47,6 +47,8 @@ public class LabOrder {
     @Column(name = "ngay_chi_dinh")
     private LocalDateTime orderDate;
 
+    @Column(name = "chuan_doan")
+    private String diagnosis;
     @Column(name = "ngay_hen_tra_ket_qua")
     private LocalDateTime expectedResultDate;
 
@@ -54,6 +56,8 @@ public class LabOrder {
     @Column(name = "thoi_gian_vao_hang")
     private LocalDateTime queueTime;
 
+    @Column(name = "phong_thuc_hien")
+    private String room;
     public enum TestStatus {
         CHO_THUC_HIEN, DANG_THUC_HIEN, HOAN_THANH, HUY_BO
     }

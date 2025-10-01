@@ -7,8 +7,9 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface HealthPlanService {
-    List<HealthPlanResponse> getAllService();
+    List<HealthPlanResponse> getAllService(String keyword);
     HealthPlan findById(Integer id);
+    HealthPlanResponse findResponseById(Integer id);
     List<HealthPlan> findAllById(List<Integer> ids);
     BigDecimal calcTotalService(List<Integer> ids);
 }

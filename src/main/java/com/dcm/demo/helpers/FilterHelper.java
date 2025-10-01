@@ -21,6 +21,14 @@ public class FilterHelper {
             return cb.or(predicates.toArray(new Predicate[0]));
         };
     }
+    public static <T> Specification<T> contain(String keyword, String field){
+        return (root, query, cb) -> {
+            if(keyword == null || keyword.isEmpty()) {
+                return cb.conjunction();
+            }
+            return cb.like(root.get(field),"%"+ keyword.trim() + "%");
+        };
+    }
     public static <T> Specification<T> equal(String field, Object value){
         return (root, query, cb) -> {
             if(value == null) {

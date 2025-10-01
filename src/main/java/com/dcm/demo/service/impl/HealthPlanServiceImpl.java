@@ -1,26 +1,36 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.response.HealthPlanResponse;
+import com.dcm.demo.dto.response.SlotResponse;
+import com.dcm.demo.helpers.FilterHelper;
 import com.dcm.demo.mapper.HealthPlanMapper;
+import com.dcm.demo.model.Department;
 import com.dcm.demo.model.HealthPlan;
 import com.dcm.demo.repository.ExaminationServiceRepository;
 import com.dcm.demo.service.interfaces.HealthPlanService;
+import com.dcm.demo.service.interfaces.ScheduleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class HealthPlanServiceImpl implements HealthPlanService {
+    private final ScheduleService scheduleService;
     private final ExaminationServiceRepository repository;
     private final HealthPlanMapper mapper;
 
     @Override
     @Transactional
-    public List<HealthPlanResponse> getAllService() {
-        return repository.findAll().stream()
+    public List<HealthPlanResponse> getAllService(String keyword) {
+        Specification<HealthPlan> spec = FilterHelper.contain(keyword, List.of("name"));
+        return repository.findAll(spec).stream()
                 .map(it -> {
                     HealthPlanResponse response = mapper.toResponse(it);
                     response.setRoomNumber(it.getRoom().getRoomNumber());
@@ -33,6 +43,21 @@ public class HealthPlanServiceImpl implements HealthPlanService {
     @Override
     public HealthPlan findById(Integer id) {
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Health plan not found"));
+    }
+
+    @Override
+    public HealthPlanResponse findResponseById(Integer id) {
+        HealthPlan healthplan = findById(id);
+        Department department = healthplan.getRoom().getDepartment();
+        List<SlotResponse> slotResponses = scheduleService.filterSchedules(department.getId(),
+                null,
+                LocalDate.now(),
+                LocalDate.now(),
+                scheduleService.getShift(LocalTime.now())
+        );
+        HealthPlanResponse response = mapper.toResponse(healthplan);
+        response.setDoctorsAssigned(slotResponses.get(0).getDoctors());
+        return response;
     }
 
     @Override

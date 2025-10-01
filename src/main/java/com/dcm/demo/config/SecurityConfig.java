@@ -1,7 +1,10 @@
 package com.dcm.demo.config;
 
+import com.dcm.demo.dto.response.ApiResponse;
+import com.dcm.demo.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.io.Decoders;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +19,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -40,8 +44,9 @@ public class SecurityConfig {
 
     private final String[] WhiteList = {
             "/api/auth/**",
-            "/api/**",
-            "/avatars/**"
+//            "/api/**",
+            "/avatars/**",
+            "/api/payments/**"
     };
 
     @Bean
@@ -59,7 +64,7 @@ public class SecurityConfig {
                                                 .decoder(jwtDecoder())
                                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())
                                 )
-//                                .authenticationEntryPoint(authenticationEntryPoint())
+                                .authenticationEntryPoint(authenticationEntryPoint())
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
@@ -101,20 +106,23 @@ public class SecurityConfig {
         return converter;
     }
 
-//    @Bean
-//    AuthenticationEntryPoint authenticationEntryPoint() {
-//        return (request, response, authException) -> {
-//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//            response.setContentType("application/json");
-//            ErrorCode errorCode = ErrorCode.LOGIN_AGAIN;
-//            ;
-//            String message = authException.getMessage();
-//
-//            if (message.contains("expired at")) {
-//                errorCode = ErrorCode.JWT_EXPIRED;
-//            }
-//
-//            objectMapper.writeValue(response.getOutputStream(), ApiResponse.ok(null, errorCode.getMessage(), errorCode.getCode()));
-//        };
-//    }
+    @Bean
+    public PasswordEncoder encoder() {
+        return new BCryptPasswordEncoder();
+    }
+    @Bean
+    AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            ErrorCode errorCode = ErrorCode.LOGIN_AGAIN;
+            String message = authException.getMessage();
+
+            if (message.contains("expired at")) {
+                errorCode = ErrorCode.JWT_EXPIRED;
+            }
+
+            objectMapper.writeValue(response.getOutputStream(), new ApiResponse<>(errorCode, message));
+        };
+    }
 }

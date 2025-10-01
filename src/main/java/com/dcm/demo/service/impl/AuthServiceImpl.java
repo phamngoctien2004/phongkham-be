@@ -19,6 +19,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,7 +32,8 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final JwtService jwtService;
     private final PatientService patientService;
-    private UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
     private final RedisTemplate<String, Object> redisTemplate;
     @Value("${ID_PHONE}")
     private String ip_phone;
@@ -55,6 +57,20 @@ public class AuthServiceImpl implements AuthService {
         return new LoginResponse(
                 jwtService.generate(user.getId(), user.getRole().name(), 60),
                 userResponse
+        );
+    }
+
+    @Override
+    public LoginResponse loginDashboard(LoginRequest request) {
+        User user = userService.findByEmail(request.getUsername());
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.AUTH_FAILED);
+        }
+        UserResponse userResponse = userMapper.toResponse(user);
+        userResponse.setRole(user.getRole());
+        return new LoginResponse(
+                jwtService.generate(user.getId(), user.getRole().name(), 60),
+                userMapper.toResponse(user)
         );
     }
 

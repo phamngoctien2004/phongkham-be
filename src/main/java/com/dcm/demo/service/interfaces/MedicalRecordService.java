@@ -4,13 +4,18 @@ import com.dcm.demo.dto.request.MedicalRequest;
 import com.dcm.demo.dto.response.MedicalResponse;
 import com.dcm.demo.model.MedicalRecord;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface MedicalRecordService {
-    void create(MedicalRequest request);
+    MedicalRecord create(MedicalRequest request);
     void update(MedicalRequest request);
     byte[] exportPdf(Integer id);
     List<MedicalResponse> me();
     List<MedicalResponse> getRelationMedicalRecord(String cccd);
+    void updateTotal(MedicalRecord medicalRecord, BigDecimal total);
     MedicalRecord findById(Integer id);
+    MedicalResponse getDetailById(Integer id);
+    List<MedicalResponse> findAll(String keyword, MedicalRecord.RecordStatus status, LocalDate date);
 }

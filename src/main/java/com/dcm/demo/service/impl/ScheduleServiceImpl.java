@@ -79,6 +79,20 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
+    public Schedule.Shift getShift(LocalTime time) {
+        if (time.isAfter(LocalTime.of(6, 59)) && time.isBefore(LocalTime.of(12, 0))) {
+            return Schedule.Shift.SANG;
+        }
+        if (time.isAfter(LocalTime.of(11, 59)) && time.isBefore(LocalTime.of(18, 0))) {
+            return Schedule.Shift.CHIEU;
+        }
+        if (time.isAfter(LocalTime.of(17, 59)) && time.isBefore(LocalTime.of(22, 1))) {
+            return Schedule.Shift.TOI;
+        }
+        return null;
+    }
+
+    @Override
     public List<SlotResponse> filterSchedules(
             Integer departmentId,
             Integer doctorId,
