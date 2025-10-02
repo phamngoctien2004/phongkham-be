@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-public class PatientResponse {
+public final class PatientResponse implements ProfileData{
     private Integer id;
     private String code;
     private String bloodType;

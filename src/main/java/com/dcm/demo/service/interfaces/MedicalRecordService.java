@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface MedicalRecordService {
     MedicalRecord create(MedicalRequest request);
+
     void update(MedicalRequest request);
     byte[] exportPdf(Integer id);
     List<MedicalResponse> me();

@@ -69,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
         UserResponse userResponse = userMapper.toResponse(user);
         userResponse.setRole(user.getRole());
         return new LoginResponse(
-                jwtService.generate(user.getId(), user.getRole().name(), 60),
+                jwtService.generate(user.getId(), user.getRole().name(), 600),
                 userMapper.toResponse(user)
         );
     }

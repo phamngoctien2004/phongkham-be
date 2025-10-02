@@ -3,6 +3,7 @@ package com.dcm.demo.service.impl;
 import com.dcm.demo.dto.request.PatientRequest;
 import com.dcm.demo.dto.response.PatientResponse;
 import com.dcm.demo.dto.response.PatientsDto;
+import com.dcm.demo.dto.response.ProfileData;
 import com.dcm.demo.helpers.FilterHelper;
 import com.dcm.demo.mapper.PatientMapper;
 import com.dcm.demo.mapper.UserMapper;
@@ -11,6 +12,7 @@ import com.dcm.demo.model.Relationship;
 import com.dcm.demo.model.User;
 import com.dcm.demo.repository.PatientRepository;
 import com.dcm.demo.service.interfaces.PatientService;
+import com.dcm.demo.service.interfaces.ProfileLoader;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,10 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class PatientServiceImpl implements PatientService {
+
     private final PatientRepository repository;
     private final UserService userService;
     private final UserMapper userMapper;

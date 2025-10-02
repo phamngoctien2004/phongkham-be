@@ -98,7 +98,7 @@ public class LabOrderServiceImpl implements LabOrderService {
         MedicalRecord medicalRecord = medicalRecordService.findById(request.getRecordId());
         BigDecimal total = BigDecimal.ZERO;
         HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
-        Doctor doctor = doctorService.findById(request.getPerformingDoctor());
+        Doctor doctor = doctorService.findById(request.getPerformingDoctorId());
         total = total.add(healthPlan.getPrice());
         buildEntity(medicalRecord, doctor, healthPlan, healthPlan.getPrice(), request.getDiagnosis());
         medicalRecordService.updateTotal(medicalRecord, total);
@@ -108,7 +108,7 @@ public class LabOrderServiceImpl implements LabOrderService {
     public void updateLabOrder(LabOrderRequest request) {
         LabOrder labOrder = findById(request.getId());
         Doctor doctor = new Doctor();
-        doctor.setId(request.getPerformingDoctor());
+        doctor.setId(request.getPerformingDoctorId());
         labOrder.setPerformingDoctor(doctor);
         repository.save(labOrder);
     }

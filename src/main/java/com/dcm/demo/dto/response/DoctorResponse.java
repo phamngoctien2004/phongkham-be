@@ -12,7 +12,7 @@ import java.time.LocalDate;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DoctorResponse {
+public final class DoctorResponse implements  ProfileData{
     private Integer id;
     private String fullName;
     private String phone;

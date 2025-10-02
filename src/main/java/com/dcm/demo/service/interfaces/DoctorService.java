@@ -8,4 +8,5 @@ import java.util.List;
 public interface DoctorService {
     Doctor findById(Integer id);
     List<DoctorResponse> findAll();
+
 }

@@ -3,6 +3,8 @@ package com.dcm.demo.controller;
 import com.dcm.demo.dto.request.UserRequest;
 import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.dto.response.UserResponse;
+import com.dcm.demo.service.impl.MeService;
+import com.dcm.demo.service.interfaces.ProfileLoader;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,8 @@ import java.util.List;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
-
     private final UserService userService;
-
+    private final MeService meService;
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest userRequest) {
         UserResponse response = userService.createUser(userRequest);
@@ -33,10 +34,8 @@ public class UserController {
     }
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int id = Integer.parseInt(authentication.getName());
         return ResponseEntity.ok(
-                new ApiResponse<>(userService.findById(id), "Get info successfully")
+                new ApiResponse<>(meService.me(), "Get info successfully")
         );
     }
 //    @PutMapping("/{id}")
