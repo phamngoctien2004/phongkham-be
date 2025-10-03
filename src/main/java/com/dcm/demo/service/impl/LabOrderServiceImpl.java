@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -32,6 +34,29 @@ public class LabOrderServiceImpl implements LabOrderService {
                 .stream()
                 .map(this::buildResponse)
                 .toList();
+    }
+
+    @Override
+    public List<LabOrderResponse> getByDoctorPerforming(String keyword, LocalDate date, LabOrder.TestStatus status) {
+        User user = userService.getCurrentUser();
+        Integer doctorId = user.getDoctor().getId();
+
+        LocalDateTime from = null, to = null;
+        if (date != null) {
+            from = date.atStartOfDay();
+            to = date.plusDays(1).atStartOfDay();
+        }
+
+        return repository.findAll(doctorId, keyword, from, to, status)
+                .stream()
+                .map(this::buildResponse)
+                .toList(
+        );
+    }
+
+    @Override
+    public List<LabOrder> findByIds(List<Integer> ids) {
+        return repository.findAllById(ids);
     }
 
     @Override
@@ -96,12 +121,19 @@ public class LabOrderServiceImpl implements LabOrderService {
     @Transactional
     public void createLabOrder(LabOrderRequest request) {
         MedicalRecord medicalRecord = medicalRecordService.findById(request.getRecordId());
-        BigDecimal total = BigDecimal.ZERO;
         HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
         Doctor doctor = doctorService.findById(request.getPerformingDoctorId());
-        total = total.add(healthPlan.getPrice());
         buildEntity(medicalRecord, doctor, healthPlan, healthPlan.getPrice(), request.getDiagnosis());
-        medicalRecordService.updateTotal(medicalRecord, total);
+
+        Invoice invoice = medicalRecord.getInvoice();
+        invoiceService.buildInvoiceDetail(
+                invoice,
+                healthPlan.getId(),
+                healthPlan.getPrice(),
+                InvoiceDetail.Status.CHUA_THANH_TOAN,
+                Invoice.PaymentMethod.TIEN_MAT
+        );
+        invoiceService.updateTotal(invoice, healthPlan.getPrice());
     }
 
     @Override
@@ -116,6 +148,7 @@ public class LabOrderServiceImpl implements LabOrderService {
     private void buildEntity(MedicalRecord medicalRecord, Doctor doctor, HealthPlan healthPlan, BigDecimal price, String diagnosis) {
         LabOrder labOrder = new LabOrder();
         labOrder.setMedicalRecord(medicalRecord);
+        labOrder.setCode("XN" + System.currentTimeMillis());
         labOrder.setHealthPlan(healthPlan);
         labOrder.setOrderingDoctor(medicalRecord.getDoctor());
         labOrder.setPerformingDoctor(doctor);

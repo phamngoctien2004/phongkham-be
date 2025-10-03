@@ -27,7 +27,7 @@ public class Invoice {
     @JoinColumn(name = "id_benh_nhan", nullable = false)
     private Patient patient;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_phieu_kham", nullable = false)
     private MedicalRecord medicalRecord;
 

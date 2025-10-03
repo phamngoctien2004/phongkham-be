@@ -35,6 +35,9 @@ public class MedicalRecord {
     @JoinColumn(name = "id_goi_kham")
     private HealthPlan healthPlan;
 
+    @OneToOne(mappedBy = "medicalRecord")
+    private Invoice invoice;
+
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "id_dat_lich")
 //    private Appointment appointment;

@@ -16,8 +16,6 @@ import java.time.LocalDate;
 public class ScheduleController {
     private final ScheduleService scheduleService;
 
-    @GetMapping("")
-
     @PostMapping
     public ResponseEntity<?> createSchedule(@RequestBody ScheduleRequest request) {
         return ResponseEntity.ok(

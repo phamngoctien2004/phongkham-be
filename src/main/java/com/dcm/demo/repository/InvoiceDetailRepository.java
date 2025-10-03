@@ -29,7 +29,7 @@ List<InvoiceDetail> findByRecordId(@Param("medicalRecordId") Integer medicalReco
             SELECT ivd.healthPlan.id FROM InvoiceDetail ivd
             LEFT JOIN ivd.invoice iv
             WHERE iv.medicalRecord.id = :medicalRecordId
-            AND ivd.status = 'CHUA_THANH_TOAN'
+            AND ivd.status = 'DA_THANH_TOAN'
             """)
     List<Integer> findServicesUnpay(@Param("medicalRecordId") Integer medicalRecordId);
 }

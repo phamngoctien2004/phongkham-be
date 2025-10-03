@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -34,6 +35,16 @@ public class LabOrderController {
 
         return ResponseEntity.ok(
                 new ApiResponse<>(labOrderService.getAll(), "Get all lab orders successfully")
+        );
+    }
+    @GetMapping("/doctor/me")
+    public ResponseEntity<?> getAllByDoctor(@RequestParam(required = false) String keyword,
+                                            @RequestParam(required = false) LabOrder.TestStatus status,
+                                            @RequestParam(required = false) LocalDate date
+                                            ) {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(labOrderService.getByDoctorPerforming(keyword, date, status), "Get all lab orders of doctor successfully")
         );
     }
     @PostMapping

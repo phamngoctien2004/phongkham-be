@@ -17,4 +17,12 @@ public class MedicalRequest {
     private String treatmentPlan;
     private String note;
     private Integer invoiceId;
+
+
+    @Data
+    public static class UpdatePaymentRequest{
+        private Integer medicalRecordId;
+        private List<Integer> labOrderIds;
+        private boolean isCash;
+    }
 }

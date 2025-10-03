@@ -17,12 +17,13 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, In
     @Query(value = """
                 SELECT mr FROM MedicalRecord mr
                 LEFT JOIN FETCH mr.patient p
+            
                 WHERE (:keyword IS NULL OR :keyword = '' 
                        OR LOWER(p.fullName) LIKE UPPER(CONCAT('%', :keyword, '%')) 
                        OR LOWER(mr.code) LIKE UPPER(CONCAT('%', :keyword, '%')) )
                   AND (:status IS NULL OR mr.status = :status)
                   AND ( (:from IS NULL OR :to IS NULL) OR (mr.date >= :from AND mr.date < :to) )
-                                          
+            
                 ORDER BY mr.date DESC
             """)
     List<MedicalRecord> findAll(

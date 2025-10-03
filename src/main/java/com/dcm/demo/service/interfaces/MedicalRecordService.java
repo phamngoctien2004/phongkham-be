@@ -1,6 +1,7 @@
 package com.dcm.demo.service.interfaces;
 
 import com.dcm.demo.dto.request.MedicalRequest;
+import com.dcm.demo.dto.request.WebhookRequest;
 import com.dcm.demo.dto.response.MedicalResponse;
 import com.dcm.demo.model.MedicalRecord;
 
@@ -10,7 +11,8 @@ import java.util.List;
 
 public interface MedicalRecordService {
     MedicalRecord create(MedicalRequest request);
-
+    void updatePaymentForLabOrder(MedicalRequest.UpdatePaymentRequest request);
+    void updateMedicalRecordInvoiceForCash(MedicalRequest.UpdatePaymentRequest request);
     void update(MedicalRequest request);
     byte[] exportPdf(Integer id);
     List<MedicalResponse> me();
@@ -19,4 +21,6 @@ public interface MedicalRecordService {
     MedicalRecord findById(Integer id);
     MedicalResponse getDetailById(Integer id);
     List<MedicalResponse> findAll(String keyword, MedicalRecord.RecordStatus status, LocalDate date);
+    void webhookPayosForCheckStatus(WebhookRequest request);
+
 }

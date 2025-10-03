@@ -1,6 +1,7 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.MedicalRequest;
+import com.dcm.demo.dto.request.WebhookRequest;
 import com.dcm.demo.dto.response.LabOrderResponse;
 import com.dcm.demo.dto.response.MedicalResponse;
 import com.dcm.demo.dto.response.PatientResponse;
@@ -14,6 +15,8 @@ import com.dcm.demo.repository.MedicalRecordRepository;
 import com.dcm.demo.repository.RelationshipRepository;
 import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,11 +24,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+@Slf4j
 public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final MedicalRecordRepository repository;
     private final DoctorService doctorService;
@@ -38,6 +44,8 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final FileService fileService;
     private final InvoiceService invoiceService;
     private final InvoiceDetailRepository invoiceDetailRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
+
     @Override
     public byte[] exportPdf(Integer id) {
         MedicalRecord medicalRecord = repository.findById(id).orElseThrow(
@@ -102,14 +110,75 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             medicalRecord.setDoctor(doctor);
         }
         MedicalRecord saved = repository.save(medicalRecord);
-        if(request.getInvoiceId() != null) {
+        if (request.getInvoiceId() != null) {
             Invoice invoice = invoiceService.findById(request.getInvoiceId());
             invoice.setMedicalRecord(saved);
             invoiceService.save(invoice);
-        }else{
-            invoiceService.createDetailInvoice(saved);
+        } else {
+            invoiceService.createInvoiceForCash(saved);
         }
         return saved;
+    }
+
+
+    //    thanh toan tien mat tu lan 2 tro di
+    @Override
+    public void updatePaymentForLabOrder(MedicalRequest.UpdatePaymentRequest request) {
+        MedicalRecord medicalRecord = findById(request.getMedicalRecordId());
+        List<Integer> labOrderIds = request.getLabOrderIds();
+//      filter laborder duoc chon tu phieu kham
+        List<LabOrder> labOrders = medicalRecord.getLabOrders().stream()
+                .filter(it -> labOrderIds.contains(it.getId()))
+                .toList();
+//      tao chi tiet hoa don
+        Invoice invoice = medicalRecord.getInvoice();
+        if (invoice != null) {
+            BigDecimal amount = BigDecimal.ZERO;
+            for (LabOrder labOrder : labOrders) {
+                invoiceService.buildInvoiceDetail(
+                        invoice,
+                        labOrder.getHealthPlan().getId(),
+                        labOrder.getPrice(),
+                        InvoiceDetail.Status.DA_THANH_TOAN,
+                        Invoice.PaymentMethod.TIEN_MAT
+                );
+            }
+//      cap nhat tong hoa don va so tien da tra
+            invoiceService.updateTotal(invoice, amount);
+            invoiceService.updatePaidAmount(invoice, amount);
+        }
+//        truong hop QR chuyen khoan -> tao qr -> neu quet thanh cong -> webhook co id cua cac laborder + phieu kham
+//        -> tim hoa don -> tao chi tiet hoa don va cap nhat so tien
+    }
+
+    @Override
+    public void updateMedicalRecordInvoiceForCash(MedicalRequest.UpdatePaymentRequest request) {
+        MedicalRecord record = findById(request.getMedicalRecordId());
+        Invoice invoice = record.getInvoice();
+//      danh sach chi dinh can thanh toan
+        List<Integer> healthPlanIds = record.getLabOrders().stream()
+                .map(it -> {
+                    if(request.getLabOrderIds().contains(it.getId())){
+                        return it.getHealthPlan().getId();
+                    }
+                    return null;
+                })
+                .toList();
+//      danh sach chi tiet hoa don can sua
+        invoice.getInvoiceDetails().forEach(it -> {
+            if(healthPlanIds.contains(it.getHealthPlan().getId())){
+                it.setStatus(InvoiceDetail.Status.DA_THANH_TOAN);
+                it.setPaymentMethod(Invoice.PaymentMethod.TIEN_MAT);
+            }
+        });
+
+//      so tien da thanh toan
+        BigDecimal amount = invoice.getInvoiceDetails().stream()
+                .filter(d -> healthPlanIds.contains(d.getHealthPlan().getId()))
+                .map(d -> d.getFee() == null ? BigDecimal.ZERO : d.getFee())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        invoiceService.updatePaidAmount(invoice, amount);
     }
 
     @Override
@@ -179,30 +248,108 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .toList();
     }
 
+    @Override
+    public void webhookPayosForCheckStatus(WebhookRequest request) {
+        WebhookRequest.DataPayload data = request.getData();
+        Invoice invoice = invoiceService.findByPayosOrder(data.getOrderCode());
+
+//      truong hop thanh toan lan 2
+        if(invoice == null) {
+            handlePaymentV2(data);
+            return;
+        }
+        handlePaymentV1(data, invoice);
+    }
+    private void handlePaymentV2(WebhookRequest.DataPayload data) {
+        String desc = data.getDesc();
+//          lay id phieu kham tu mo ta T70X11D12D13D14
+        String recordIdStr = desc.substring(1, desc.indexOf("X"));
+        Integer recordId = Integer.parseInt(recordIdStr);
+        MedicalRecord record = findById(recordId);
+        Invoice invoice = record.getInvoice();
+//      lay danh sach dich vu kham tu mo ta
+        String listServiceStr = desc.substring(desc.indexOf("X") + 1);
+        String[] serviceIdsStr = listServiceStr.split("D");
+        List<Integer> serviceIds = Arrays.stream(serviceIdsStr)
+                .map(Integer::parseInt)
+                .toList();
+        List<InvoiceDetail> invoiceDetails = invoice.getInvoiceDetails().stream()
+                .map(detail -> {
+                    if(serviceIds.contains(detail.getHealthPlan().getId())){
+                        detail.setStatus(InvoiceDetail.Status.DA_THANH_TOAN);
+                        detail.setPaymentMethod(Invoice.PaymentMethod.CHUYEN_KHOAN);
+                        return invoiceDetailRepository.save(detail);
+                    }
+                    return detail;
+                })
+                .toList();
+        invoice.setInvoiceDetails(invoiceDetails);
+
+        invoiceService.updateTotal(invoice, BigDecimal.valueOf(data.getAmount()));
+        invoiceService.updatePaidAmount(invoice, BigDecimal.valueOf(data.getAmount()));
+
+//      xoa flag khoi redis
+        redisTemplate.delete("PAYMENT_" + invoice.getId());
+        log.error(desc);
+    }
+    private void handlePaymentV1(WebhookRequest.DataPayload data, Invoice invoice) {
+        if(invoice.getStatus() == Invoice.PaymentStatus.DA_THANH_TOAN) {
+            return;
+        }
+        if (data.getCode().equals("00")) {
+            invoice.setStatus(Invoice.PaymentStatus.DA_THANH_TOAN);
+            List<InvoiceDetail> invoiceDetails = invoice.getInvoiceDetails();
+            for (InvoiceDetail detail : invoiceDetails) {
+                detail.setStatus(InvoiceDetail.Status.DA_THANH_TOAN);
+                invoiceDetailRepository.save(detail);
+            }
+        }
+        invoiceService.updatePaidAmount(invoice, BigDecimal.valueOf(data.getAmount()));
+    }
+
     private MedicalResponse buildResponse(MedicalRecord record) {
         MedicalResponse response = mapper.toResponse(record);
-        response.setPatientName(record.getPatient().getFullName());
+        Patient patient = record.getPatient();
+        response.setPatientName(patient.getFullName());
+        response.setPatientGender(patient.getGender());
+        response.setPatientAddress(patient.getAddress());
+        response.setPatientGender(patient.getGender());
+        response.setPatientPhone(patient.getPhone());
 
+//      danh dau cac dich vu con
+        HealthPlan healthPlanParent = record.getHealthPlan();
+        List<Integer> healthPlanChildren = healthPlanParent.getHealthPlanDetails()
+                .stream()
+                .map(it -> it.getServiceDetail().getId())
+                .toList();
+
+        if(record.getInvoice() != null){
+            response.setInvoiceId(record.getInvoice().getId());
+        }
         List<LabOrderResponse> services = new ArrayList<>();
         List<LabOrder> labOrders = record.getLabOrders();
-        if(labOrders != null){
+        if (labOrders != null) {
             labOrders.forEach(labOrder -> {
                 HealthPlan healthPlan = labOrder.getHealthPlan();
                 LabOrderResponse detail = labOrderMapper.toResponse(labOrder);
                 detail.setHealthPlanId(healthPlan.getId());
                 detail.setHealthPlanName(healthPlan.getName());
-                if(labOrder.getPerformingDoctor() != null){
+                if (labOrder.getPerformingDoctor() != null) {
                     detail.setDoctorPerformed(labOrder.getPerformingDoctor().getFullName());
                     detail.setDoctorPerformedId(labOrder.getPerformingDoctor().getId());
                 }
-                if(labOrder.getOrderingDoctor() != null){
+                if (labOrder.getOrderingDoctor() != null) {
                     detail.setDoctorOrdered(labOrder.getOrderingDoctor().getFullName());
                 }
                 List<Integer> healthPlanUnPay = invoiceDetailRepository.findServicesUnpay(record.getId());
-                if(healthPlanUnPay.contains(healthPlan.getId())){
-                    detail.setStatusPayment("CHUA_THANH_TOAN");
-                } else {
+                if (healthPlanUnPay.contains(healthPlan.getId())) {
                     detail.setStatusPayment("DA_THANH_TOAN");
+                } else {
+                    detail.setStatusPayment("CHUA_THANH_TOAN");
+                }
+
+                if(healthPlanChildren.contains(healthPlan.getId())){
+                    detail.setServiceParent(healthPlanParent.getName());
                 }
                 services.add(detail);
             });

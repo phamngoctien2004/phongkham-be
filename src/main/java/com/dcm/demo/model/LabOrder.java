@@ -21,6 +21,8 @@ public class LabOrder {
     @Column(name = "id_chi_dinh")
     private Integer id;
 
+    @Column(name = "ma_chi_dinh")
+    private String code;
     @ManyToOne
     @JoinColumn(name = "id_phieu_kham", nullable = false)
     private MedicalRecord medicalRecord;

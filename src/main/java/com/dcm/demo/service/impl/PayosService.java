@@ -5,16 +5,21 @@ import com.dcm.demo.dto.request.PaymentRequest;
 import com.dcm.demo.dto.response.InvoiceResponse;
 import com.dcm.demo.dto.response.PaymentResponse;
 import com.dcm.demo.model.Invoice;
+import com.dcm.demo.model.LabOrder;
 import com.dcm.demo.model.MedicalRecord;
 import com.dcm.demo.service.interfaces.InvoiceService;
+import com.dcm.demo.service.interfaces.LabOrderService;
 import com.dcm.demo.service.interfaces.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import vn.payos.PayOS;
 import vn.payos.type.PaymentData;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -25,8 +30,9 @@ public class PayosService {
     private final String checksumKey = "91e022cb0777e5700cfe57d541e778bf9c744170c957423ac53cbf8e4d40448a";
 
     private final InvoiceService invoiceService;
+    private final LabOrderService labOrderService;
     private final MedicalRecordService medicalRecordService;
-    private BigDecimal total = BigDecimal.ZERO;
+    private final RedisTemplate<String, Object> redisTemplate;
     final PayOS payOS = new PayOS(clientId, apiKey, checksumKey);
 
     public PaymentResponse createLinkPayment(PaymentRequest paymentRequest) {
@@ -35,6 +41,7 @@ public class PayosService {
             if (paymentRequest.getMedicalRecordId() == null) {
                 return createLinkPaymentV1(paymentRequest);
             }
+            return createLinkPaymentV2(paymentRequest);
 
         } catch (Exception ignored) {
             log.error(ignored.getMessage(), ignored);
@@ -54,7 +61,7 @@ public class PayosService {
         if (paymentRequest.getHealthPlanIds() != null && !paymentRequest.getHealthPlanIds().isEmpty()) {
             invoiceRequest.setHealthPlanIds(paymentRequest.getHealthPlanIds());
         }
-        InvoiceResponse invoiceResponse = invoiceService.createInvoice(invoiceRequest);
+        InvoiceResponse invoiceResponse = invoiceService.createInvoiceForQR(invoiceRequest);
 
         PaymentData paymentData = PaymentData
                 .builder()
@@ -67,17 +74,33 @@ public class PayosService {
         return new PaymentResponse(invoiceResponse.getId(), payOS.createPaymentLink(paymentData).getQrCode());
     }
 
-    private String createLinkPaymentV2(PaymentRequest paymentRequest) throws Exception {
+    private PaymentResponse createLinkPaymentV2(PaymentRequest paymentRequest) throws Exception {
         Long orderCode = System.currentTimeMillis() / 1000;
         MedicalRecord medicalRecord = medicalRecordService.findById(paymentRequest.getMedicalRecordId());
+        List<LabOrder> labOrders = labOrderService.findByIds(paymentRequest.getLabOrderIds());
+        List<Integer> servicesSelected = labOrders
+                .stream()
+                .map(labOrder -> labOrder.getHealthPlan().getId())
+                .toList();
+        BigDecimal totalAmount = labOrders
+                .stream()
+                .map(LabOrder::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        String description = "T" + medicalRecord.getId() + "X" + servicesSelected
+                .stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining("D"));
+        Integer invoiceId = medicalRecord.getInvoice().getId();
+        System.out.println(description);
+        redisTemplate.opsForValue().set("PAYMENT_" + invoiceId, servicesSelected);
         PaymentData paymentData = PaymentData
                 .builder()
                 .orderCode(orderCode)
-                .amount(1)
-                .description("Thanh toán hoa đơn ")
+                .amount(totalAmount.intValue())
+                .description(description)
                 .returnUrl("http://localhost:8080")
                 .cancelUrl("http://localhost:8080")
                 .build();
-        return payOS.createPaymentLink(paymentData).getQrCode();
+        return new PaymentResponse(invoiceId, payOS.createPaymentLink(paymentData).getQrCode());
     }
 }

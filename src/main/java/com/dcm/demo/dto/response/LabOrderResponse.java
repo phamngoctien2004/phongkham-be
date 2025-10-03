@@ -29,4 +29,5 @@ public class LabOrderResponse {
     private LocalDateTime orderDate;
     private String diagnosis;
     private LocalDateTime expectedResultDate;
+    private String serviceParent;
 }
