@@ -18,5 +18,6 @@ public interface LabOrderService {
     LabOrderResponse findResponseById(Integer id);
     void createLabOrder(LabOrderRequest request);
     void updateLabOrder(LabOrderRequest request);
+    void updateStatus(Integer id, LabOrder.TestStatus status);
     void createLabOrderFromHealthPlan(MedicalRecord medicalRecord, Integer healthPlanId);
 }

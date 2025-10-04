@@ -2,8 +2,10 @@ package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.LabOrderRequest;
 import com.dcm.demo.dto.response.LabOrderResponse;
+import com.dcm.demo.dto.response.LabResultResponse;
 import com.dcm.demo.mapper.HealthPlanMapper;
 import com.dcm.demo.mapper.LabOrderMapper;
+import com.dcm.demo.mapper.LabResultMapper;
 import com.dcm.demo.model.*;
 import com.dcm.demo.repository.LabOrderRepository;
 import com.dcm.demo.service.interfaces.*;
@@ -26,6 +28,7 @@ public class LabOrderServiceImpl implements LabOrderService {
     private final MedicalRecordService medicalRecordService;
     private final DoctorService doctorService;
     private final LabOrderMapper mapper;
+    private final LabResultMapper labResultMapper;
     private final InvoiceService invoiceService;
 
     @Override
@@ -39,7 +42,7 @@ public class LabOrderServiceImpl implements LabOrderService {
     @Override
     public List<LabOrderResponse> getByDoctorPerforming(String keyword, LocalDate date, LabOrder.TestStatus status) {
         User user = userService.getCurrentUser();
-        Integer doctorId = user.getDoctor().getId();
+        Integer doctorId = user.getDoctor() != null ? user.getDoctor().getId() : 0;
 
         LocalDateTime from = null, to = null;
         if (date != null) {
@@ -69,8 +72,10 @@ public class LabOrderServiceImpl implements LabOrderService {
 
     public LabOrderResponse buildResponse(LabOrder labOrder) {
         HealthPlan healthPlan = labOrder.getHealthPlan();
+        LabResultResponse labOrderResult = labResultMapper.toResponse(labOrder.getLabResult());
         return LabOrderResponse.builder()
                 .id(labOrder.getId())
+                .code(labOrder.getCode())
                 .recordId(labOrder.getMedicalRecord().getId())
                 .healthPlanId(healthPlan.getId())
                 .healthPlanName(healthPlan.getName())
@@ -82,6 +87,7 @@ public class LabOrderServiceImpl implements LabOrderService {
                 .diagnosis(labOrder.getDiagnosis())
                 .orderDate(labOrder.getOrderDate())
                 .expectedResultDate(labOrder.getExpectedResultDate())
+                .labResultResponse(labOrderResult)
                 .build();
     }
 
@@ -142,6 +148,13 @@ public class LabOrderServiceImpl implements LabOrderService {
         Doctor doctor = new Doctor();
         doctor.setId(request.getPerformingDoctorId());
         labOrder.setPerformingDoctor(doctor);
+        repository.save(labOrder);
+    }
+
+    @Override
+    public void updateStatus(Integer id, LabOrder.TestStatus status) {
+        LabOrder labOrder = findById(id);
+        labOrder.setStatus(status);
         repository.save(labOrder);
     }
 

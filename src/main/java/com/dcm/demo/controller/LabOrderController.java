@@ -9,11 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
-@RequestMapping("/api/lab-orders")
 @RequiredArgsConstructor
+@RequestMapping("/api/lab-orders")
 public class LabOrderController {
     private final LabOrderService labOrderService;
 
@@ -25,7 +24,7 @@ public class LabOrderController {
         );
     }
     @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable Integer id) {
+    public ResponseEntity<?> getById(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(
                 new ApiResponse<>(labOrderService.findResponseById(id), "Get lab order by id successfully")
         );
@@ -52,6 +51,13 @@ public class LabOrderController {
         labOrderService.createLabOrder(request);
         return ResponseEntity.ok(
                 new ApiResponse<>("", "Create lab order successfully")
+        );
+    }
+    @PutMapping("/status")
+    public ResponseEntity<?> updateStatus(@RequestBody LabOrderRequest request) {
+        labOrderService.updateStatus(request.getId(), request.getStatus());
+        return ResponseEntity.ok(
+                new ApiResponse<>("", "Update lab order status successfully")
         );
     }
     @PutMapping

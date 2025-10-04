@@ -24,12 +24,14 @@ public class LabResultServiceImpl implements LabResultService {
         LabResult labResult = new LabResult();
 
         LabOrder labOrder = labOrderService.findById(request.getLabOrderId());
+        labOrder.setStatus(LabOrder.TestStatus.HOAN_THANH);
         labResult.setLabOrder(labOrder);
         labResult.setPerformingDoctor(labOrder.getPerformingDoctor());
         labResult.setExplanation(request.getExplanation());
         labResult.setNote(request.getNote());
         labResult.setResultDetails(request.getResultDetails());
         labResult.setSummary(request.getSummary());
+        labResult.setStatus(LabResult.Status.HOAN_THANH);
         return buildResponse(repository.save(labResult));
     }
 
@@ -38,7 +40,6 @@ public class LabResultServiceImpl implements LabResultService {
 
         LabOrderResponse labOrderResponse = labOrderService.buildResponse(labResult.getLabOrder());
         response.setId(labResult.getId());
-        response.setLabOrderResponse(labOrderResponse);
         response.setDate(labResult.getDate());
         response.setExplanation(labResult.getExplanation());
         response.setNote(labResult.getNote());

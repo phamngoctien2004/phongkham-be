@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Data
 public class LabResultResponse {
     private Integer id;
-    private LabOrderResponse labOrderResponse;
     private LocalDateTime date;
     private LabResult.Status status;
     private String resultDetails;

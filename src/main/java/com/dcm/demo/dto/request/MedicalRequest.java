@@ -1,5 +1,6 @@
 package com.dcm.demo.dto.request;
 
+import com.dcm.demo.model.MedicalRecord;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ public class MedicalRequest {
     private String treatmentPlan;
     private String note;
     private Integer invoiceId;
-
+    private MedicalRecord.RecordStatus status;
 
     @Data
     public static class UpdatePaymentRequest{

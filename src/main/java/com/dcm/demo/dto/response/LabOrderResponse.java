@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 public class LabOrderResponse {
     private Integer id;
+    private String code;
     private Integer recordId;
     private Integer healthPlanId;
     private String healthPlanName;
@@ -30,4 +31,5 @@ public class LabOrderResponse {
     private String diagnosis;
     private LocalDateTime expectedResultDate;
     private String serviceParent;
+    private LabResultResponse labResultResponse;
 }

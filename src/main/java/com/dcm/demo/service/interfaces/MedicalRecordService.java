@@ -14,6 +14,7 @@ public interface MedicalRecordService {
     void updatePaymentForLabOrder(MedicalRequest.UpdatePaymentRequest request);
     void updateMedicalRecordInvoiceForCash(MedicalRequest.UpdatePaymentRequest request);
     void update(MedicalRequest request);
+    void updateStatus(Integer id, MedicalRecord.RecordStatus status);
     byte[] exportPdf(Integer id);
     List<MedicalResponse> me();
     List<MedicalResponse> getRelationMedicalRecord(String cccd);

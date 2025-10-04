@@ -63,6 +63,8 @@ public class LabOrder {
     public enum TestStatus {
         CHO_THUC_HIEN, DANG_THUC_HIEN, HOAN_THANH, HUY_BO
     }
+    @OneToOne(mappedBy = "labOrder")
+    private LabResult labResult;
     @Override
     public String toString() {
         return "";

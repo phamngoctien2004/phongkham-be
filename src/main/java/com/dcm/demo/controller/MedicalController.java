@@ -68,6 +68,13 @@ public class MedicalController {
         );
     }
 
+    @PutMapping("/status")
+    public ResponseEntity<?> updateStatus(@RequestBody MedicalRequest request){
+        medicalRecordService.updateStatus(request.getId(), request.getStatus());
+        return ResponseEntity.ok(
+                new ApiResponse<>("", "successfully")
+        );
+    }
     @GetMapping("/{id}/pdf")
     public ResponseEntity<?> getMedicalRecordPdf(@PathVariable Integer id) {
 

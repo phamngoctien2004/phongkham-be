@@ -186,16 +186,23 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         MedicalRecord medicalRecord = repository.findById(request.getId()).orElseThrow(
                 () -> new AppException(ErrorCode.RECORD_NOTFOUND)
         );
-
-        Doctor doctor = new Doctor();
-        doctor.setId(request.getDoctorId());
-        medicalRecord.setDoctor(doctor);
+//
+//        Doctor doctor = new Doctor();
+//        doctor.setId(request.getDoctorId());
+//        medicalRecord.setDoctor(doctor);
         medicalRecord.setSymptoms(request.getSymptoms());
         medicalRecord.setClinicalExamination(request.getClinicalExamination());
         medicalRecord.setDiagnosis(request.getDiagnosis());
         medicalRecord.setTreatmentPlan(request.getTreatmentPlan());
         medicalRecord.setNote(request.getNote());
         repository.save(medicalRecord);
+    }
+
+    @Override
+    public void updateStatus(Integer id, MedicalRecord.RecordStatus status) {
+        MedicalRecord record = repository.findById(id).orElseThrow(() -> new RuntimeException("Medical record not found"));
+        record.setStatus(status);
+        repository.save(record);
     }
 
     @Override
