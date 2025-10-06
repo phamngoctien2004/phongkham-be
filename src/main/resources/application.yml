@@ -59,5 +59,4 @@ springdoc:
   swagger-ui:
     path: /docs
 
-url:
-  fe: ${FE_URL:http://localhost:3000}
+

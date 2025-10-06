@@ -1,0 +1,41 @@
+name: clinic-stack
+
+x-image:
+  &backend_image ghcr.io/phamngoctien2004/phongkham-be/backend:${TAG:-latest}
+# Bạn có thể đổi TAG qua env TAG=sha-xxxx hoặc TAG=main
+
+services:
+  backend:
+    image: *backend_image
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/auth/test" ]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+
+  mysql:
+    image: mysql:8.4
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: datn
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+volumes:
+  mysql_data: { }

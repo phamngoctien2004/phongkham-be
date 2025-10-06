@@ -1,0 +1,99 @@
+name: BE-CI-CD
+
+on:
+  push:
+    branches: ["main" ]
+    paths: [ "pom.xml", "src/**", ".github/workflows/ci-be.yml", "Dockerfile" ]
+
+concurrency:
+  group: be-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test_build:
+    name: Test & Package (Maven)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Unit tests
+        run: ./mvnw -q -T 1C -DskipTests=false test
+
+      - name: Package JAR (skip tests for speed)
+        run: ./mvnw -q -T 1C -DskipTests package
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: be-jar
+          path: target/*.jar
+
+  docker_build_push:
+    name: Build & Push Docker (cached)
+    needs: test_build
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/phamngoctien2004/phongkham-be/backend
+          tags: |
+            type=ref,event=branch
+            type=sha
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push (with cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/backend:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/backend:buildcache,mode=max
+
+  deploy_vps:
+    name: Deploy to VPS (SSH)
+    needs: docker_build_push
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          # port: 22
+          script_stop: true
+          script: |
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            mkdir -p ~/srv/app && cd ~/srv/app
+            docker compose pull backend
+            docker compose up -d backend
+            docker image prune -f

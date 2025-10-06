@@ -2,11 +2,13 @@ package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.LoginRequest;
 import com.dcm.demo.dto.request.OtpRequest;
+import com.dcm.demo.dto.response.DoctorResponse;
 import com.dcm.demo.dto.response.LoginResponse;
 import com.dcm.demo.dto.response.UserResponse;
 import com.dcm.demo.exception.AppException;
 import com.dcm.demo.exception.ErrorCode;
 import com.dcm.demo.mapper.UserMapper;
+import com.dcm.demo.model.Doctor;
 import com.dcm.demo.model.Patient;
 import com.dcm.demo.model.User;
 import com.dcm.demo.service.interfaces.AuthService;
@@ -66,8 +68,16 @@ public class AuthServiceImpl implements AuthService {
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.AUTH_FAILED);
         }
+
         UserResponse userResponse = userMapper.toResponse(user);
         userResponse.setRole(user.getRole());
+        Doctor doctor = user.getDoctor();
+        if(doctor != null){
+            DoctorResponse doctorResponse = new DoctorResponse();
+            doctorResponse.setId(doctor.getId());
+            doctorResponse.setFullName(doctor.getFullName());
+            userResponse.setDoctor(doctorResponse);
+        }
         return new LoginResponse(
                 jwtService.generate(user.getId(), user.getRole().name(), 600),
                 userMapper.toResponse(user)
