@@ -37,6 +37,12 @@ public class MedicalController {
                 new ApiResponse<>(medicalRecordService.getDetailById(id), "Get medical record by id successfully")
         );
     }
+    @GetMapping("/patient/{id}")
+    public ResponseEntity<?> getMedicalRecordsByPatientId(@PathVariable Integer id) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(medicalRecordService.findByPatientId(id), "Get medical record by id successfully")
+        );
+    }
     @GetMapping("/me")
     public ResponseEntity<?> getMyMedicalRecord() {
         return ResponseEntity.ok(

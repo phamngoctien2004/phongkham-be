@@ -244,6 +244,13 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     }
 
     @Override
+    public List<MedicalResponse> findByPatientId(Integer patientId) {
+        return repository.findByPatientId(patientId).stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @Override
     public List<MedicalResponse> findAll(String keyword, MedicalRecord.RecordStatus status, LocalDate date) {
         LocalDateTime from = null, to = null;
         if (date != null) {
@@ -317,6 +324,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private MedicalResponse buildResponse(MedicalRecord record) {
         MedicalResponse response = mapper.toResponse(record);
         Patient patient = record.getPatient();
+        response.setPatientId(patient.getId());
         response.setPatientName(patient.getFullName());
         response.setPatientGender(patient.getGender());
         response.setPatientAddress(patient.getAddress());

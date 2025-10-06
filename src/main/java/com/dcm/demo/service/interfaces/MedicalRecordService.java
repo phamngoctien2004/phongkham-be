@@ -21,6 +21,7 @@ public interface MedicalRecordService {
     void updateTotal(MedicalRecord medicalRecord, BigDecimal total);
     MedicalRecord findById(Integer id);
     MedicalResponse getDetailById(Integer id);
+    List<MedicalResponse> findByPatientId(Integer patientId);
     List<MedicalResponse> findAll(String keyword, MedicalRecord.RecordStatus status, LocalDate date);
     void webhookPayosForCheckStatus(WebhookRequest request);
 

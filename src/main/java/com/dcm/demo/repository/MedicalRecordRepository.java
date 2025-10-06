@@ -19,8 +19,8 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, In
                 LEFT JOIN FETCH mr.patient p
             
                 WHERE (:keyword IS NULL OR :keyword = '' 
-                       OR LOWER(p.fullName) LIKE UPPER(CONCAT('%', :keyword, '%')) 
-                       OR LOWER(mr.code) LIKE UPPER(CONCAT('%', :keyword, '%')) )
+                       OR LOWER(p.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) 
+                       OR LOWER(mr.code) LIKE LOWER(CONCAT('%', :keyword, '%')) )
                   AND (:status IS NULL OR mr.status = :status)
                   AND ( (:from IS NULL OR :to IS NULL) OR (mr.date >= :from AND mr.date < :to) )
             
@@ -31,4 +31,6 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, In
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,
             @Param("status") MedicalRecord.RecordStatus status);
+
+    List<MedicalRecord> findByPatientId(Integer patientId);
 }

@@ -18,6 +18,7 @@ public class MedicalResponse {
     private String treatmentPlan;
     private String note;
     private BigDecimal total;
+    private Integer patientId;
     private String patientName;
     private String patientPhone;
     private String patientAddress;
