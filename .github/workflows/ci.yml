@@ -90,7 +90,7 @@ jobs:
           script_stop: true
           script: |
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-            mkdir -p ~/srv/app && cd ~/srv/app
+            cd /srv/app
             docker compose pull backend
             docker compose up -d backend
             docker image prune -f
