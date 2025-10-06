@@ -3,7 +3,7 @@ name: BE-CI-CD
 on:
   push:
     branches: ["main" ]
-    paths: [ "pom.xml", "src/**", ".github/workflows/ci-be.yml", "Dockerfile" ]
+    paths: [ "pom.xml", "src/**", ".github/workflows/ci.yml", "Dockerfile" ]
 
 concurrency:
   group: be-${{ github.ref }}
