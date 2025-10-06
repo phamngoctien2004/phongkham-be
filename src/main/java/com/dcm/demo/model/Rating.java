@@ -15,7 +15,7 @@ public class Rating {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_danh_gia")
-    private Integer ratingId;
+    private Integer ratingIds;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_nguoi_dung")
