@@ -32,4 +32,7 @@ List<InvoiceDetail> findByRecordId(@Param("medicalRecordId") Integer medicalReco
             AND ivd.status = 'DA_THANH_TOAN'
             """)
     List<Integer> findServicesUnpay(@Param("medicalRecordId") Integer medicalRecordId);
+
+    List<InvoiceDetail> findByInvoiceIdAndHealthPlanIdIn(Integer invoiceId, List<Integer> healthPlanId);
+    void deleteByInvoiceIdAndHealthPlanId(Integer invoiceId, Integer healthPlanId);
 }

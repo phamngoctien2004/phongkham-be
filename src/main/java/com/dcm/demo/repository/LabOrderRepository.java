@@ -34,4 +34,8 @@ public interface LabOrderRepository extends JpaRepository<LabOrder, Integer> , J
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,
             @Param("status") LabOrder.TestStatus status);
+
+
+    List<LabOrder> findByMedicalRecordIdAndHealthPlanIdIn(Integer medicalRecordId, List<Integer> healthPlanIds);
+    Optional<LabOrder> findByMedicalRecordIdAndHealthPlanId(Integer medicalRecordId, Integer healthPlanId);
 }

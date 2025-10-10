@@ -34,6 +34,8 @@ public class LabOrder {
     @ManyToOne(fetch =  FetchType.LAZY)
     @JoinColumn(name = "id_bac_si_chi_dinh", nullable = false)
     private Doctor orderingDoctor;
+
+
     @ManyToOne(fetch =  FetchType.LAZY)
     @JoinColumn(name = "id_bac_si_thuc_hien", nullable = false)
     private Doctor performingDoctor;

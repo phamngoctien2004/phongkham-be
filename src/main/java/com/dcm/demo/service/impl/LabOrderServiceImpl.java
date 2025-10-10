@@ -1,5 +1,6 @@
 package com.dcm.demo.service.impl;
 
+import com.dcm.demo.dto.request.LabDeleteRequest;
 import com.dcm.demo.dto.request.LabOrderRequest;
 import com.dcm.demo.dto.response.LabOrderResponse;
 import com.dcm.demo.dto.response.LabResultResponse;
@@ -7,6 +8,7 @@ import com.dcm.demo.mapper.HealthPlanMapper;
 import com.dcm.demo.mapper.LabOrderMapper;
 import com.dcm.demo.mapper.LabResultMapper;
 import com.dcm.demo.model.*;
+import com.dcm.demo.repository.InvoiceDetailRepository;
 import com.dcm.demo.repository.LabOrderRepository;
 import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +32,9 @@ public class LabOrderServiceImpl implements LabOrderService {
     private final LabOrderMapper mapper;
     private final LabResultMapper labResultMapper;
     private final InvoiceService invoiceService;
-
+    private final InvoiceDetailRepository invoiceDetailRepository;
+    private final DepartmentService departmentService;
+    private BigDecimal defaultPrice = BigDecimal.valueOf(2000);
     @Override
     public List<LabOrderResponse> getAll() {
         return repository.findAll()
@@ -103,24 +107,44 @@ public class LabOrderServiceImpl implements LabOrderService {
 
     @Override
     public void createLabOrderFromHealthPlan(MedicalRecord medicalRecord, Integer healthPlanId) {
+//      kham bac si chuyen khoa
+        HealthPlan healthPlan = healthPlanService.findById(1);
         if (healthPlanId == null) {
-            HealthPlan healthPlan = healthPlanService.findById(1);
-            buildEntity(medicalRecord, medicalRecord.getDoctor(), healthPlan, medicalRecord.getFee(), null);
+            buildEntity(medicalRecord, medicalRecord.getDoctor(), healthPlan, null,medicalRecord.getFee(), null);
             return;
         }
-        HealthPlan healthPlan = healthPlanService.findById(healthPlanId);
-        List<healthPlanDetail> healthPlanDetails = healthPlan.getHealthPlanDetails();
 
+        HealthPlan healthPlanPrimary = healthPlanService.findById(healthPlanId);
+//      chi dinh le
+        if(!healthPlanPrimary.getType().equals(HealthPlan.ServiceType.DICH_VU)){
+            buildEntity(medicalRecord, medicalRecord.getDoctor(), healthPlan, null,defaultPrice, null);
+            buildEntity(medicalRecord, null, healthPlanPrimary, null,healthPlanPrimary.getPrice(), null);
+            return;
+        }
+
+//      goi kham
+        List<healthPlanDetail> healthPlanDetails = healthPlanPrimary.getHealthPlanDetails();
         if (healthPlanDetails != null && !healthPlanDetails.isEmpty()) {
-            HealthPlan temp = healthPlanService.findById(1);
-
-            buildEntity(medicalRecord, medicalRecord.getDoctor(), temp, BigDecimal.ZERO, null);
             healthPlanDetails.forEach(detail -> {
-                buildEntity(medicalRecord, null, detail.getServiceDetail(), detail.getServiceDetail().getPrice(), null);
+                buildEntity(medicalRecord, null, detail.getServiceDetail(), detail.getService(), BigDecimal.ZERO, null);
             });
-            return;
         }
-        buildEntity(medicalRecord, null, healthPlan, healthPlan.getPrice(), null);
+
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllById(LabDeleteRequest request) {
+//     logic check neeu da co chi dinh xn hoac da thanh toan thi k xoa duoc
+
+//      xoa hoa don lien quan
+        MedicalRecord record = medicalRecordService.findById(request.getMedicalRecordId());
+        Invoice invoice = record.getInvoice();
+        List<LabOrder> labOrders = repository.findAllById(request.getIds());
+        labOrders.forEach(labOrder -> {
+            invoiceDetailRepository.deleteByInvoiceIdAndHealthPlanId(invoice.getId(), labOrder.getHealthPlan().getId());
+            repository.deleteById(labOrder.getId());
+        });
     }
 
     @Override
@@ -129,7 +153,7 @@ public class LabOrderServiceImpl implements LabOrderService {
         MedicalRecord medicalRecord = medicalRecordService.findById(request.getRecordId());
         HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
         Doctor doctor = doctorService.findById(request.getPerformingDoctorId());
-        buildEntity(medicalRecord, doctor, healthPlan, healthPlan.getPrice(), request.getDiagnosis());
+        buildEntity(medicalRecord, doctor, healthPlan, null,healthPlan.getPrice(), request.getDiagnosis());
 
         Invoice invoice = medicalRecord.getInvoice();
         invoiceService.buildInvoiceDetail(
@@ -137,7 +161,8 @@ public class LabOrderServiceImpl implements LabOrderService {
                 healthPlan.getId(),
                 healthPlan.getPrice(),
                 InvoiceDetail.Status.CHUA_THANH_TOAN,
-                Invoice.PaymentMethod.TIEN_MAT
+                Invoice.PaymentMethod.TIEN_MAT,
+                BigDecimal.ZERO
         );
         invoiceService.updateTotal(invoice, healthPlan.getPrice());
     }
@@ -158,7 +183,7 @@ public class LabOrderServiceImpl implements LabOrderService {
         repository.save(labOrder);
     }
 
-    private void buildEntity(MedicalRecord medicalRecord, Doctor doctor, HealthPlan healthPlan, BigDecimal price, String diagnosis) {
+    private void buildEntity(MedicalRecord medicalRecord, Doctor doctor, HealthPlan healthPlan, HealthPlan parent, BigDecimal price, String diagnosis) {
         LabOrder labOrder = new LabOrder();
         labOrder.setMedicalRecord(medicalRecord);
         labOrder.setCode("XN" + System.currentTimeMillis());
@@ -167,8 +192,15 @@ public class LabOrderServiceImpl implements LabOrderService {
         labOrder.setPerformingDoctor(doctor);
         labOrder.setPrice(price);
         labOrder.setDiagnosis(diagnosis);
-        Room room = healthPlan.getRoom();
-        labOrder.setRoom(room.getRoomName() + " - " + room.getRoomNumber());
+//        labOrder.setHealthPlanParent(parent);
+        if(doctor != null) {
+            Department department = doctor.getDepartment();
+            labOrder.setRoom(departmentService.getRoomFromDepartment(department));
+        }else{
+            Room room = healthPlan.getRoom();
+            labOrder.setRoom(room.getRoomName() + " - " + room.getRoomNumber());
+        }
+
         repository.save(labOrder);
     }
 }

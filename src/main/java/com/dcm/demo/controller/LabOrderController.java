@@ -1,5 +1,6 @@
 package com.dcm.demo.controller;
 
+import com.dcm.demo.dto.request.LabDeleteRequest;
 import com.dcm.demo.dto.request.LabOrderRequest;
 import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.model.LabOrder;
@@ -66,5 +67,10 @@ public class LabOrderController {
         return ResponseEntity.ok(
                 new ApiResponse<>("", "Update lab order successfully")
         );
+    }
+    @DeleteMapping
+    public ResponseEntity<Void> delete(@RequestBody LabDeleteRequest request) {
+        labOrderService.deleteAllById(request);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,7 +1,9 @@
 package com.dcm.demo.controller;
 
+import com.dcm.demo.dto.request.LeaveRequest;
 import com.dcm.demo.dto.request.ScheduleRequest;
 import com.dcm.demo.dto.response.ApiResponse;
+import com.dcm.demo.model.Leave;
 import com.dcm.demo.model.Schedule;
 import com.dcm.demo.service.interfaces.ScheduleService;
 import lombok.RequiredArgsConstructor;
@@ -30,16 +32,6 @@ public class ScheduleController {
                 new ApiResponse<>("", "delete schedule success")
         );
     }
-
-
-    @PutMapping("/leave/{id}")
-    public ResponseEntity<?> updateSchedule(@PathVariable Integer id) {
-        scheduleService.acceptLeave(id);
-        return ResponseEntity.ok(
-                new ApiResponse<>("", "update schedule success")
-        );
-    }
-
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableSlots(
             @RequestParam LocalDate startDate,
@@ -58,4 +50,37 @@ public class ScheduleController {
                 ), "get available slots success")
         );
     }
+    @GetMapping("leave/me")
+    public ResponseEntity<?> getMyLeaves(
+            @RequestParam(required = false) LocalDate date,
+            @RequestParam(required = false) Leave.leaveStatus status
+    ) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(scheduleService.getLeaveByDoctor(date, status), "get my leaves success")
+        );
+    }
+    @PostMapping("/leave")
+    public ResponseEntity<?> createLeave(@RequestBody LeaveRequest request) {
+        scheduleService.createLeave(request);
+        return ResponseEntity.ok(
+                new ApiResponse<>("", "create leave success")
+        );
+    }
+    @PutMapping("/leave")
+    public ResponseEntity<?> updateSchedule(@RequestBody LeaveRequest request) {
+        scheduleService.updateLeave(request);
+        return ResponseEntity.ok(
+                new ApiResponse<>("", "update schedule success")
+        );
+    }
+    @DeleteMapping("/leave")
+    public ResponseEntity<?> deleteLeave(@RequestBody LeaveRequest request) {
+        scheduleService.deleteLeave(request.getId());
+        return ResponseEntity.ok(
+                new ApiResponse<>("", "delete leave success")
+        );
+    }
+
+
+
 }

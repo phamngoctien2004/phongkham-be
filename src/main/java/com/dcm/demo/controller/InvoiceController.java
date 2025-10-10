@@ -1,6 +1,7 @@
 package com.dcm.demo.controller;
 
 import com.dcm.demo.dto.request.MedicalRequest;
+import com.dcm.demo.dto.request.PaymentRequest;
 import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.service.interfaces.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class InvoiceController {
     private final MedicalRecordService medicalRecordService;
 
     @PostMapping("/pay-cash")
-    public ResponseEntity<? > payInvoiceCash(@RequestBody MedicalRequest.UpdatePaymentRequest request) {
+    public ResponseEntity<? > payInvoiceCash(@RequestBody PaymentRequest request) {
         medicalRecordService.updateMedicalRecordInvoiceForCash(request);
         return ResponseEntity.ok(
                 new ApiResponse<>("", "Payment successful")

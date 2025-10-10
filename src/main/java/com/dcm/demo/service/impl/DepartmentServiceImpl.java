@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -62,5 +63,14 @@ public class DepartmentServiceImpl implements DepartmentService {
                     return response;
                 })
                 .toList();
+    }
+
+    @Override
+    public String getRoomFromDepartment(Department department) {
+        Room room = department.getRooms().stream()
+                .filter(it -> it.getRoomNumber().contains("A"))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng khám"));
+        return room.getRoomName() + " - " + room.getRoomNumber();
     }
 }

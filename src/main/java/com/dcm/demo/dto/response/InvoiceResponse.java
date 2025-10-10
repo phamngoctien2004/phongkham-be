@@ -12,5 +12,5 @@ public class InvoiceResponse {
     private String paymentMethod;
     private Integer totalAmount;
     private Invoice.PaymentStatus status;
-
+    private Integer examFee;
 }

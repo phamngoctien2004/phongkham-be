@@ -20,10 +20,5 @@ public class MedicalRequest {
     private Integer invoiceId;
     private MedicalRecord.RecordStatus status;
 
-    @Data
-    public static class UpdatePaymentRequest{
-        private Integer medicalRecordId;
-        private List<Integer> labOrderIds;
-        private boolean isCash;
-    }
+
 }

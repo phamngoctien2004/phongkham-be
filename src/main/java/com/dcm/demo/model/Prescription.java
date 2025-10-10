@@ -18,18 +18,17 @@ public class Prescription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_don_thuoc")
-    private Integer prescriptionId;
+    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "ma_don_thuoc", unique = true, length = 20)
+    private String code;
+
+    @OneToOne
     @JoinColumn(name = "id_phieu_kham", nullable = false)
     private MedicalRecord medicalRecord;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_bac_si")
-    private Doctor doctor;
-
-    @Column(name = "ma_don_thuoc", unique = true, length = 20)
-    private String prescriptionCode;
+    @Column(name = "bac_si_ke_thuoc")
+    private String doctorCreated;
 
     @CreationTimestamp
     @Column(name = "ngay_ke_don")

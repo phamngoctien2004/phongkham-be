@@ -15,16 +15,18 @@ public class Medicine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_thuoc")
-    private Integer medicineId;
+    private Integer id;
 
     @Column(name = "ten_thuoc", nullable = false)
-    private String medicineName;
+    private String name;
 
     @Column(name = "ham_luong", length = 100)
     private String concentration;
 
     @Column(name = "dang_bao_che", length = 100)
     private String dosageForm;
+
+
     @Override
     public String toString() {
         return "";

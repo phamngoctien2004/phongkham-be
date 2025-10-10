@@ -1,5 +1,6 @@
 package com.dcm.demo.service.interfaces;
 
+import com.dcm.demo.dto.request.LabDeleteRequest;
 import com.dcm.demo.dto.request.LabOrderRequest;
 import com.dcm.demo.dto.response.LabOrderResponse;
 import com.dcm.demo.model.LabOrder;
@@ -20,4 +21,5 @@ public interface LabOrderService {
     void updateLabOrder(LabOrderRequest request);
     void updateStatus(Integer id, LabOrder.TestStatus status);
     void createLabOrderFromHealthPlan(MedicalRecord medicalRecord, Integer healthPlanId);
+    void deleteAllById(LabDeleteRequest request);
 }

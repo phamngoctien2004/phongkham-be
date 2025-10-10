@@ -37,6 +37,7 @@ public class InvoiceDetail {
 
     public enum Status{
         DA_THANH_TOAN,
-        CHUA_THANH_TOAN
+        CHUA_THANH_TOAN,
+        THANH_TOAN_MOT_PHAN
     }
 }

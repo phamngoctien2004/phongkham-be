@@ -8,7 +8,6 @@ import java.util.List;
 public class PaymentRequest {
     private Integer medicalRecordId;
     private List<Integer> healthPlanIds;
-    private List<Integer> labOrderIds;
     private Integer doctorId;
-    private String totalAmount;
+    private Integer totalAmount;
 }

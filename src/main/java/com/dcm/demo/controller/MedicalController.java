@@ -2,6 +2,7 @@ package com.dcm.demo.controller;
 
 import com.dcm.demo.dto.request.MedicalRequest;
 import com.dcm.demo.dto.response.ApiResponse;
+import com.dcm.demo.model.Invoice;
 import com.dcm.demo.model.MedicalRecord;
 import com.dcm.demo.service.interfaces.FileService;
 import com.dcm.demo.service.interfaces.LabOrderService;
@@ -9,6 +10,8 @@ import com.dcm.demo.service.interfaces.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,6 +25,7 @@ public class MedicalController {
     private final MedicalRecordService medicalRecordService;
     private final LabOrderService labOrderService;
     private final FileService fileService;
+    private final TemplateEngine templateEngine;
 
     @GetMapping("")
     public ResponseEntity<?> getAllMedicalRecord(@RequestParam(name = "keyword",required = false) String keyword,
@@ -62,7 +66,7 @@ public class MedicalController {
         MedicalRecord medicalRecord = medicalRecordService.create(request);
         labOrderService.createLabOrderFromHealthPlan(medicalRecord, request.getHealthPlanId());
         return ResponseEntity.ok(
-                new ApiResponse<>("", "successfully")
+                new ApiResponse<>(medicalRecord.getId(), "successfully")
         );
     }
 
@@ -83,13 +87,8 @@ public class MedicalController {
     }
     @GetMapping("/{id}/pdf")
     public ResponseEntity<?> getMedicalRecordPdf(@PathVariable Integer id) {
-
-        byte[] pdf = medicalRecordService.exportPdf(id);
-
-        HttpHeaders headers = new HttpHeaders();
-        var cd = ContentDisposition.attachment().filename("invoice-" + id + ".pdf").build();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDisposition(cd);
-        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+        return ResponseEntity.ok()
+                .contentType(MediaType.TEXT_HTML)
+                .body(medicalRecordService.exportHtml(id));
     }
 }

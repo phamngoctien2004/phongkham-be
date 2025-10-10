@@ -4,6 +4,7 @@ import com.dcm.demo.dto.request.InvoiceRequest;
 import com.dcm.demo.dto.request.PaymentRequest;
 import com.dcm.demo.dto.response.InvoiceResponse;
 import com.dcm.demo.dto.response.PaymentResponse;
+import com.dcm.demo.dto.response.PayosResponse;
 import com.dcm.demo.model.Invoice;
 import com.dcm.demo.model.LabOrder;
 import com.dcm.demo.model.MedicalRecord;
@@ -13,7 +14,11 @@ import com.dcm.demo.service.interfaces.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import vn.payos.PayOS;
 import vn.payos.type.PaymentData;
 
@@ -55,52 +60,69 @@ public class PayosService {
         InvoiceRequest invoiceRequest = new InvoiceRequest();
         invoiceRequest.setPaymentMethod(Invoice.PaymentMethod.CHUYEN_KHOAN);
         invoiceRequest.setOrderCode(orderCode);
+
+//      Kham bac si chuyen khoa
         if (paymentRequest.getDoctorId() != null) {
             invoiceRequest.setDoctorId(paymentRequest.getDoctorId());
         }
+//      danh sach dich vu kham
         if (paymentRequest.getHealthPlanIds() != null && !paymentRequest.getHealthPlanIds().isEmpty()) {
             invoiceRequest.setHealthPlanIds(paymentRequest.getHealthPlanIds());
         }
         InvoiceResponse invoiceResponse = invoiceService.createInvoiceForQR(invoiceRequest);
-
+        System.out.println("Invoice ID: " + invoiceResponse.getId());
         PaymentData paymentData = PaymentData
                 .builder()
                 .orderCode(orderCode)
-                .amount(invoiceResponse.getTotalAmount())
+                .amount(invoiceResponse.getExamFee())
                 .description("Thanh toán hoa đơn ")
                 .returnUrl("http://localhost:8080")
                 .cancelUrl("http://localhost:8080")
                 .build();
-        return new PaymentResponse(invoiceResponse.getId(), payOS.createPaymentLink(paymentData).getQrCode());
+        return new PaymentResponse(invoiceResponse.getId(), payOS.createPaymentLink(paymentData).getQrCode(), orderCode);
     }
 
     private PaymentResponse createLinkPaymentV2(PaymentRequest paymentRequest) throws Exception {
         Long orderCode = System.currentTimeMillis() / 1000;
         MedicalRecord medicalRecord = medicalRecordService.findById(paymentRequest.getMedicalRecordId());
-        List<LabOrder> labOrders = labOrderService.findByIds(paymentRequest.getLabOrderIds());
-        List<Integer> servicesSelected = labOrders
-                .stream()
-                .map(labOrder -> labOrder.getHealthPlan().getId())
-                .toList();
-        BigDecimal totalAmount = labOrders
-                .stream()
-                .map(LabOrder::getPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Invoice invoice = medicalRecord.getInvoice();
+
+//      danh sach dich vu thanh toan
+        List<Integer> servicesSelected = paymentRequest.getHealthPlanIds();
+
+//      tinh tong
+        BigDecimal total = invoice.getTotalAmount().subtract(invoice.getPaidAmount());
+
+//      tao mo ta de xu li sau nay
         String description = "T" + medicalRecord.getId() + "X" + servicesSelected
                 .stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining("D"));
-        Integer invoiceId = medicalRecord.getInvoice().getId();
-        System.out.println(description);
-        redisTemplate.opsForValue().set("PAYMENT_" + invoiceId, servicesSelected);
+
         PaymentData paymentData = PaymentData
                 .builder()
                 .orderCode(orderCode)
-                .amount(totalAmount.intValue())
+                .amount(total.intValue())
                 .description(description)
                 .returnUrl("http://localhost:8080")
                 .cancelUrl("http://localhost:8080")
                 .build();
-        return new PaymentResponse(invoiceId, payOS.createPaymentLink(paymentData).getQrCode());
+        return new PaymentResponse(medicalRecord.getId(), payOS.createPaymentLink(paymentData).getQrCode(), orderCode);
     }
+
+    public boolean checkStatus(Long orderCode) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("x-client-id", "355718b7-5f38-44ea-b31e-3e269705aa5b");
+        headers.add("x-api-key", "06eac658-bada-4cee-92a3-48626b520aab");
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+        PayosResponse response = restTemplate.exchange(
+                "https://api-merchant.payos.vn/v2/payment-requests/" + orderCode,
+                HttpMethod.GET,
+                request,
+                PayosResponse.class).getBody();
+
+        return "PAID".equalsIgnoreCase(response.getData().getStatus());
+    }
+
 }

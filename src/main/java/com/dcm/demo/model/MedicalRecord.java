@@ -38,6 +38,8 @@ public class MedicalRecord {
     @OneToOne(mappedBy = "medicalRecord")
     private Invoice invoice;
 
+    @OneToOne(mappedBy = "medicalRecord")
+    private Prescription prescription;
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "id_dat_lich")
 //    private Appointment appointment;

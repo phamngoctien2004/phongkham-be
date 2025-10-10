@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Phiếu Khám Bệnh</title>
+    <style>
+        @page { size: A4; margin: 20mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', serif; font-size: 13px; line-height: 1.6; }
+
+        .header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .header-left { text-align: left; }
+        .header-left .name { font-weight: bold; text-transform: uppercase; font-size: 14px; }
+        .header-left div { font-size: 12px; }
+        .header-right { text-align: right; font-size: 11px; }
+
+        .title { text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; margin: 15px 0; }
+
+        .info-line { display: flex; margin-bottom: 8px; }
+        .info-line label { min-width: 150px; font-weight: normal; }
+        .info-line .dots { flex: 1; border-bottom: 1px dotted #000; min-width: 200px; padding-left: 5px; }
+
+        .section { margin: 15px 0; }
+        .section-title { font-weight: bold; margin-bottom: 8px; }
+
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; }
+        th { font-weight: bold; background: #f5f5f5; }
+
+        .signatures { display: flex; justify-content: space-around; margin-top: 40px; text-align: center; }
+        .sig-block { min-width: 150px; }
+        .sig-title { font-weight: bold; margin-bottom: 5px; }
+        .sig-note { font-style: italic; font-size: 11px; margin-bottom: 60px; }
+
+        @media print { body { margin: 0; } }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="name" th:text="${clinicName}">PHÒNG KHÁM ĐA KHOA PHỐ NỐI</div>
+        <div>Địa chỉ: <span th:text="${clinicAddress}">123 Đường ABC, Phố Nối, Hưng Yên</span></div>
+        <div>Điện thoại: <span th:text="${clinicPhone}">0123 456 789</span></div>
+    </div>
+    <div class="header-right">
+        <div>Số: <span th:text="${appointmentCode}">............</span></div>
+    </div>
+</div>
+
+<div class="title">PHIẾU KHÁM BỆNH</div>
+
+<div class="section">
+    <div class="info-line">
+        <label>Họ và tên bệnh nhân:</label>
+        <span class="dots" th:text="${patientName}"></span>
+        <label style="min-width: 80px; margin-left: 10px;">Tuổi:</label>
+        <span class="dots" style="max-width: 60px;" th:text="${patientAge}"></span>
+    </div>
+    <div class="info-line">
+        <label>Ngày sinh:</label>
+        <span class="dots" style="max-width: 200px;" th:text="${#temporals.format(patientBirthDate, 'dd/MM/yyyy')}"></span>
+        <label style="min-width: 100px; margin-left: 10px;">Giới tính:</label>
+        <span class="dots" style="max-width: 100px;" th:text="${patientGender}"></span>
+    </div>
+    <div class="info-line">
+        <label>Địa chỉ:</label>
+        <span class="dots" th:text="${patientAddress}"></span>
+    </div>
+    <div class="info-line">
+        <label>Điện thoại:</label>
+        <span class="dots" style="max-width: 200px;" th:text="${patientPhone}"></span>
+        <label style="min-width: 120px; margin-left: 10px;" th:if="${insuranceNumber}">Số thẻ BHYT:</label>
+        <span class="dots" th:if="${insuranceNumber}" th:text="${insuranceNumber}"></span>
+    </div>
+</div>
+
+<div class="section">
+    <table>
+        <tr>
+            <th style="width: 25%;">Ngày khám</th>
+            <th style="width: 15%;">Giờ</th>
+            <th style="width: 30%;">Chuyên khoa</th>
+            <th style="width: 30%;">Phòng khám</th>
+        </tr>
+        <tr>
+            <td th:text="${#temporals.format(appointmentDate, 'dd/MM/yyyy')}"></td>
+            <td th:text="${appointmentTime}"></td>
+            <td th:text="${departmentName}"></td>
+            <td th:text="${roomName}"></td>
+        </tr>
+        <tr>
+            <th colspan="2">Bác sĩ khám bệnh</th>
+            <th colspan="2">Phí khám</th>
+        </tr>
+        <tr>
+            <td colspan="2" th:text="${doctorName}"></td>
+            <td colspan="2" th:text="${examFee}"></td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <div style="border: 1px solid #000; padding: 8px; min-height: 80px;">
+        <div style="font-weight: bold; margin-bottom: 5px;">Ghi chú:</div>
+        <div style="font-size: 12px;">
+            - Vui lòng đến trước giờ hẹn 15 phút<br>
+            - Mang theo CMND/CCCD và thẻ BHYT (nếu có)
+        </div>
+    </div>
+</div>
+
+<div class="signatures">
+    <div class="sig-block">
+        <div class="sig-title">Lễ tân</div>
+        <div class="sig-note">(Ký, ghi rõ họ tên)</div>
+    </div>
+    <div class="sig-block">
+        <div class="sig-title">Bệnh nhân</div>
+        <div class="sig-note">(Ký xác nhận)</div>
+    </div>
+</div>
+</body>
+</html>

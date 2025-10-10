@@ -11,4 +11,5 @@ public interface DepartmentService {
     Department findById(Integer id);
     List<DepartmentResponse> findAll();
     List<DoctorResponse> findDoctorByDepartments(Integer id);
+    String getRoomFromDepartment(Department department);
 }

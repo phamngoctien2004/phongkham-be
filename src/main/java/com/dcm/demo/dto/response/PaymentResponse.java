@@ -9,4 +9,5 @@ import vn.payos.type.CheckoutResponseData;
 public class PaymentResponse {
     private Integer invoiceId;
     private String qrCode;
+    private Long orderCode;
 }

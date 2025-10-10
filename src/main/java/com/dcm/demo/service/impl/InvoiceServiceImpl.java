@@ -1,6 +1,7 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.InvoiceRequest;
+import com.dcm.demo.dto.response.InvoiceDetailResponse;
 import com.dcm.demo.dto.response.InvoiceResponse;
 import com.dcm.demo.mapper.InvoiceMapper;
 import com.dcm.demo.model.*;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,6 +29,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final HealthPlanService healthPlanService;
     private final InvoiceMapper mapper;
     private final RedisTemplate<String, Object> redisTemplate;
+    private Integer defaultPrice = 2000;
 
     @Override
     public Invoice findById(Integer id) {
@@ -38,71 +41,78 @@ public class InvoiceServiceImpl implements InvoiceService {
         Invoice invoice = mapper.toEntity(request);
         invoice.setCode("HD" + System.currentTimeMillis() / 1000);
         invoice.setPayosOrder(request.getOrderCode());
+        repository.save(invoice);
+
+        InvoiceDetail.Status status = InvoiceDetail.Status.CHUA_THANH_TOAN;
         if (request.getHealthPlanIds() != null && !request.getHealthPlanIds().isEmpty()) {
-            invoice.setTotalAmount(healthPlanService.calcTotalService(request.getHealthPlanIds()));
-        }
-        BigDecimal examinationFee = BigDecimal.ZERO;
-        if (request.getDoctorId() != null) {
-            Doctor doctor = doctorService.findById(request.getDoctorId());
-            examinationFee = examinationFee.add(doctor.getDegree().getExaminationFee());
-            invoice.setTotalAmount(examinationFee);
-        }
-        invoice.setPaymentMethod(Invoice.PaymentMethod.CHUYEN_KHOAN);
-        Invoice savedInvoice = repository.save(invoice);
-        if (request.getHealthPlanIds() != null && !request.getHealthPlanIds().isEmpty()) {
-            for (Integer healthPlanId : request.getHealthPlanIds()) {
-                HealthPlan healthPlan = healthPlanService.findById(healthPlanId);
-                if(healthPlan.getHealthPlanDetails() != null && !healthPlan.getHealthPlanDetails().isEmpty()) {
-                    buildInvoiceDetail(invoice, 1, BigDecimal.ZERO, InvoiceDetail.Status.DA_THANH_TOAN, Invoice.PaymentMethod.CHUYEN_KHOAN);
-                    List<HealthPlan> serviceDetails = healthPlan.getHealthPlanDetails().stream().map(healthPlanDetail::getServiceDetail).toList();
-                    for (HealthPlan serviceDetail : serviceDetails) {
-                        buildInvoiceDetail(invoice, serviceDetail.getId(), serviceDetail.getPrice(), InvoiceDetail.Status.CHUA_THANH_TOAN, Invoice.PaymentMethod.CHUYEN_KHOAN);
-                    }
-                    continue;
-                }
-                buildInvoiceDetail(invoice, healthPlanId, healthPlan.getPrice(), InvoiceDetail.Status.CHUA_THANH_TOAN, Invoice.PaymentMethod.CHUYEN_KHOAN);
+            HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanIds().get(0));
+//      benh nhan chon goi kham (goi kham bao gom phi kham benh)
+            if (healthPlan != null && healthPlan.getType().equals(HealthPlan.ServiceType.DICH_VU) && healthPlan.getId() != 1) {
+                buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
+                updateTotal(invoice, healthPlan.getPrice());
+                return buildPayosResponse(invoice.getId(), defaultPrice);
+            }
+//      kham dich vu le (kham benh + chi dinh le)
+            if (healthPlan != null && healthPlan.getId() != 1) {
+                buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
+                buildInvoiceDetail(invoice, 1, BigDecimal.valueOf(defaultPrice), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
+                updateTotal(invoice, healthPlan.getPrice().add(BigDecimal.valueOf(defaultPrice)));
+                return buildPayosResponse(invoice.getId(), defaultPrice);
             }
         }
-//        truong hop kham bac si rieng
-        if (!examinationFee.equals(BigDecimal.ZERO)) {
-            buildInvoiceDetail(invoice, 1, examinationFee, InvoiceDetail.Status.CHUA_THANH_TOAN, Invoice.PaymentMethod.CHUYEN_KHOAN);
-        }
-        return mapper.toResponse(savedInvoice);
+        Doctor doctor = doctorService.findById(request.getDoctorId());
+        buildInvoiceDetail(invoice, 1, doctor.getDegree().getExaminationFee(), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
+        updateTotal(invoice, doctor.getDegree().getExaminationFee());
+        // kham chuyen khoa
+        return buildPayosResponse(invoice.getId(),  doctor.getDegree().getExaminationFee().intValue());
+    }
+
+    private InvoiceResponse buildPayosResponse(Integer id, Integer examFee) {
+        InvoiceResponse response = new InvoiceResponse();
+        response.setId(id);
+        response.setExamFee(examFee);
+        return response;
     }
 
     @Override
     public void createInvoiceForCash(MedicalRecord record) {
+//      tao hoa don
         Invoice invoice = buildInvoice(record);
         repository.save(invoice);
 
+        InvoiceDetail.Status status = InvoiceDetail.Status.CHUA_THANH_TOAN;
         HealthPlan healthPlan = record.getHealthPlan();
-//        truong hop goi kham benh
-        if (healthPlan != null && healthPlan.getHealthPlanDetails() != null && !healthPlan.getHealthPlanDetails().isEmpty()) {
-            for (healthPlanDetail detail : healthPlan.getHealthPlanDetails()) {
-                HealthPlan serviceDetail = detail.getServiceDetail();
-                buildInvoiceDetail(invoice, serviceDetail.getId(), serviceDetail.getPrice(), InvoiceDetail.Status.DA_THANH_TOAN, Invoice.PaymentMethod.TIEN_MAT);
-            }
-            buildInvoiceDetail(invoice, 1, BigDecimal.ZERO, InvoiceDetail.Status.DA_THANH_TOAN, Invoice.PaymentMethod.TIEN_MAT);
+//      benh nhan chon goi kham (goi kham bao gom phi kham benh)
+        if (healthPlan != null && healthPlan.getType().equals(HealthPlan.ServiceType.DICH_VU) && healthPlan.getId() != 1) {
+            buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), InvoiceDetail.Status.THANH_TOAN_MOT_PHAN, Invoice.PaymentMethod.TIEN_MAT, BigDecimal.valueOf(defaultPrice));
+
+            updateTotal(invoice, healthPlan.getPrice());
+            updatePaidAmount(invoice, BigDecimal.valueOf(defaultPrice));
             return;
         }
-// truong hop chi dinh le
-        if (healthPlan != null) {
-            buildInvoiceDetail(invoice, 1, BigDecimal.ZERO, InvoiceDetail.Status.DA_THANH_TOAN, Invoice.PaymentMethod.TIEN_MAT);
-            buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), InvoiceDetail.Status.DA_THANH_TOAN, Invoice.PaymentMethod.TIEN_MAT);
+//      benh nhan yeu cau chi dinh le (kham benh + chi dinh le)
+        if (healthPlan != null && healthPlan.getId() != 1) {
+//          tao chi tiet phi kham benh va dich v u
+            buildInvoiceDetail(invoice, 1, BigDecimal.valueOf(defaultPrice), InvoiceDetail.Status.DA_THANH_TOAN, Invoice.PaymentMethod.TIEN_MAT, BigDecimal.valueOf(defaultPrice));
+            buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), status, Invoice.PaymentMethod.TIEN_MAT, BigDecimal.ZERO);
+
+//          cap nhat tong tien va da thanh toan
+            updateTotal(invoice, healthPlan.getPrice().add(BigDecimal.valueOf(defaultPrice)));
+            updatePaidAmount(invoice, BigDecimal.valueOf(defaultPrice));
             return;
         }
 
+//      kham rieng bac si (chon kham chuyen khoa)
         Doctor doctor = record.getDoctor();
-        buildInvoiceDetail(invoice, 1, doctor.getDegree().getExaminationFee(), InvoiceDetail.Status.DA_THANH_TOAN, Invoice.PaymentMethod.TIEN_MAT);
+        buildInvoiceDetail(invoice, 1, doctor.getDegree().getExaminationFee(), InvoiceDetail.Status.DA_THANH_TOAN, Invoice.PaymentMethod.TIEN_MAT, doctor.getDegree().getExaminationFee());
+        updateTotal(invoice, doctor.getDegree().getExaminationFee());
+        updatePaidAmount(invoice, doctor.getDegree().getExaminationFee());
     }
 
     static Invoice buildInvoice(MedicalRecord record) {
         Invoice invoice = new Invoice();
         invoice.setMedicalRecord(record);
         invoice.setCode("HD" + System.currentTimeMillis() / 1000);
-        invoice.setTotalAmount(record.getTotal());
-        invoice.setPaidAmount(record.getTotal());
-        invoice.setStatus(Invoice.PaymentStatus.DA_THANH_TOAN);
         invoice.setPaymentMethod(Invoice.PaymentMethod.TIEN_MAT);
         return invoice;
     }
@@ -129,7 +139,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             return true;
         }
         if (invoice.getStatus() == Invoice.PaymentStatus.THANH_TOAN_MOT_PHAN
-        && redisTemplate.opsForValue().get("PAYMENT_" + invoiceId) == null) {
+                && redisTemplate.opsForValue().get("PAYMENT_" + invoiceId) == null) {
             return true;
         }
         return false;
@@ -146,11 +156,12 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public void buildInvoiceDetail(Invoice invoice, Integer healthPlanId, BigDecimal feeService, InvoiceDetail.Status status, Invoice.PaymentMethod paymentMethod) {
+    public void buildInvoiceDetail(Invoice invoice, Integer healthPlanId, BigDecimal feeService, InvoiceDetail.Status status, Invoice.PaymentMethod paymentMethod, BigDecimal paymentAmount) {
         InvoiceDetail detail = new InvoiceDetail();
         detail.setInvoice(invoice);
         detail.setPaymentMethod(paymentMethod);
         detail.setStatus(status);
+        detail.setPaidAmount(paymentAmount);
         if (healthPlanId != null && healthPlanId != 1) {
             HealthPlan healthPlan = healthPlanService.findById(healthPlanId);
             healthPlan.setId(healthPlanId);
@@ -165,6 +176,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
         invoiceDetailRepository.save(detail);
     }
+
+
 
     @Override
     public Invoice findByPayosOrder(Long orderCode) {

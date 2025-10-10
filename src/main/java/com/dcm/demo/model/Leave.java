@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScheduleException {
+public class Leave {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +38,7 @@ public class ScheduleException {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai_nghi")
-    private ScheduleException.leaveStatus leaveStatus;
+    private Leave.leaveStatus leaveStatus;
 
     @Column(name = "ngay_gui")
     private LocalDate submitDate;
@@ -53,7 +53,7 @@ public class ScheduleException {
     }
 
     public enum type {
-        CA_NGAY, THEO_CA
+        SANG, CHIEU, TOI
     }
 
     public enum leaveStatus {

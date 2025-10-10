@@ -4,7 +4,6 @@ import com.dcm.demo.model.MedicalRecord;
 import com.dcm.demo.model.User;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,7 +16,7 @@ public class MedicalResponse {
     private String diagnosis;
     private String treatmentPlan;
     private String note;
-    private BigDecimal total;
+
     private Integer patientId;
     private String patientName;
     private String patientPhone;
@@ -25,6 +24,10 @@ public class MedicalResponse {
     private User.Gender patientGender;
     private LocalDateTime date;
     private MedicalRecord.RecordStatus status;
-    private List<LabOrderResponse> labOrdersResponses;
-    private Integer invoiceId;
+
+    private Integer healthPlanId;
+    private String healthPlanName;
+    private Integer total;
+    private Integer paid;
+    private List<InvoiceDetailResponse> invoiceDetailsResponse;
 }

@@ -7,8 +7,14 @@ import com.dcm.demo.service.impl.PayosService;
 import com.dcm.demo.service.interfaces.InvoiceService;
 import com.dcm.demo.service.interfaces.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
@@ -24,22 +30,16 @@ public class PaymentController {
     }
 
     @PostMapping("/webhook")
-    public String handleWebhook(@RequestBody WebhookRequest webhookRequest) {
+    public void handleWebhook(@RequestBody WebhookRequest webhookRequest) {
         // Logic to handle webhook notifications
-        medicalRecordService.webhookPayosForCheckStatus(webhookRequest);
-        return "ok";
+            medicalRecordService.webhookPayosForCheckStatus(webhookRequest);
+            log.error("checheck");
     }
 
 //     loi o day nhe
-    @GetMapping("/status/{invoiceId}")
-    public ApiResponse<?> getPaymentStatus(@PathVariable Integer invoiceId) {
+    @GetMapping("/status/{orderCode}")
+    public ApiResponse<?> getPaymentStatus(@PathVariable Long orderCode) {
         // Logic to get payment status
-        return new ApiResponse<>(invoiceService.checkStatusPayment(invoiceId), "Payment status retrieved successfully");
-    }
-
-    @GetMapping("/test")
-    public ApiResponse<?> test() {
-        // Logic to get payment status
-        return new ApiResponse<>(invoiceService.getServicesUnPay(26), "Payment status retrieved successfully");
+        return new ApiResponse<>(payosService.checkStatus(orderCode), "Payment status retrieved successfully");
     }
 }

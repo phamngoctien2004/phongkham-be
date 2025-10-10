@@ -15,13 +15,13 @@ public class PrescriptionDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_chi_tiet")
-    private Integer detailId;
+    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_don_thuoc", nullable = false)
     private Prescription prescription;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_thuoc")
     private Medicine medicine;
 
