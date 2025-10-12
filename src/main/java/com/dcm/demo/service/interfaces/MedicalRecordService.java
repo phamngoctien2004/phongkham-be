@@ -24,6 +24,5 @@ public interface MedicalRecordService {
     List<MedicalResponse> findByPatientId(Integer patientId);
     List<MedicalResponse> findAll(String keyword, MedicalRecord.RecordStatus status, LocalDate date);
     void webhookPayosForCheckStatus(WebhookRequest request);
-    byte[] exportPdf(Integer id);
-    String exportHtml(Integer id);
+
 }

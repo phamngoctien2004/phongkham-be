@@ -200,7 +200,11 @@ public class LabOrderServiceImpl implements LabOrderService {
             Room room = healthPlan.getRoom();
             labOrder.setRoom(room.getRoomName() + " - " + room.getRoomNumber());
         }
-
+        if(healthPlan.getId() == 1) {
+            labOrder.setStatus(LabOrder.TestStatus.HOAN_THANH);
+            labOrder.setOrderDate(LocalDateTime.now().minusHours(1));
+            labOrder.setExpectedResultDate(LocalDateTime.now());
+        }
         repository.save(labOrder);
     }
 }

@@ -26,6 +26,7 @@ public interface LabOrderRepository extends JpaRepository<LabOrder, Integer> , J
                 AND (:status IS NULL OR l.status = :status)
                 AND ( (:from IS NULL OR :to IS NULL) OR (l.orderDate >= :from AND l.orderDate < :to) )
                 AND (:doctorId IS NULL OR (d.id = :doctorId) )
+                AND (h.id != 1)
                 ORDER BY l.orderDate ASC 
             """)
     List<LabOrder> findAll(

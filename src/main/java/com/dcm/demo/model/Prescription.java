@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "don_thuoc")
@@ -36,6 +38,9 @@ public class Prescription {
 
     @Column(name = "huong_dan_chung", columnDefinition = "TEXT")
     private String generalInstructions;
+
+    @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PrescriptionDetail> prescriptionDetails = new ArrayList<>();
     @Override
     public String toString() {
         return "";

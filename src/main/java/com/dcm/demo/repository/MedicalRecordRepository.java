@@ -23,7 +23,6 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, In
                        OR LOWER(mr.code) LIKE LOWER(CONCAT('%', :keyword, '%')) )
                   AND (:status IS NULL OR mr.status = :status)
                   AND ( (:from IS NULL OR :to IS NULL) OR (mr.date >= :from AND mr.date < :to) )
-            
                 ORDER BY mr.date DESC
             """)
     List<MedicalRecord> findAll(

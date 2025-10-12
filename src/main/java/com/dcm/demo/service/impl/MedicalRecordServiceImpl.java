@@ -53,66 +53,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final TemplateEngine templateEngine;
     private BigDecimal defaultPrice = BigDecimal.valueOf(2000);
 
-    @Override
-    public byte[] exportPdf(Integer id) {
-        MedicalRecord medicalRecord = repository.findById(id).orElseThrow(
-                () -> new AppException(ErrorCode.RECORD_NOTFOUND)
-        );
-        Patient patient = medicalRecord.getPatient();
-        HealthPlan healthPlan = medicalRecord.getHealthPlan();
-        Doctor doctor = medicalRecord.getDoctor();
-        String healName = healthPlan != null ? healthPlan.getName() : "Goi kham thuong";
-        BigDecimal healPrice = healthPlan != null ? healthPlan.getPrice() : doctor.getDegree().getExaminationFee();
-        LocalDate now = LocalDate.now();
-        Map<String, Object> params = Map.of(
-                "tenBenhNhan", patient.getFullName(),
-                "diaChi", patient.getAddress(),
-                "thanhToan", "Tien Mat",
-                "total", medicalRecord.getTotal(),
-                "today", now
 
-        );
-        List<Map<String, Object>> items = List.of(
-                Map.of("name", healName, "price", healPrice)
-        );
-
-        return fileService.render("pdfs/invoice", params, items);
-    }
-
-    @Override
-    public String exportHtml(Integer id) {
-        MedicalRecord medicalRecord = repository.findById(id).orElseThrow(
-                () -> new AppException(ErrorCode.RECORD_NOTFOUND)
-        );
-        Patient patient = medicalRecord.getPatient();
-        Doctor doctor = medicalRecord.getDoctor();
-
-        Map<String, Object> params = new LinkedHashMap<>();
-
-        params.put("patientName", patient.getFullName());
-        params.put("patientGender", patient.getGender() != null ? patient.getGender().toString() : "");
-        params.put("patientAddress", patient.getAddress());
-        params.put("patientPhone", patient.getPhone());
-        params.put("patientBirthDate", patient.getBirth());
-        params.put("insuranceNumber", "1023888519");
-
-        params.put("appointmentDate", medicalRecord.getDate().toLocalDate());
-        params.put("appointmentTime", medicalRecord.getDate().toLocalTime());
-
-        params.put("doctorName", doctor.getFullName());
-        params.put("roomName", departmentService.getRoomFromDepartment(doctor.getDepartment()));
-        params.put("departmentName", doctor.getDepartment().getName());
-
-        Locale locale = new Locale("vi", "VN");
-        NumberFormat currencyVN = NumberFormat.getCurrencyInstance(locale);
-        String formattedFee = currencyVN.format(medicalRecord.getFee()); // ví dụ examFee = 150000 → "150.000 ₫"
-
-        params.put("examFee", formattedFee);
-        Context ctx = new Context();
-        ctx.setVariables(params);
-
-        return templateEngine.process("pdfs/phieukham.html", ctx);
-    }
 
     @Override
     @Transactional

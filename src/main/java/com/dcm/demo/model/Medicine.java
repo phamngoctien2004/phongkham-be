@@ -20,12 +20,17 @@ public class Medicine {
     @Column(name = "ten_thuoc", nullable = false)
     private String name;
 
+    @Column(name = "mo_ta")
+    private String description;
+
     @Column(name = "ham_luong", length = 100)
     private String concentration;
 
     @Column(name = "dang_bao_che", length = 100)
     private String dosageForm;
 
+    @Column(name = "don_vi_tinh")
+    private String unit;
 
     @Override
     public String toString() {

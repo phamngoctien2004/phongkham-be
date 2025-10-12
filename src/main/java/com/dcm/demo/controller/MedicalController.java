@@ -85,10 +85,5 @@ public class MedicalController {
                 new ApiResponse<>("", "successfully")
         );
     }
-    @GetMapping("/{id}/pdf")
-    public ResponseEntity<?> getMedicalRecordPdf(@PathVariable Integer id) {
-        return ResponseEntity.ok()
-                .contentType(MediaType.TEXT_HTML)
-                .body(medicalRecordService.exportHtml(id));
-    }
+
 }

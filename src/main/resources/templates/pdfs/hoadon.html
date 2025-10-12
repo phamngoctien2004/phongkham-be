@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hóa Đơn Thanh Toán</title>
+    <style>
+        @page { size: A4; margin: 20mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', serif; font-size: 13px; line-height: 1.6; }
+
+        .header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+        .header-left { text-align: left; }
+        .header-left .name { font-weight: bold; text-transform: uppercase; font-size: 14px; }
+        .header-left div { font-size: 12px; }
+        .header-right { text-align: right; font-size: 11px; }
+
+        .title { text-align: center; font-size: 18px; font-weight: bold; text-transform: uppercase; margin: 15px 0; }
+
+        .info-line { display: flex; margin-bottom: 6px; }
+        .info-line label { min-width: 140px; font-weight: normal; }
+        .info-line .dots { flex: 1; border-bottom: 1px dotted #000; padding-left: 5px; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+
+        .section { margin: 15px 0; }
+
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #000; padding: 6px 8px; text-align: left; font-size: 12px; }
+        th { font-weight: bold; background: #f5f5f5; }
+        .cat-row { background: #e8e8e8; font-weight: bold; text-transform: uppercase; }
+        .subtotal-row { background: #f5f5f5; font-weight: bold; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+
+        .total-box { border: 2px solid #000; padding: 10px; margin: 10px 0; }
+        .total-line { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .grand-total { font-size: 16px; font-weight: bold; padding-top: 8px; border-top: 1px solid #000; margin-top: 8px; }
+
+        .amount-words { text-align: center; font-style: italic; padding: 8px; margin: 10px 0; border: 1px solid #000; }
+
+        .signatures { display: flex; justify-content: space-around; margin-top: 40px; text-align: center; }
+        .sig-block { min-width: 150px; }
+        .sig-title { font-weight: bold; margin-bottom: 5px; }
+        .sig-note { font-style: italic; font-size: 11px; margin-bottom: 60px; }
+
+        @media print { body { margin: 0; } }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="name" th:text="${clinicName}">PHÒNG KHÁM ĐA KHOA PHỐ NỐI</div>
+        <div>Địa chỉ: <span th:text="${clinicAddress}">123 Đường ABC, Phố Nối</span></div>
+        <div>Điện thoại: <span th:text="${clinicPhone}">0123 456 789</span> - Email: <span th:text="${clinicEmail}">pk@phonoi.vn</span></div>
+        <div>Mã số thuế: <span th:text="${clinicTaxCode}">0123456789</span></div>
+    </div>
+    <div class="header-right">
+        <div style="margin-bottom: 5px;"><strong>Mẫu số:</strong> 01GTKT</div>
+        <div><strong>Ký hiệu:</strong> AA/25E</div>
+        <div><strong>Số:</strong> <span th:text="${invoiceCode}">............</span></div>
+    </div>
+</div>
+
+<div class="title">HÓA ĐƠN THANH TOÁN VIỆN PHÍ</div>
+<div style="text-align: center; font-size: 12px; margin-bottom: 15px;">
+    Ngày <span th:text="${#temporals.format(invoiceDate, 'dd')}">...</span>
+    tháng <span th:text="${#temporals.format(invoiceDate, 'MM')}">...</span>
+    năm <span th:text="${#temporals.format(invoiceDate, 'yyyy')}">...</span>
+</div>
+
+<div class="info-grid">
+    <div>
+        <div class="info-line">
+            <label>Họ tên bệnh nhân:</label>
+            <span class="dots" th:text="${patientName}"></span>
+        </div>
+        <div class="info-line">
+            <label>Ngày sinh:</label>
+            <span class="dots" th:text="${#temporals.format(patientBirthDate, 'dd/MM/yyyy')}"></span>
+        </div>
+        <div class="info-line">
+            <label>Địa chỉ:</label>
+            <span class="dots" th:text="${patientAddress}"></span>
+        </div>
+    </div>
+    <div>
+        <div class="info-line">
+            <label>Mã bệnh nhân:</label>
+            <span class="dots" th:text="${patientCode}"></span>
+        </div>
+        <div class="info-line">
+            <label>Điện thoại:</label>
+            <span class="dots" th:text="${patientPhone}"></span>
+        </div>
+        <div class="info-line" th:if="${hasInsurance}">
+            <label>Số thẻ BHYT:</label>
+            <span class="dots" th:text="${insuranceNumber}"></span>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <table>
+        <thead>
+        <tr>
+            <th style="width: 5%;">STT</th>
+            <th style="width: 45%;">Nội dung</th>
+            <th style="width: 10%;">ĐVT</th>
+            <th style="width: 8%;">SL</th>
+            <th style="width: 16%;">Đơn giá</th>
+            <th style="width: 16%;">Thành tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Dịch vụ khám -->
+        <tr class="cat-row">
+            <td colspan="6">DỊCH VỤ KHÁM VÀ ĐIỀU TRỊ</td>
+        </tr>
+        <tr th:each="srv, iter : ${medicalServices}">
+            <td class="text-center" th:text="${iter.count}">1</td>
+            <td th:text="${srv.name}"></td>
+            <td class="text-center" th:text="${srv.unit}"></td>
+            <td class="text-center" th:text="${srv.quantity}"></td>
+            <td class="text-right" th:text="${#numbers.formatDecimal(srv.price, 0, 'COMMA', 0, 'POINT')}"></td>
+            <td class="text-right" th:text="${#numbers.formatDecimal(srv.total, 0, 'COMMA', 0, 'POINT')}"></td>
+        </tr>
+        <tr class="subtotal-row">
+            <td colspan="5" class="text-right">Tạm tính (A):</td>
+            <td class="text-right" th:text="${#numbers.formatDecimal(medicalServicesTotal, 0, 'COMMA', 0, 'POINT')}"></td>
+        </tr>
+
+
+        </tbody>
+    </table>
+</div>
+
+<div class="total-box">
+    <div class="total-line">
+        <span>Tổng cộng:</span>
+        <span th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+    </div>
+    <div class="total-line" th:if="${discount > 0}">
+        <span>Giảm giá (<span th:text="${discountPercent + '%'}"></span>):</span>
+        <span th:text="'-' + ${#numbers.formatDecimal(discount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+    </div>
+    <div class="total-line" th:if="${hasInsurance}">
+        <span>BHYT thanh toán (<span th:text="${insuranceRate + '%'}"></span>):</span>
+        <span th:text="'-' + ${#numbers.formatDecimal(insuranceAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+    </div>
+    <div class="total-line grand-total">
+        <span>TỔNG THANH TOÁN:</span>
+        <span th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+    </div>
+    <div class="total-line" th:if="${paidAmount > 0}">
+        <span>Đã thanh toán:</span>
+        <span th:text="${#numbers.formatDecimal(paidAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+    </div>
+    <div class="total-line" th:if="${remainingAmount > 0}">
+        <span>Còn lại:</span>
+        <span th:text="${#numbers.formatDecimal(remainingAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
+    </div>
+</div>
+
+<div class="amount-words">
+    Số tiền bằng chữ: <strong th:text="${amountInWords}"></strong>
+</div>
+
+<div style="margin: 10px 0; font-size: 12px;" th:if="${paymentMethod}">
+    <strong>Hình thức thanh toán:</strong>
+    <span th:text="${paymentMethod == 'TIEN_MAT' ? 'Tiền mặt' : (paymentMethod == 'THE_ATM' ? 'Thẻ ATM' : (paymentMethod == 'CHUYEN_KHOAN' ? 'Chuyển khoản' : 'QR Code'))}"></span>
+    | <strong>Người thu:</strong> <span th:text="${cashierName}"></span>
+</div>
+
+<div class="signatures">
+    <div class="sig-block">
+        <div class="sig-title">Bệnh nhân</div>
+        <div class="sig-note">(Ký, ghi rõ họ tên)</div>
+    </div>
+    <div class="sig-block">
+        <div class="sig-title">Thu ngân</div>
+        <div class="sig-note">(Ký, ghi rõ họ tên)</div>
+        <div th:text="${cashierName}"></div>
+    </div>
+</div>
+</body>
+</html>
