@@ -6,6 +6,7 @@ import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.model.LabOrder;
 import com.dcm.demo.service.interfaces.LabOrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,11 +41,13 @@ public class LabOrderController {
     @GetMapping("/doctor/me")
     public ResponseEntity<?> getAllByDoctor(@RequestParam(required = false) String keyword,
                                             @RequestParam(required = false) LabOrder.TestStatus status,
-                                            @RequestParam(required = false) LocalDate date
-                                            ) {
+                                            @RequestParam(required = false) LocalDate date,
+                                            @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                            @RequestParam(value = "limit", defaultValue = "10") Integer limit) {
+        Pageable pageable = Pageable.ofSize(limit).withPage(page - 1);
 
         return ResponseEntity.ok(
-                new ApiResponse<>(labOrderService.getByDoctorPerforming(keyword, date, status), "Get all lab orders of doctor successfully")
+                new ApiResponse<>(labOrderService.getByDoctorPerforming(keyword, date, status, pageable), "Get all lab orders of doctor successfully")
         );
     }
     @PostMapping

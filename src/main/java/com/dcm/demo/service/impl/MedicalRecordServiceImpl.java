@@ -19,9 +19,12 @@ import com.dcm.demo.repository.RelationshipRepository;
 import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -51,6 +54,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final LabOrderRepository labOrderRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final TemplateEngine templateEngine;
+    private final RestClient.Builder builder;
     private BigDecimal defaultPrice = BigDecimal.valueOf(2000);
 
 
@@ -199,7 +203,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     public List<MedicalResponse> me() {
         PatientResponse currentPatient = patientService.me();
         return repository.findByPatientIdOrderByDateDesc(currentPatient.getId()).stream()
-                .map(mapper::toResponse)
+                .map(this::buildResponse)
                 .toList();
     }
 
@@ -216,20 +220,19 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Override
     public List<MedicalResponse> findByPatientId(Integer patientId) {
         return repository.findByPatientId(patientId).stream()
-                .map(mapper::toResponse)
+                .map(this::buildResponse)
                 .toList();
     }
 
     @Override
-    public List<MedicalResponse> findAll(String keyword, MedicalRecord.RecordStatus status, LocalDate date) {
+    public Page<MedicalResponse> findAll(String keyword, MedicalRecord.RecordStatus status, LocalDate date, Pageable pageable) {
         LocalDateTime from = null, to = null;
         if (date != null) {
             from = date.atStartOfDay();
             to = date.plusDays(1).atStartOfDay();
         }
-        return repository.findAll(keyword, from, to, status).stream()
-                .map(this::buildResponse)
-                .toList();
+        return repository.findAll(keyword, from, to, status, pageable)
+                .map(it -> buildResponse(it.getPatient(), it));
     }
 
     @Override
@@ -321,15 +324,20 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     }
 
-    private MedicalResponse buildResponse(MedicalRecord record) {
+    private MedicalResponse buildResponse(Patient patient, MedicalRecord record) {
         MedicalResponse response = mapper.toResponse(record);
-        Patient patient = record.getPatient();
         response.setPatientId(patient.getId());
         response.setPatientName(patient.getFullName());
         response.setPatientGender(patient.getGender());
         response.setPatientAddress(patient.getAddress());
         response.setPatientGender(patient.getGender());
         response.setPatientPhone(patient.getPhone());
+        return response;
+    }
+    private MedicalResponse buildResponse(MedicalRecord record) {
+        Patient patient = record.getPatient();
+
+        MedicalResponse response = buildResponse(patient, record);
 
 //      lay danh sach chi tiet hoa don
 

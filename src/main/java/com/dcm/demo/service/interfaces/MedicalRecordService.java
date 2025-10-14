@@ -5,6 +5,8 @@ import com.dcm.demo.dto.request.PaymentRequest;
 import com.dcm.demo.dto.request.WebhookRequest;
 import com.dcm.demo.dto.response.MedicalResponse;
 import com.dcm.demo.model.MedicalRecord;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,7 +24,7 @@ public interface MedicalRecordService {
     MedicalRecord findById(Integer id);
     MedicalResponse getDetailById(Integer id);
     List<MedicalResponse> findByPatientId(Integer patientId);
-    List<MedicalResponse> findAll(String keyword, MedicalRecord.RecordStatus status, LocalDate date);
+    Page<MedicalResponse> findAll(String keyword, MedicalRecord.RecordStatus status, LocalDate date, Pageable pageable);
     void webhookPayosForCheckStatus(WebhookRequest request);
 
 }

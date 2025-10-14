@@ -22,6 +22,10 @@ public class Relationship {
 
     @Column(name = "vai_tro")
     private String relational;
+
+    @Column(name = "da_xac_thuc")
+    private Boolean verified = true;
+
     @Override
     public String toString() {
         return "";

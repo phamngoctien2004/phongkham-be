@@ -12,6 +12,8 @@ import com.dcm.demo.repository.InvoiceDetailRepository;
 import com.dcm.demo.repository.LabOrderRepository;
 import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +61,21 @@ public class LabOrderServiceImpl implements LabOrderService {
                 .map(this::buildResponse)
                 .toList(
         );
+    }
+
+    @Override
+    public Page<LabOrderResponse> getByDoctorPerforming(String keyword, LocalDate date, LabOrder.TestStatus status, Pageable pageable) {
+        User user = userService.getCurrentUser();
+        Integer doctorId = user.getDoctor() != null ? user.getDoctor().getId() : 0;
+
+        LocalDateTime from = null, to = null;
+        if (date != null) {
+            from = date.atStartOfDay();
+            to = date.plusDays(1).atStartOfDay();
+        }
+
+        return repository.findAllWithPagination(doctorId, keyword, from, to, status, pageable)
+                .map(this::buildResponse);
     }
 
     @Override
@@ -117,7 +134,8 @@ public class LabOrderServiceImpl implements LabOrderService {
         HealthPlan healthPlanPrimary = healthPlanService.findById(healthPlanId);
 //      chi dinh le
         if(!healthPlanPrimary.getType().equals(HealthPlan.ServiceType.DICH_VU)){
-            buildEntity(medicalRecord, medicalRecord.getDoctor(), healthPlan, null,defaultPrice, null);
+            Doctor doctor = doctorService.findById(medicalRecord.getDoctor().getId());
+            buildEntity(medicalRecord, doctor, healthPlan, null,defaultPrice, null);
             buildEntity(medicalRecord, null, healthPlanPrimary, null,healthPlanPrimary.getPrice(), null);
             return;
         }

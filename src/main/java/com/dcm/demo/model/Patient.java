@@ -61,6 +61,8 @@ public class Patient {
     @Column(name = "ngay_dang_ky")
     private LocalDateTime registrationDate;
 
+    @Column(name = "sync")
+    private String sync;
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Relationship> relationships = new ArrayList<>();
 

@@ -61,6 +61,7 @@ public class DoctorServiceImpl implements DoctorService, ProfileLoader {
         response.setId(doctor.getId());
         response.setFullName(doctor.getFullName());
         response.setPosition(doctor.getPosition());
+        response.setExaminationFee(doctor.getDegree().getExaminationFee());
         if (room != null) {
             response.setRoomNumber(room.getRoomNumber());
             response.setRoomName(room.getRoomName());

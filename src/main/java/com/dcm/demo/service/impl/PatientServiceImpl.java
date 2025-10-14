@@ -1,9 +1,9 @@
 package com.dcm.demo.service.impl;
 
+import com.dcm.demo.dto.request.OtpRequest;
 import com.dcm.demo.dto.request.PatientRequest;
+import com.dcm.demo.dto.request.VerifyOtpRequest;
 import com.dcm.demo.dto.response.PatientResponse;
-import com.dcm.demo.dto.response.PatientsDto;
-import com.dcm.demo.dto.response.ProfileData;
 import com.dcm.demo.helpers.FilterHelper;
 import com.dcm.demo.mapper.PatientMapper;
 import com.dcm.demo.mapper.UserMapper;
@@ -12,24 +12,27 @@ import com.dcm.demo.model.Relationship;
 import com.dcm.demo.model.User;
 import com.dcm.demo.repository.PatientRepository;
 import com.dcm.demo.service.interfaces.PatientService;
-import com.dcm.demo.service.interfaces.ProfileLoader;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository repository;
     private final UserService userService;
     private final UserMapper userMapper;
     private final PatientMapper patientMapper;
+    private final SendMessage sendMessage;
 
     @Override
     @Transactional
@@ -53,7 +56,8 @@ public class PatientServiceImpl implements PatientService {
         patient.setHeight(request.getHeight());
 
         if (patient.getPhone() != null) {
-            User user = userService.findByPhone(patient.getPhone());
+            User user = userService.findByPhone(patient.getPhone())
+                    .orElseThrow(() -> new RuntimeException("user not found"));
             user.setEmail(request.getEmail());
             user.setPhone(request.getPhone());
             userService.save(user);
@@ -67,7 +71,9 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public PatientResponse createPatient(PatientRequest request, User user) {
         Patient patient = buildPatient(request);
-        this.buildRelationship(patient, user);
+        Relationship relationship = this.buildRelationship(patient, user, null);
+        relationship.setVerified(true);
+        patient.getRelationships().add(relationship);
         return patientMapper.toResponse(
                 repository.save(patient)
         );
@@ -91,30 +97,25 @@ public class PatientServiceImpl implements PatientService {
 
         if (request.getPhone() != null) {
             User newUser = userService.createAccountByPhone(request.getPhone());
-            this.buildRelationship(patient, newUser);
+
+            Relationship relationship = this.buildRelationship(patient, newUser, "Bản thân");
+            relationship.setVerified(true);
+
+            patient.getRelationships().add(relationship);
         }
 
         if (request.getPhoneLink() != null) {
             User userLink = userService.createAccountByPhone(request.getPhoneLink());
-            this.buildRelationship(patient, userLink);
+
+            Relationship relationship = this.buildRelationship(patient, userLink, "Người thân");
+            relationship.setVerified(true);
+
+            patient.getRelationships().add(relationship);
         }
 
         return patientMapper.toResponse(
                 repository.save(patient)
         );
-    }
-
-    private Patient buildPatient(PatientRequest request) {
-        Patient patient = patientMapper.toEntity(request);
-        patient.setCode("BN" + System.currentTimeMillis());
-        return patient;
-    }
-
-    private void buildRelationship(Patient patient, User user) {
-        Relationship relationship = new Relationship();
-        relationship.setUser(user);
-        relationship.setPatient(patient);
-        patient.getRelationships().add(relationship);
     }
 
 
@@ -147,6 +148,15 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
+    public Page<PatientResponse> findAll(String keyword, Pageable pageable) {
+        Specification<Patient> spec = FilterHelper.contain(keyword, List.of(
+                "phone", "cccd", "fullName"
+        ));
+        return repository.findAll(spec, pageable)
+                .map(patientMapper::toResponse);
+    }
+
+    @Override
     public PatientResponse me() {
         User user = userService.getCurrentUser();
         if (user == null) {
@@ -159,25 +169,97 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
+    public Patient save(Patient patient) {
+        return repository.save(patient);
+    }
+
+    @Override
     public List<PatientResponse> all() {
         User user = userService.getCurrentUser();
         if (user != null) {
             List<Relationship> relationships = user.getRelationships();
 
-            PatientsDto patientsDto = new PatientsDto();
+            List<PatientResponse> patientResponses = new ArrayList<>();
 
-            return relationships.stream()
-                    .map((it) -> {
-                        Patient patient = it.getPatient();
-                        if (!user.getPhone().equals(patient.getPhone())) {
-                            PatientResponse response = patientMapper.toResponse(patient);
-                            response.setRelationship(it.getRelational());
-                            return response;
-                        }
-                        return null;
-                    }).toList();
+            for (Relationship relationship : relationships) {
+                Patient patient = relationship.getPatient();
+                if (user.getPhone().equals(patient.getPhone())) {
+                    continue;
+                }
+                PatientResponse response = patientMapper.toResponse(patient);
+                response.setRelationship(relationship.getRelational());
+                response.setVerified(relationship.getVerified());
+                patientResponses.add(response);
+            }
+            return patientResponses;
         }
         return null;
+    }
+
+    @Override
+    public void addRelationship(PatientRequest request) {
+//      tao benh nhan tam
+        User user = userService.getCurrentUser();
+        Patient patient = this.buildPatient(request);
+        Relationship relationship = this.buildRelationship(patient, user, request.getRelationshipName());
+
+        relationship.setVerified(false);
+        patient.getRelationships().add(relationship);
+        repository.save(patient);
+
+//      gui otp
+        sendMessage.sendOtp(new OtpRequest(request.getSync(), "null"));
+    }
+
+    @Override
+    public void syncRelationship(VerifyOtpRequest request) {
+//      kiem tra otp
+        sendMessage.checkOtp(request.getPhone(), request.getOtp());
+
+//      gan id benh nhan da tim thay vao tai khoan
+        User user = userService.getCurrentUser();
+        Patient patient = repository.findBySync(request.getPhone()).orElseThrow(() -> new RuntimeException("Patient not found"));
+        Patient existPatient = repository.findByPhone(request.getPhone()).orElse(null);
+
+//      dong bo voi benh nhan da ton tai
+        if (existPatient != null) {
+            String relational = patient.getRelationships().get(0).getRelational();
+            Relationship relationship = this.buildRelationship(existPatient, user, relational);
+            relationship.setVerified(true);
+            existPatient.getRelationships().add(relationship);
+            repository.save(existPatient);
+            repository.delete(patient);
+            return;
+        }
+
+//      cap nhat benh nhan moi tao voi so chinh thuc
+        patient.getRelationships().get(0).setVerified(true);
+        patient.setPhone(request.getPhone());
+        repository.save(patient);
+    }
+
+    @Override
+    public void deleteRelationship(Integer patientId) {
+        User user = userService.getCurrentUser();
+        user.getRelationships().removeIf(r -> r.getPatient().getId().equals(patientId));
+        userService.save(user);
+    }
+
+    @Override
+    public Relationship buildRelationship(Patient patient, User user, String relational) {
+        Relationship relationship = new Relationship();
+        relationship.setUser(user);
+        relationship.setPatient(patient);
+        if (relational != null && !relational.isEmpty()) {
+            relationship.setRelational(relational);
+        }
+        return relationship;
+    }
+
+    private Patient buildPatient(PatientRequest request) {
+        Patient patient = patientMapper.toEntity(request);
+        patient.setCode("BN" + System.currentTimeMillis());
+        return patient;
     }
 
 

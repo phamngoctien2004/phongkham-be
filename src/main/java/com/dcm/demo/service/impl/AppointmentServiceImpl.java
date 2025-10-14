@@ -9,6 +9,8 @@ import com.dcm.demo.model.*;
 import com.dcm.demo.repository.AppointmentRepository;
 import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -94,7 +96,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public List<AppointmentResponse> findByPhone(String phone, LocalDate date, Appointment.AppointmentStatus status) {
+    public Page<AppointmentResponse> findByPhone(String phone, LocalDate date, Appointment.AppointmentStatus status, Pageable pageable) {
         Specification<Appointment> spec = FilterHelper.contain(phone, List.of(
                 "phone"
         ));
@@ -104,9 +106,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         if(status != null) {
             spec = spec.and(FilterHelper.equal("status", status));
         }
-        List<Appointment> appointments = repository.findAll(spec);
+        Page<Appointment> appointments = repository.findAll(spec, pageable);
 
-        return appointments.stream().map((appointment -> {
+        return appointments.map((appointment -> {
             AppointmentResponse response = mapper.toResponse(appointment);
             response.setStatus(appointment.getStatus());
             response.setPatientId(appointment.getPatient().getId());
@@ -133,7 +135,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 response.setDepartmentResponse(departmentResponse);
             }
             return response;
-        })).toList();
+        }));
     }
 
     @Override

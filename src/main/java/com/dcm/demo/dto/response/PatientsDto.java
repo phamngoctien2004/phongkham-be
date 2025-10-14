@@ -8,5 +8,4 @@ import java.util.List;
 @Data
 public class PatientsDto {
     private List<PatientResponse> patients;
-    private Integer ownerId;
 }

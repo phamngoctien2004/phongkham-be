@@ -1,6 +1,8 @@
 package com.dcm.demo.repository;
 
 import com.dcm.demo.model.MedicalRecord;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -25,11 +27,12 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, In
                   AND ( (:from IS NULL OR :to IS NULL) OR (mr.date >= :from AND mr.date < :to) )
                 ORDER BY mr.date DESC
             """)
-    List<MedicalRecord> findAll(
+    Page<MedicalRecord> findAll(
             @Param("keyword") String keyword,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,
-            @Param("status") MedicalRecord.RecordStatus status);
+            @Param("status") MedicalRecord.RecordStatus status,
+            Pageable pageable);
 
     List<MedicalRecord> findByPatientId(Integer patientId);
 }

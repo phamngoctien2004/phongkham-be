@@ -8,6 +8,7 @@ import com.dcm.demo.service.interfaces.FileService;
 import com.dcm.demo.service.interfaces.LabOrderService;
 import com.dcm.demo.service.interfaces.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.TemplateEngine;
@@ -30,9 +31,13 @@ public class MedicalController {
     @GetMapping("")
     public ResponseEntity<?> getAllMedicalRecord(@RequestParam(name = "keyword",required = false) String keyword,
                                                  @RequestParam(name = "date", required = false) LocalDate date,
-                                                 @RequestParam(name = "status", required = false) MedicalRecord.RecordStatus status){
+                                                 @RequestParam(name = "status", required = false) MedicalRecord.RecordStatus status,
+                                                 @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                 @RequestParam(value = "limit", defaultValue = "10") Integer limit){
+        Pageable pageable = Pageable.ofSize(limit).withPage(page-1);
+
         return ResponseEntity.ok(
-                new ApiResponse<>(medicalRecordService.findAll(keyword, status, date), "Get all medical record successfully")
+                new ApiResponse<>(medicalRecordService.findAll(keyword, status, date, pageable), "Get all medical record successfully")
         );
     }
     @GetMapping("/{id}")

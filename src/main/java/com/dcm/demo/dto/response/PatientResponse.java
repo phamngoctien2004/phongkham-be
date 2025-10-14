@@ -23,5 +23,6 @@ public final class PatientResponse implements ProfileData{
     private User.Gender gender;
     private String profileImage;
     private String relationship;
+    private boolean isVerified;
     private String email;
 }

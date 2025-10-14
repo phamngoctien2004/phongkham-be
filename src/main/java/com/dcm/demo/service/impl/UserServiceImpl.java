@@ -3,7 +3,6 @@ package com.dcm.demo.service.impl;
 import com.dcm.demo.dto.request.ChangePasswordRequest;
 import com.dcm.demo.dto.request.ResetPassword;
 import com.dcm.demo.dto.request.UserRequest;
-import com.dcm.demo.dto.response.ProfileData;
 import com.dcm.demo.dto.response.UserResponse;
 import com.dcm.demo.exception.AppException;
 import com.dcm.demo.exception.ErrorCode;
@@ -11,7 +10,6 @@ import com.dcm.demo.mapper.UserMapper;
 import com.dcm.demo.model.User;
 import com.dcm.demo.repository.UserRepository;
 import com.dcm.demo.service.interfaces.JwtService;
-import com.dcm.demo.service.interfaces.ProfileLoader;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -34,8 +32,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByPhone(String phone) {
-        return userRepository.findByPhone(phone).orElseThrow(() -> new RuntimeException("User invalid"));
+    public Optional<User> findByPhone(String phone) {
+        return userRepository.findByPhone(phone);
     }
 
     @Override
