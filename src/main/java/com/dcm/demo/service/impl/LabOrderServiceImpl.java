@@ -69,7 +69,7 @@ public class LabOrderServiceImpl implements LabOrderService {
     @Override
     public Page<LabOrderResponse> getByDoctorPerforming(String keyword, LocalDate date, LabOrder.TestStatus status, Pageable pageable) {
         User user = userService.getCurrentUser();
-        Integer doctorId = user.getDoctor() != null ? user.getDoctor().getId() : 0;
+        Department department = user.getDoctor().getDepartment();
 
         LocalDateTime from = null, to = null;
         if (date != null) {
@@ -77,7 +77,7 @@ public class LabOrderServiceImpl implements LabOrderService {
             to = date.plusDays(1).atStartOfDay();
         }
 
-        return repository.findAllWithPagination(doctorId, keyword, from, to, status, pageable)
+        return repository.findAllWithPagination(department.getId(), keyword, from, to, status, pageable)
                 .map(this::buildResponse);
     }
 
@@ -123,6 +123,28 @@ public class LabOrderServiceImpl implements LabOrderService {
     @Override
     public LabOrderResponse findResponseById(Integer id) {
         return buildResponse(repository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu chỉ định3")));
+    }
+
+    @Override
+    public LabOrderResponse fetchAndMarkProcessingLabOrder(Integer id) {
+        LabOrder labOrder = repository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu chỉ định"));
+
+//      lay user hien tai muon truy cap
+        User user = userService.getCurrentUser();
+
+        if (labOrder.getStatus().equals(LabOrder.TestStatus.DANG_THUC_HIEN)
+                && !Objects.equals(labOrder.getPerformingDoctor().getId(), user.getDoctor().getId())) {
+            throw new RuntimeException("Phiếu chỉ định đang được thực hiện bởi bac si " + labOrder.getPerformingDoctor().getFullName());
+        }
+        if (labOrder.getStatus().equals(LabOrder.TestStatus.CHO_THUC_HIEN)) {
+            labOrder.setStatus(LabOrder.TestStatus.DANG_THUC_HIEN);
+            labOrder.setPerformingDoctor(user.getDoctor());
+            labOrder.setOrderDate(LocalDateTime.now());
+            labOrder.setExpectedResultDate(LocalDateTime.now().plusHours(1));
+            repository.save(labOrder);
+            return buildResponse(labOrder);
+        }
+        return buildResponse(labOrder);
     }
 
     @Override

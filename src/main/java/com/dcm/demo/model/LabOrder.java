@@ -63,7 +63,7 @@ public class LabOrder {
     @Column(name = "phong_thuc_hien")
     private String room;
     public enum TestStatus {
-        CHO_THUC_HIEN, DANG_THUC_HIEN, HOAN_THANH, HUY_BO
+        CHO_THUC_HIEN, DANG_THUC_HIEN, CHO_KET_QUA,HOAN_THANH, HUY_BO
     }
     @OneToOne(mappedBy = "labOrder")
     private LabResult labResult;

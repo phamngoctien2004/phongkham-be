@@ -42,16 +42,16 @@ public interface LabOrderRepository extends JpaRepository<LabOrder, Integer> , J
                 SELECT l FROM LabOrder l
                 JOIN FETCH l.healthPlan h 
                 JOIN FETCH l.medicalRecord mr
-                JOIN FETCH l.performingDoctor d
+                JOIN FETCH h.room r
                 where (:keyword IS NULL OR :keyword = ''
                 OR LOWER (mr.code) LIKE LOWER (CONCAT('%', :keyword, '%')) )
                 AND (:status IS NULL OR l.status = :status)
                 AND ( (:from IS NULL OR :to IS NULL) OR (l.orderDate >= :from AND l.orderDate < :to) )
-                AND (:doctorId IS NULL OR (d.id = :doctorId) )
+                AND (:departmentId IS NULL OR (r.roomId = :departmentId) )
                 AND (h.id != 1)
             """)
     Page<LabOrder> findAllWithPagination(
-            @Param("doctorId") Integer doctorId,
+            @Param("departmentId") Integer departmentId,
             @Param("keyword") String keyword,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to,

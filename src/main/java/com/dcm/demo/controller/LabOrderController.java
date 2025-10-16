@@ -31,6 +31,12 @@ public class LabOrderController {
                 new ApiResponse<>(labOrderService.findResponseById(id), "Get lab order by id successfully")
         );
     }
+    @GetMapping("/processing/{id}")
+    public ResponseEntity<?> getByPerformDoctorId(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(labOrderService.fetchAndMarkProcessingLabOrder(id), "Get lab order successfully")
+        );
+    }
     @GetMapping
     public ResponseEntity<?> getAll() {
 
@@ -38,7 +44,7 @@ public class LabOrderController {
                 new ApiResponse<>(labOrderService.getAll(), "Get all lab orders successfully")
         );
     }
-    @GetMapping("/doctor/me")
+    @GetMapping("/doctor")
     public ResponseEntity<?> getAllByDoctor(@RequestParam(required = false) String keyword,
                                             @RequestParam(required = false) LabOrder.TestStatus status,
                                             @RequestParam(required = false) LocalDate date,

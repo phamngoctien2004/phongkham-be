@@ -20,12 +20,14 @@ public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
     private final SendMessage sendMessage;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(
-                new ApiResponse<>(authService.login(loginRequest),"Login successful")
+                new ApiResponse<>(authService.login(loginRequest), "Login successful")
         );
     }
+
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@RequestBody OtpRequest request) {
         authService.sendOtp(request);
@@ -33,6 +35,7 @@ public class AuthController {
                 new ApiResponse<>("", "Send OTP successful")
         );
     }
+
     @PostMapping("/register-otp")
     public ResponseEntity<?> sendRegister(@RequestBody OtpRequest request) {
         authService.sendRegisterOtp(request);
@@ -40,22 +43,25 @@ public class AuthController {
                 new ApiResponse<>("", "Send OTP successful")
         );
     }
-        @PostMapping("/register")
+
+    @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request) {
         return ResponseEntity.ok(
-                new ApiResponse<>(authService.register(request),"Register successful")
+                new ApiResponse<>(authService.register(request), "Register successful")
         );
     }
+
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody VerifyOtpRequest request) {
         return ResponseEntity.ok(
-                new ApiResponse<>(authService.canRegister(request),"Verify OTP successful")
+                new ApiResponse<>(authService.canRegister(request), "Verify OTP successful")
         );
     }
+
     @PostMapping("/dashboard/login")
     public ResponseEntity<?> dashboardLogin(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(
-                new ApiResponse<>(authService.loginDashboard(loginRequest),"Login successful")
+                new ApiResponse<>(authService.loginDashboard(loginRequest), "Login successful")
         );
     }
 

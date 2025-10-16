@@ -27,6 +27,7 @@ public interface LabOrderService {
 
     LabOrderResponse findResponseById(Integer id);
 
+    LabOrderResponse fetchAndMarkProcessingLabOrder(Integer id);
     void createLabOrder(LabOrderRequest request);
 
     void updateLabOrder(LabOrderRequest request);
