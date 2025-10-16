@@ -70,6 +70,9 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         PrescriptionDetail prescriptionDetail = ConvertUtil.convert(request);
         Prescription prescription = repository.findById(request.getPrescriptionId())
                 .orElseThrow(() -> new RuntimeException("Prescription not found"));
+        Medicine medicine = medicineRepository.findById(request.getMedicineId())
+                .orElseThrow(() -> new RuntimeException("Medicine not found"));
+        prescriptionDetail.setMedicine(medicine);
         prescriptionDetail.setPrescription(prescription);
         return ConvertUtil.convert(pdRepository.save(prescriptionDetail));
     }

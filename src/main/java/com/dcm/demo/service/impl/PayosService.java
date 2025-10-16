@@ -61,11 +61,11 @@ public class PayosService {
         invoiceRequest.setPaymentMethod(Invoice.PaymentMethod.CHUYEN_KHOAN);
         invoiceRequest.setOrderCode(orderCode);
 
-//      Kham bac si chuyen khoa
+//      Chon bac si
         if (paymentRequest.getDoctorId() != null) {
             invoiceRequest.setDoctorId(paymentRequest.getDoctorId());
         }
-//      danh sach dich vu kham
+//      dich vu kham
         if (paymentRequest.getHealthPlanIds() != null && !paymentRequest.getHealthPlanIds().isEmpty()) {
             invoiceRequest.setHealthPlanIds(paymentRequest.getHealthPlanIds());
         }
@@ -76,8 +76,7 @@ public class PayosService {
                 .orderCode(orderCode)
                 .amount(invoiceResponse.getExamFee())
                 .description("Thanh toán hoa đơn ")
-                .returnUrl("http://localhost:8080")
-                .cancelUrl("http://localhost:8080")
+
                 .build();
         return new PaymentResponse(invoiceResponse.getId(), payOS.createPaymentLink(paymentData).getQrCode(), orderCode);
     }
@@ -104,8 +103,6 @@ public class PayosService {
                 .orderCode(orderCode)
                 .amount(total.intValue())
                 .description(description)
-                .returnUrl("http://localhost:8080")
-                .cancelUrl("http://localhost:8080")
                 .build();
         return new PaymentResponse(medicalRecord.getId(), payOS.createPaymentLink(paymentData).getQrCode(), orderCode);
     }

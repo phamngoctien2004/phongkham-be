@@ -43,27 +43,29 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setPayosOrder(request.getOrderCode());
         repository.save(invoice);
 
-        InvoiceDetail.Status status = InvoiceDetail.Status.CHUA_THANH_TOAN;
+        InvoiceDetail.Status status = InvoiceDetail.Status.DA_THANH_TOAN;
         if (request.getHealthPlanIds() != null && !request.getHealthPlanIds().isEmpty()) {
             HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanIds().get(0));
 //      benh nhan chon goi kham (goi kham bao gom phi kham benh)
             if (healthPlan != null && healthPlan.getType().equals(HealthPlan.ServiceType.DICH_VU) && healthPlan.getId() != 1) {
                 buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
                 updateTotal(invoice, healthPlan.getPrice());
-                return buildPayosResponse(invoice.getId(), defaultPrice);
+                return buildPayosResponse(invoice.getId(), healthPlan.getPrice().intValue());
             }
-//      kham dich vu le (kham benh + chi dinh le)
+//      dich vu kham
             if (healthPlan != null && healthPlan.getId() != 1) {
                 buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
-                buildInvoiceDetail(invoice, 1, BigDecimal.valueOf(defaultPrice), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
-                updateTotal(invoice, healthPlan.getPrice().add(BigDecimal.valueOf(defaultPrice)));
-                return buildPayosResponse(invoice.getId(), defaultPrice);
+//                buildInvoiceDetail(invoice, 1, BigDecimal.valueOf(defaultPrice), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
+                updateTotal(invoice, healthPlan.getPrice());
+                return buildPayosResponse(invoice.getId(), healthPlan.getPrice().intValue());
             }
         }
+
+//      kham bac si
         Doctor doctor = doctorService.findById(request.getDoctorId());
         buildInvoiceDetail(invoice, 1, doctor.getDegree().getExaminationFee(), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
         updateTotal(invoice, doctor.getDegree().getExaminationFee());
-        // kham chuyen khoa
+
         return buildPayosResponse(invoice.getId(),  doctor.getDegree().getExaminationFee().intValue());
     }
 
@@ -80,29 +82,19 @@ public class InvoiceServiceImpl implements InvoiceService {
         Invoice invoice = buildInvoice(record);
         repository.save(invoice);
 
-        InvoiceDetail.Status status = InvoiceDetail.Status.CHUA_THANH_TOAN;
+        InvoiceDetail.Status status = InvoiceDetail.Status.DA_THANH_TOAN;
         HealthPlan healthPlan = record.getHealthPlan();
-//      benh nhan chon goi kham (goi kham bao gom phi kham benh)
-        if (healthPlan != null && healthPlan.getType().equals(HealthPlan.ServiceType.DICH_VU) && healthPlan.getId() != 1) {
-            buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), InvoiceDetail.Status.THANH_TOAN_MOT_PHAN, Invoice.PaymentMethod.TIEN_MAT, BigDecimal.valueOf(defaultPrice));
 
-            updateTotal(invoice, healthPlan.getPrice());
-            updatePaidAmount(invoice, BigDecimal.valueOf(defaultPrice));
-            return;
-        }
-//      benh nhan yeu cau chi dinh le (kham benh + chi dinh le)
         if (healthPlan != null && healthPlan.getId() != 1) {
-//          tao chi tiet phi kham benh va dich v u
-            buildInvoiceDetail(invoice, 1, BigDecimal.valueOf(defaultPrice), InvoiceDetail.Status.DA_THANH_TOAN, Invoice.PaymentMethod.TIEN_MAT, BigDecimal.valueOf(defaultPrice));
-            buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), status, Invoice.PaymentMethod.TIEN_MAT, BigDecimal.ZERO);
+            buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), status, Invoice.PaymentMethod.TIEN_MAT, healthPlan.getPrice());
 
 //          cap nhat tong tien va da thanh toan
-            updateTotal(invoice, healthPlan.getPrice().add(BigDecimal.valueOf(defaultPrice)));
-            updatePaidAmount(invoice, BigDecimal.valueOf(defaultPrice));
+            updateTotal(invoice, healthPlan.getPrice());
+            updatePaidAmount(invoice, healthPlan.getPrice());
             return;
         }
 
-//      kham rieng bac si (chon kham chuyen khoa)
+//      kham rieng bac si
         Doctor doctor = record.getDoctor();
         buildInvoiceDetail(invoice, 1, doctor.getDegree().getExaminationFee(), InvoiceDetail.Status.DA_THANH_TOAN, Invoice.PaymentMethod.TIEN_MAT, doctor.getDegree().getExaminationFee());
         updateTotal(invoice, doctor.getDegree().getExaminationFee());

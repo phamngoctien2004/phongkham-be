@@ -57,10 +57,15 @@ public class PatientServiceImpl implements PatientService {
 
         if (patient.getPhone() != null) {
             User user = userService.findByPhone(patient.getPhone())
-                    .orElseThrow(() -> new RuntimeException("user not found"));
-            user.setEmail(request.getEmail());
-            user.setPhone(request.getPhone());
-            userService.save(user);
+                    .orElse(null);
+            if(user != null){
+                user.setEmail(request.getEmail());
+                user.setPhone(request.getPhone());
+                userService.save(user);
+            }
+        }
+        if(request.getPhoneLink() != null){
+
         }
         return patientMapper.toResponse(
                 repository.save(patient)
@@ -79,20 +84,16 @@ public class PatientServiceImpl implements PatientService {
         );
     }
 
+    @Override
+    public void delete(Integer id) {
+        Patient patient = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        repository.delete(patient);
+    }
+
     //    tao user va account
     @Override
     public PatientResponse createPatientAndAccount(PatientRequest request) {
-//        User UserExist = userService.findByPhone(phoneCreateAccount);
-//        if (UserExist != null) {
-//            throw new RuntimeException("Số điện thoại đã tồn tại");
-//        }
-//        User user = User.builder()
-//                .email(request.getEmail())
-//                .phone(phoneCreateAccount)
-//                .role(User.Role.BENH_NHAN)
-//                .build();
-//        User newUser = userService.save(user);
-
         Patient patient = buildPatient(request);
 
         if (request.getPhone() != null) {

@@ -73,6 +73,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User createAccountByCCCD(String cccd) {
+        return null;
+    }
+
+    @Override
     public User createUserEntity(UserRequest user) {
         User userEntity = userMapper.toEntity(user);
         return userRepository.save(userEntity);

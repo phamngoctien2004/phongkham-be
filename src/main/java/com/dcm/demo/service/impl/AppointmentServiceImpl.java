@@ -45,10 +45,6 @@ public class AppointmentServiceImpl implements AppointmentService {
             Doctor doctor = doctorService.findById(request.getDoctorId());
             appointment.setDoctor(doctor);
         }
-        if (request.getDepartmentId() != null) {
-            Department department = departmentService.findById(request.getDepartmentId());
-            appointment.setDepartment(department);
-        }
 
         Integer patientId = request.getPatientId();
 
@@ -66,7 +62,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Patient patient = new Patient();
         patient.setId(patientId);
         appointment.setPatient(patient);
-        appointment.setStatus(Appointment.AppointmentStatus.CHO_XAC_NHAN);
+        appointment.setStatus(Appointment.AppointmentStatus.DA_XAC_NHAN);
         repository.save(appointment);
         System.out.println("ok");
     }
@@ -127,13 +123,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 healthPlanResponse.setName(healthPlan.getName());
                 response.setHealthPlanResponse(healthPlanResponse);
             }
-            if (appointment.getDepartment() != null) {
-                Department department = appointment.getDepartment();
-                DepartmentResponse departmentResponse = new DepartmentResponse();
-                departmentResponse.setId(department.getId());
-                departmentResponse.setName(department.getName());
-                response.setDepartmentResponse(departmentResponse);
-            }
+
             return response;
         }));
     }

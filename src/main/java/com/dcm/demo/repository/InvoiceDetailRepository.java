@@ -1,5 +1,7 @@
 package com.dcm.demo.repository;
 
+import com.dcm.demo.model.HealthPlan;
+import com.dcm.demo.model.Invoice;
 import com.dcm.demo.model.InvoiceDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -34,5 +36,5 @@ List<InvoiceDetail> findByRecordId(@Param("medicalRecordId") Integer medicalReco
     List<Integer> findServicesUnpay(@Param("medicalRecordId") Integer medicalRecordId);
 
     List<InvoiceDetail> findByInvoiceIdAndHealthPlanIdIn(Integer invoiceId, List<Integer> healthPlanId);
-    void deleteByInvoiceIdAndHealthPlanId(Integer invoiceId, Integer healthPlanId);
+    void deleteByInvoiceAndHealthPlan(Invoice invoice, HealthPlan healthPlan);
 }

@@ -27,6 +27,7 @@ public class MedicalResponse {
 
     private Integer healthPlanId;
     private String healthPlanName;
+    private String doctorName;
     private Integer total;
     private Integer paid;
     private List<InvoiceDetailResponse> invoiceDetailsResponse;

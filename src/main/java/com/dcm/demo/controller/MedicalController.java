@@ -40,6 +40,19 @@ public class MedicalController {
                 new ApiResponse<>(medicalRecordService.findAll(keyword, status, date, pageable), "Get all medical record successfully")
         );
     }
+    @GetMapping("/doctor")
+    public ResponseEntity<?> getAllByDoctor(@RequestParam(name = "keyword",required = false) String keyword,
+                                                 @RequestParam(name = "date", required = false) LocalDate date,
+                                                 @RequestParam(name = "status", required = false) MedicalRecord.RecordStatus status,
+                                                 @RequestParam(name = "isAllDepartment", defaultValue = "false") boolean isAllDepartment,
+                                                 @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                 @RequestParam(value = "limit", defaultValue = "10") Integer limit){
+        Pageable pageable = Pageable.ofSize(limit).withPage(page-1);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(medicalRecordService.findAllByDoctor(keyword, status, date, isAllDepartment, pageable), "Get all medical record successfully")
+        );
+    }
     @GetMapping("/{id}")
     public ResponseEntity<?> getMedicalRecordById(@PathVariable Integer id) {
         return ResponseEntity.ok(

@@ -17,6 +17,7 @@ public interface PatientService {
     PatientResponse update(PatientRequest request);
     PatientResponse createPatientAndAccount(PatientRequest request);
     PatientResponse createPatient(PatientRequest request, User user);
+    void delete(Integer id);
     Patient findByPhone(String phone);
     Patient findByCccd(String cccd);
     PatientResponse findById(Integer id);

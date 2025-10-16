@@ -1,5 +1,6 @@
 package com.dcm.demo.dto.response;
 
+import com.dcm.demo.model.HealthPlan;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -15,5 +16,6 @@ public class HealthPlanResponse {
     private String description;
     private String roomNumber;
     private String roomName;
+    private HealthPlan.ServiceType type;
     private List<DoctorResponse> doctorsAssigned;
 }

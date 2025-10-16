@@ -44,8 +44,8 @@ public class MedicalRecord {
 //    @JoinColumn(name = "id_dat_lich")
 //    private Appointment appointment;
 
-    @ManyToOne()
-    @JoinColumn(name = "id_bac_si", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "id_bac_si")
     private Doctor doctor;
 
     @CreationTimestamp
@@ -78,7 +78,7 @@ public class MedicalRecord {
     private RecordStatus status = RecordStatus.DANG_KHAM;
 
     public enum RecordStatus {
-        DANG_KHAM, CHO_XET_NGHIEM, HOAN_THANH, HUY
+        CHO_KHAM, DANG_KHAM, CHO_XET_NGHIEM, HOAN_THANH, HUY
     }
     @Override
     public String toString() {

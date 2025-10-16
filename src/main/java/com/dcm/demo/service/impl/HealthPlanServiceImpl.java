@@ -10,7 +10,9 @@ import com.dcm.demo.repository.ExaminationServiceRepository;
 import com.dcm.demo.service.interfaces.HealthPlanService;
 import com.dcm.demo.service.interfaces.ScheduleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.connection.SortParameters;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +32,7 @@ public class HealthPlanServiceImpl implements HealthPlanService {
     @Transactional
     public List<HealthPlanResponse> getAllService(String keyword) {
         Specification<HealthPlan> spec = FilterHelper.contain(keyword, List.of("name"));
-        return repository.findAll(spec).stream()
+        return repository.findAll(spec, Sort.by("code")).stream()
                 .map(it -> {
                     HealthPlanResponse response = mapper.toResponse(it);
                     response.setRoomNumber(it.getRoom().getRoomNumber());

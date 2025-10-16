@@ -71,9 +71,9 @@ public class LabOrderController {
                 new ApiResponse<>("", "Update lab order successfully")
         );
     }
-    @DeleteMapping
-    public ResponseEntity<Void> delete(@RequestBody LabDeleteRequest request) {
-        labOrderService.deleteAllById(request);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        labOrderService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

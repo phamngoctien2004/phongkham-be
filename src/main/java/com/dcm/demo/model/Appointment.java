@@ -30,10 +30,6 @@ public class Appointment {
     @JoinColumn(name = "id_dich_vu_kham")
     private HealthPlan healthPlan;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_khoa")
-    private Department department;
-
     @Column(name = "ho_ten", nullable = false)
     private String fullName;
 
@@ -57,7 +53,7 @@ public class Appointment {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")
-    private AppointmentStatus status = AppointmentStatus.CHO_XAC_NHAN;
+    private AppointmentStatus status = AppointmentStatus.DA_XAC_NHAN;
 
     @Column(name = "trieu_chung", columnDefinition = "TEXT")
     private String symptoms;
@@ -75,7 +71,7 @@ public class Appointment {
     private Patient patient;
 
     public enum AppointmentStatus {
-        CHO_XAC_NHAN, DA_XAC_NHAN, KHONG_DEN, DA_DEN
+        DA_XAC_NHAN, KHONG_DEN, DANG_KHAM
     }
     @Override
     public String toString() {

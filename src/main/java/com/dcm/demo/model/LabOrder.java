@@ -24,7 +24,7 @@ public class LabOrder {
     @Column(name = "ma_chi_dinh")
     private String code;
     @ManyToOne
-    @JoinColumn(name = "id_phieu_kham", nullable = false)
+    @JoinColumn(name = "id_phieu_kham")
     private MedicalRecord medicalRecord;
 
     @ManyToOne
@@ -32,12 +32,12 @@ public class LabOrder {
     private HealthPlan healthPlan;
 
     @ManyToOne(fetch =  FetchType.LAZY)
-    @JoinColumn(name = "id_bac_si_chi_dinh", nullable = false)
+    @JoinColumn(name = "id_bac_si_chi_dinh")
     private Doctor orderingDoctor;
 
 
     @ManyToOne(fetch =  FetchType.LAZY)
-    @JoinColumn(name = "id_bac_si_thuc_hien", nullable = false)
+    @JoinColumn(name = "id_bac_si_thuc_hien")
     private Doctor performingDoctor;
 
     @Enumerated(EnumType.STRING)

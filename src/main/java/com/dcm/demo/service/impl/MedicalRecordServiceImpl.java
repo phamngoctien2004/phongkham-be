@@ -85,17 +85,9 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             medicalRecord.setHealthPlan(healthPlan);
         }
 
-//      khong tao health plan phi kham benh
-        if (request.getHealthPlanId() != null) {
+        if (request.getHealthPlanId() != null && request.getHealthPlanId() > 0) {
             HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
             medicalRecord.setHealthPlan(healthPlan);
-//          gan bac si kham ban dau cho phieu kham (bac si nay se la nguoi thuc hien kham, ke don, ...)
-            Doctor doctor = new Doctor();
-
-//          phi kham ung truoc
-            medicalRecord.setFee(defaultPrice);
-            doctor.setId(1);
-            medicalRecord.setDoctor(doctor);
         }
         MedicalRecord saved = repository.save(medicalRecord);
 //      thanh toan online
@@ -111,34 +103,6 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         return saved;
     }
 
-
-//    //    thanh toan tien mat tu lan 2 tro di
-//    @Override
-//    public void updatePaymentForLabOrder(MedicalRequest.UpdatePaymentRequest request) {
-//        MedicalRecord medicalRecord = findById(request.getMedicalRecordId());
-//        List<Integer> labOrderIds = request.getLabOrderIds();
-////      filter laborder duoc chon tu phieu kham
-//        List<LabOrder> labOrders = medicalRecord.getLabOrders().stream()
-//                .filter(it -> labOrderIds.contains(it.getId()))
-//                .toList();
-////      tao chi tiet hoa don
-//        Invoice invoice = medicalRecord.getInvoice();
-//        if (invoice != null) {
-//            BigDecimal amount = BigDecimal.ZERO;
-//            for (LabOrder labOrder : labOrders) {
-//                invoiceService.buildInvoiceDetail(
-//                        invoice,
-//                        labOrder.getHealthPlan().getId(),
-//                        labOrder.getPrice(),
-//                        InvoiceDetail.Status.DA_THANH_TOAN,
-//                        Invoice.PaymentMethod.TIEN_MAT
-//                );
-//            }
-//            invoiceService.updateTotal(invoice, amount);
-//            invoiceService.updatePaidAmount(invoice, amount);
-//        }
-//
-//    }
 
     @Override
     public void updateMedicalRecordInvoiceForCash(PaymentRequest request) {
@@ -231,7 +195,28 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             from = date.atStartOfDay();
             to = date.plusDays(1).atStartOfDay();
         }
-        return repository.findAll(keyword, from, to, status, pageable)
+        return repository.findAll(keyword, from, to, status, null,null,pageable)
+                .map(it -> buildResponse(it.getPatient(), it));
+    }
+
+    @Override
+    public Page<MedicalResponse> findAllByDoctor(String keyword, MedicalRecord.RecordStatus status, LocalDate date, boolean isAllDepartment, Pageable pageable) {
+        LocalDateTime from = null, to = null;
+        if (date != null) {
+            from = date.atStartOfDay();
+            to = date.plusDays(1).atStartOfDay();
+        }
+
+        User user = userService.getCurrentUser();
+        Doctor doctor = user.getDoctor();
+        Integer doctorId = null;
+        Integer departmentId = null;
+        if (!isAllDepartment) {
+            doctorId = doctor.getId();
+        } else {
+            departmentId = doctor.getDepartment().getId();
+        }
+        return repository.findAll(keyword, from, to, status, doctorId, departmentId,pageable)
                 .map(it -> buildResponse(it.getPatient(), it));
     }
 
@@ -263,18 +248,14 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .map(Integer::parseInt)
                 .toList();
 
-//      cap nhat trang thai chi tiet hoa donq
-        List<InvoiceDetail> invoiceDetails = invoice.getInvoiceDetails().stream()
-                .map(detail -> {
-                    if (serviceIds.contains(detail.getHealthPlan().getId())) {
-                        detail.setStatus(InvoiceDetail.Status.DA_THANH_TOAN);
-                        detail.setPaymentMethod(Invoice.PaymentMethod.CHUYEN_KHOAN);
-                        detail.setPaidAmount(detail.getFee());
-                        return invoiceDetailRepository.save(detail);
-                    }
-                    return detail;
-                })
-                .toList();
+//      cap nhat trang thai chi tiet hoa don
+        invoice.getInvoiceDetails().forEach(detail -> {
+            if (serviceIds.contains(detail.getHealthPlan().getId())) {
+                detail.setStatus(InvoiceDetail.Status.DA_THANH_TOAN);
+                detail.setPaymentMethod(Invoice.PaymentMethod.CHUYEN_KHOAN);
+                detail.setPaidAmount(detail.getFee());
+            }
+        });
 
         invoiceService.updatePaidAmount(invoice, BigDecimal.valueOf(data.getAmount()));
     }
@@ -292,33 +273,33 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             if (healthPlan.getType().equals(HealthPlan.ServiceType.DICH_VU)) {
                 InvoiceDetail invoiceDetail = invoice.getInvoiceDetails().get(0);
                 invoiceDetail.setPaidAmount(BigDecimal.valueOf(data.getAmount()));
-                invoiceDetail.setStatus(InvoiceDetail.Status.THANH_TOAN_MOT_PHAN);
+                invoiceDetail.setStatus(InvoiceDetail.Status.DA_THANH_TOAN);
                 invoiceDetailRepository.save(invoiceDetail);
                 invoiceService.updatePaidAmount(invoice, BigDecimal.valueOf(data.getAmount()));
                 log.error("goi kham");
                 return;
             }
-//          dich vu le
+//          dich vu lkhams
             if (healthPlan.getId() != 1) {
                 InvoiceDetail invoiceDetail = invoice.getInvoiceDetails().stream()
-                        .filter(it -> it.getHealthPlan().getId().equals(1))
+                        .filter(it -> !it.getHealthPlan().getId().equals(1))
                         .findFirst()
                         .orElseThrow(() -> new RuntimeException("Invoice detail not found"));
                 invoiceDetail.setPaidAmount(BigDecimal.valueOf(data.getAmount()));
                 invoiceDetail.setStatus(InvoiceDetail.Status.DA_THANH_TOAN);
                 invoiceDetailRepository.save(invoiceDetail);
                 invoiceService.updatePaidAmount(invoice, BigDecimal.valueOf(data.getAmount()));
-                log.error("goi le");
+                log.error("goi xn / chuyen khoa");
 
                 return;
             }
-            // kham chuyen khoa
+            // kham bac si
             InvoiceDetail invoiceDetail = invoice.getInvoiceDetails().get(0);
             invoiceDetail.setPaidAmount(BigDecimal.valueOf(data.getAmount()));
             invoiceDetail.setStatus(InvoiceDetail.Status.DA_THANH_TOAN);
             invoiceDetailRepository.save(invoiceDetail);
             invoiceService.updatePaidAmount(invoice, BigDecimal.valueOf(data.getAmount()));
-            log.error("goi chuyen khoa");
+            log.error("kham bac si");
 
         }
 
@@ -332,6 +313,9 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         response.setPatientAddress(patient.getAddress());
         response.setPatientGender(patient.getGender());
         response.setPatientPhone(patient.getPhone());
+        if(record.getDoctor() != null){
+            response.setDoctorName(record.getDoctor().getFullName());
+        }
         return response;
     }
     private MedicalResponse buildResponse(MedicalRecord record) {

@@ -43,6 +43,11 @@ public class PatientController {
                 new ApiResponse<>(patientService.update(request), "Update patient successfully")
         );
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePatient(@PathVariable Integer id) {
+        patientService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
     @GetMapping("/me")
     public ResponseEntity<?> getMyPatient() {
         return ResponseEntity.ok(

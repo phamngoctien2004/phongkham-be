@@ -25,6 +25,7 @@ public interface MedicalRecordService {
     MedicalResponse getDetailById(Integer id);
     List<MedicalResponse> findByPatientId(Integer patientId);
     Page<MedicalResponse> findAll(String keyword, MedicalRecord.RecordStatus status, LocalDate date, Pageable pageable);
+    Page<MedicalResponse> findAllByDoctor(String keyword, MedicalRecord.RecordStatus status, LocalDate date, boolean isAllDepartment,Pageable pageable);
     void webhookPayosForCheckStatus(WebhookRequest request);
 
 }

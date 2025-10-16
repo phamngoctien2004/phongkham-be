@@ -19,6 +19,7 @@ public interface UserService {
     UserResponse createUser(UserRequest user);
 
     User createAccountByPhone(String phone);
+    User createAccountByCCCD(String cccd);
     User createUserEntity(UserRequest user);
     UserResponse updateUser(UserRequest user);
 
