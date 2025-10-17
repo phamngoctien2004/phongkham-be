@@ -65,7 +65,7 @@ public class LabOrder {
     public enum TestStatus {
         CHO_THUC_HIEN, DANG_THUC_HIEN, CHO_KET_QUA,HOAN_THANH, HUY_BO
     }
-    @OneToOne(mappedBy = "labOrder")
+    @OneToOne(mappedBy = "labOrder", cascade = CascadeType.ALL)
     private LabResult labResult;
     @Override
     public String toString() {

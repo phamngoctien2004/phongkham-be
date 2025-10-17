@@ -2,9 +2,11 @@ package com.dcm.demo.controller;
 
 import com.dcm.demo.dto.request.LabDeleteRequest;
 import com.dcm.demo.dto.request.LabOrderRequest;
+import com.dcm.demo.dto.request.ParamRequest;
 import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.model.LabOrder;
 import com.dcm.demo.service.interfaces.LabOrderService;
+import com.dcm.demo.service.interfaces.LabProcessingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +19,18 @@ import java.time.LocalDate;
 @RequestMapping("/api/lab-orders")
 public class LabOrderController {
     private final LabOrderService labOrderService;
-
+    private final LabProcessingService labProcessingService;
 
     @GetMapping("/code/{code}")
     public ResponseEntity<?> getByRecordCode(@PathVariable String code) {
         return ResponseEntity.ok(
                 new ApiResponse<>(labOrderService.findByRecordCode(code), "Get lab order by record code successfully")
+        );
+    }
+    @GetMapping("/{id}/params")
+    public ResponseEntity<?> getParamsByLabOrderId(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(labOrderService.getParamsByLabOrderId(id), "Get lab order params by lab order id successfully")
         );
     }
     @GetMapping("/{id}")
@@ -65,9 +73,16 @@ public class LabOrderController {
     }
     @PutMapping("/status")
     public ResponseEntity<?> updateStatus(@RequestBody LabOrderRequest request) {
-        labOrderService.updateStatus(request.getId(), request.getStatus());
+        labProcessingService.processUpdateStatusLab(request.getId(), request.getStatus());
         return ResponseEntity.ok(
                 new ApiResponse<>("", "Update lab order status successfully")
+        );
+    }
+    @PutMapping("/complete")
+    public ResponseEntity<?> completeLabOrder(@RequestBody ParamRequest request) {
+        labProcessingService.completeLabOrder(request);
+        return ResponseEntity.ok(
+                new ApiResponse<>("", "Complete lab order successfully")
         );
     }
     @PutMapping

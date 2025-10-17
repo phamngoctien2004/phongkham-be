@@ -98,6 +98,6 @@ public class PdfService implements FileService {
         } catch (IOException e) {
             throw new RuntimeException("Lỗi upload", e);
         }
-        return "https://files.tienpndev.id.vn/phongkham/" + folderName + "/"+ key;
+        return "https://files.tienpndev.id.vn/phongkham/" + key;
     }
 }

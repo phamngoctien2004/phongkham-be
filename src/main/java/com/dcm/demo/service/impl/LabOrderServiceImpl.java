@@ -3,11 +3,13 @@ package com.dcm.demo.service.impl;
 import com.dcm.demo.dto.request.LabOrderRequest;
 import com.dcm.demo.dto.response.LabOrderResponse;
 import com.dcm.demo.dto.response.LabResultResponse;
-import com.dcm.demo.mapper.HealthPlanMapper;
+import com.dcm.demo.dto.response.ParamResponse;
+import com.dcm.demo.dto.response.ResultDetailResponse;
 import com.dcm.demo.mapper.LabOrderMapper;
 import com.dcm.demo.mapper.LabResultMapper;
+import com.dcm.demo.mapper.ParamMapper;
 import com.dcm.demo.model.*;
-import com.dcm.demo.repository.InvoiceDetailRepository;
+import com.dcm.demo.repository.ImageLabRepository;
 import com.dcm.demo.repository.LabOrderRepository;
 import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
@@ -30,21 +32,31 @@ public class LabOrderServiceImpl implements LabOrderService {
     private final LabOrderRepository repository;
     private final UserService userService;
     private final HealthPlanService healthPlanService;
-    private final HealthPlanMapper healthPlanMapper;
     private final MedicalRecordService medicalRecordService;
     private final DoctorService doctorService;
     private final LabOrderMapper mapper;
     private final LabResultMapper labResultMapper;
     private final InvoiceService invoiceService;
-    private final InvoiceDetailRepository invoiceDetailRepository;
     private final DepartmentService departmentService;
-    private BigDecimal defaultPrice = BigDecimal.valueOf(2000);
+    private final ParamMapper paramMapper;
+    private final ImageLabRepository imageLabRepository;
 
     @Override
     public List<LabOrderResponse> getAll() {
         return repository.findAll()
                 .stream()
                 .map(this::buildResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ParamResponse> getParamsByLabOrderId(Integer labOrderId) {
+        LabOrder labOrder = repository.findById(labOrderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu chỉ định"));
+        HealthPlan healthPlan = labOrder.getHealthPlan();
+        List<HealthPlanParam> params = healthPlan.getHealthPlanParams();
+        return params.stream()
+                .map(planParam -> paramMapper.toResponse(planParam.getParam()))
                 .toList();
     }
 
@@ -67,9 +79,11 @@ public class LabOrderServiceImpl implements LabOrderService {
     }
 
     @Override
+    @Transactional
     public Page<LabOrderResponse> getByDoctorPerforming(String keyword, LocalDate date, LabOrder.TestStatus status, Pageable pageable) {
         User user = userService.getCurrentUser();
-        Department department = user.getDoctor().getDepartment();
+        Doctor doctor = user.getDoctor();
+        Department department = doctor.getDepartment();
 
         LocalDateTime from = null, to = null;
         if (date != null) {
@@ -96,7 +110,7 @@ public class LabOrderServiceImpl implements LabOrderService {
 
     public LabOrderResponse buildResponse(LabOrder labOrder) {
         HealthPlan healthPlan = labOrder.getHealthPlan();
-        LabResultResponse labOrderResult = labResultMapper.toResponse(labOrder.getLabResult());
+        LabResultResponse labOrderResult = getLabResultResponse(labOrder);
         return LabOrderResponse.builder()
                 .id(labOrder.getId())
                 .code(labOrder.getCode())
@@ -115,6 +129,32 @@ public class LabOrderServiceImpl implements LabOrderService {
                 .build();
     }
 
+    private LabResultResponse getLabResultResponse(LabOrder labOrder) {
+        if (labOrder.getLabResult() == null) {
+            return null;
+        }
+
+        LabResult labResult = labOrder.getLabResult();
+        List<ResultDetailResponse> resultDetailResponse = labResult.getLabResultDetails().stream()
+                .map(it -> {
+                    ResultDetailResponse response = new ResultDetailResponse();
+                    response.setId(it.getId());
+                    response.setName(it.getName());
+                    response.setUnit(it.getUnit());
+                    response.setRange(it.getRange());
+                    response.setValue(it.getValue());
+                    response.setRangeStatus(it.getRangeStatus());
+                    return response;
+                })
+                .toList();
+        LabResultResponse labResultResponse = labResultMapper.toResponse(labResult);
+        labResultResponse.setParamResults(resultDetailResponse);
+        List<String> urls = imageLabRepository.findByLabResultId(labResult.getId()).stream()
+                .map(ImageLab::getUrl)
+                .toList();
+        labResultResponse.setUrls(urls);
+        return labResultResponse;
+    }
     @Override
     public LabOrder findById(Integer id) {
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy phiếu chỉ định2"));
@@ -209,6 +249,11 @@ public class LabOrderServiceImpl implements LabOrderService {
                 detail.getHealthPlan().getId().equals(labOrder.getHealthPlan().getId()));
         repository.deleteById(labOrder.getId());
         invoiceService.updateTotal(invoice, labOrder.getPrice().negate());
+    }
+
+    @Override
+    public void save(LabOrder labOrder) {
+        repository.save(labOrder);
     }
 
     @Override

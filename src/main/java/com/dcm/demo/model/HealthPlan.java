@@ -49,6 +49,10 @@ public class HealthPlan {
 //    danh sach xet nghiep thuoc cac goi kham nao
     @OneToMany(mappedBy = "serviceDetail")
     private List<healthPlanDetail> belongHealthPlan;
+
+    @OneToMany(mappedBy = "healthPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HealthPlanParam> healthPlanParams;
+
     public enum ServiceType {
         DICH_VU, XET_NGHIEM, CHUAN_DOAN_HINH_ANH, KHAC, CHUYEN_KHOA
     }

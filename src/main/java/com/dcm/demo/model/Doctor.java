@@ -42,7 +42,7 @@ public class Doctor {
     @Column(name = "anh_nguoi_dung", length = 500)
     private String profileImage;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_khoa")
     private Department department;
 

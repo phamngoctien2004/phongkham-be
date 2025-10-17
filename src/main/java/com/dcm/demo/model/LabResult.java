@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "ket_qua_xet_nghiem")
@@ -20,13 +22,9 @@ public class LabResult {
     @Column(name = "id_ket_qua")
     private Integer id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "id_chi_dinh", nullable = false, unique = true)
     private LabOrder labOrder;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_bac_si_thuc_hien")
-    private Doctor performingDoctor;
 
     @CreationTimestamp
     @Column(name = "ngay_thuc_hien")
@@ -44,10 +42,18 @@ public class LabResult {
     @Column(name="ket_luan")
     private String summary;
 
+    @Column(name = "thoi_gian_lay_mau")
+    private LocalDateTime sampleTime;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")
     private Status status = Status.HOAN_THANH;
 
+    @OneToMany(mappedBy = "labResult", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LabResultDetail> labResultDetails = new ArrayList<>();
+
+    @OneToMany(mappedBy = "labResult", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ImageLab> imageLabs = new ArrayList<>();
     public enum Status {
         HOAN_THANH, CAN_KIEM_TRA_LAI
     }
