@@ -206,7 +206,11 @@ public class AuthServiceImpl implements AuthService {
 //      user thiet lap
         if(request.getUserId() == null){
             User user = userService.getCurrentUser();
+            if(!passwordEncoder.matches(request.getOldPassword(), user.getPassword())){
+                throw new RuntimeException("Mật khẩu cũ không đúng");
+            }
             user.setPassword(passwordEncoder.encode(request.getPassword()));
+
             userService.save(user);
             return;
         }
