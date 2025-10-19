@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -62,12 +61,13 @@ public class ScheduleServiceImpl implements ScheduleService {
         response.setEndTime(leave.getEndTime());
         response.setSubmitDate(leave.getSubmitDate());
         response.setLeaveStatus(leave.getLeaveStatus());
-        if(leave.getLeaveStatus() != Leave.leaveStatus.CHO_DUYET){
+        if (leave.getLeaveStatus() != Leave.leaveStatus.CHO_DUYET) {
             response.setUserApprover("ADMIN");
         }
         response.setReason(leave.getReason());
         return response;
     }
+
     @Override
     @Transactional
     public ScheduleResponse create(ScheduleRequest request) {
@@ -108,7 +108,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public void deleteLeave(Integer id) {
         Leave leave = seRepository.findById(id).orElseThrow(() -> new RuntimeException("Leave not found"));
-        if(leave.getLeaveStatus() != Leave.leaveStatus.CHO_DUYET) {
+        if (leave.getLeaveStatus() != Leave.leaveStatus.CHO_DUYET) {
             throw new RuntimeException("Cannot delete approved leave");
         }
         seRepository.delete(leave);
@@ -151,7 +151,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     public void updateLeave(LeaveRequest request) {
         var leave = seRepository.findById(request.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOTFOUND));
-        if(leave.getLeaveStatus() != Leave.leaveStatus.CHO_DUYET) {
+        if (leave.getLeaveStatus() != Leave.leaveStatus.CHO_DUYET) {
             throw new RuntimeException("Cannot update approved leave");
         }
         leave.setLeaveStatus(request.getLeaveStatus());

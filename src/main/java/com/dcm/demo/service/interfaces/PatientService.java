@@ -21,6 +21,7 @@ public interface PatientService {
     Patient findByPhone(String phone);
     Patient findByCccd(String cccd);
     PatientResponse findById(Integer id);
+    Patient findEntityById(Integer id);
     List<PatientResponse> findAll(String keyword);
     Page<PatientResponse> findAll(String keyword, Pageable pageable);
 

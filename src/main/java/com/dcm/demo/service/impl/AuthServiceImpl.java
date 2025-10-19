@@ -145,26 +145,26 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public LoginResponse canRegister(VerifyOtpRequest request) {
+    public boolean canRegister(VerifyOtpRequest request) {
         sendMessage.checkOtp(request.getPhone(), request.getOtp());
-        Patient patient = patientService.findByPhone(request.getPhone());
+//        Patient patient = patientService.findByPhone(request.getPhone());
 
 //      thong tin benh nhan da ton tai -> tao user -> dang nhap
-        if(patient != null){
-            UserRequest userRequest = new UserRequest();
-            userRequest.setPhone(request.getPhone());
-            userRequest.setRole(User.Role.BENH_NHAN);
-            User user = userService.createUserEntity(userRequest);
-            patient.getRelationships().add(patientService.buildRelationship(patient, user, "Bản thân"));
-            patientService.save(patient);
-            UserResponse userResponse = userMapper.toResponse(user);
-            userResponse.setName(patient.getFullName());
-            return new LoginResponse(
-                    jwtService.generate(user.getId(), user.getRole().name(), 600),
-                    userResponse
-            );
-        }
-        return null;
+//        if(patient != null){
+//            UserRequest userRequest = new UserRequest();
+//            userRequest.setPhone(request.getPhone());
+//            userRequest.setRole(User.Role.BENH_NHAN);
+//            User user = userService.createUserEntity(userRequest);
+//            patient.getRelationships().add(patientService.buildRelationship(patient, user, "Bản thân"));
+//            patientService.save(patient);
+//            UserResponse userResponse = userMapper.toResponse(user);
+//            userResponse.setName(patient.getFullName());
+//            return new LoginResponse(
+//                    jwtService.generate(user.getId(), user.getRole().name(), 600),
+//                    userResponse
+//            );
+//        }
+        return true;
     }
 
     @Override

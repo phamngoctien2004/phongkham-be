@@ -20,5 +20,5 @@ public class MedicalRequest {
     private Integer invoiceId;
     private MedicalRecord.RecordStatus status;
 
-
+    private Integer appointmentId;
 }

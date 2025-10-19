@@ -8,7 +8,7 @@ public interface AuthService {
     LoginResponse loginDashboard(LoginRequest request);
     void sendOtp(OtpRequest request);
     void sendRegisterOtp(OtpRequest request);
-    LoginResponse canRegister(VerifyOtpRequest request);
+    boolean canRegister(VerifyOtpRequest request);
     LoginResponse register(RegisterRequest request);
     void resetPassword(ResetPasswordRequest request);
 }

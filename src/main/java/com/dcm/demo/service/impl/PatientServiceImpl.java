@@ -58,13 +58,13 @@ public class PatientServiceImpl implements PatientService {
         if (patient.getPhone() != null) {
             User user = userService.findByPhone(patient.getPhone())
                     .orElse(null);
-            if(user != null){
+            if (user != null) {
                 user.setEmail(request.getEmail());
                 user.setPhone(request.getPhone());
                 userService.save(user);
             }
         }
-        if(request.getPhoneLink() != null){
+        if (request.getPhoneLink() != null) {
 
         }
         return patientMapper.toResponse(
@@ -136,6 +136,11 @@ public class PatientServiceImpl implements PatientService {
         return patientMapper.toResponse(
                 repository.findById(id).orElseThrow(() -> new RuntimeException("Patient not found"))
         );
+    }
+
+    @Override
+    public Patient findEntityById(Integer id) {
+        return repository.findById(id).orElseThrow(() -> new RuntimeException("Patient not found"));
     }
 
     @Override
