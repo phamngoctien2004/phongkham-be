@@ -66,6 +66,9 @@ public class AuthServiceImpl implements AuthService {
         Patient patient = patientService.findByPhone(user.getPhone());
         UserResponse userResponse = userMapper.toResponse(user);
         userResponse.setName(patient.getFullName());
+
+
+        userResponse.setCreatedPassword(user.getPassword() != null && !user.getPassword().isEmpty());
         return new LoginResponse(
                 jwtService.generate(user.getId(), user.getRole().name(), 60),
                 userResponse

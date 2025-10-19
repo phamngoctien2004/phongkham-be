@@ -18,4 +18,5 @@ public final class UserResponse implements ProfileData {
     private Boolean status;
     private LocalDateTime createdAt;
     private DoctorResponse doctor;
+    private boolean isCreatedPassword;
 }
