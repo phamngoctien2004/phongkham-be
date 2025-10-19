@@ -84,10 +84,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cors = new CorsConfiguration();
-        cors.setAllowedOrigins(List.of("http://localhost:3000", "https://phongkham.tienpndev.id.vn", "http://localhost:5173"));
-        cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        cors.setAllowedOriginPatterns(List.of("*"));
+        cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         cors.addAllowedHeader("*");
         cors.setAllowCredentials(true);
+
 
 //        áp dụng cors cho phép gửi đến tất cả api
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
