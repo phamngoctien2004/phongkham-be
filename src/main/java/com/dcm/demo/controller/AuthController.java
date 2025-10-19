@@ -1,9 +1,6 @@
 package com.dcm.demo.controller;
 
-import com.dcm.demo.dto.request.LoginRequest;
-import com.dcm.demo.dto.request.OtpRequest;
-import com.dcm.demo.dto.request.RegisterRequest;
-import com.dcm.demo.dto.request.VerifyOtpRequest;
+import com.dcm.demo.dto.request.*;
 import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.service.impl.SendMessage;
 import com.dcm.demo.service.interfaces.AuthService;
@@ -65,10 +62,11 @@ public class AuthController {
         );
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<?> test() {
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
         return ResponseEntity.ok(
-                new ApiResponse<>(jwtService.generate(1, "BENH_NHAN", 1000000000), "Test successful")
+                new ApiResponse<>("", "Reset password successful")
         );
     }
 }
