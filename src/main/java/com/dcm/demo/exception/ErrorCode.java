@@ -14,7 +14,7 @@ public enum ErrorCode {
     ROLE_NOT_FOUND("ROLE_404", "Không tìm thấy role", HttpStatus.NOT_FOUND),
     OTP_INVALID("OTP_401", "Mã otp không chính xác", HttpStatus.UNAUTHORIZED),
     OTP_CANNOT_RESEND("OTP_429", "Chưa được gửi lại otp", HttpStatus.TOO_MANY_REQUESTS),
-    SEND_EMAIL_FAILED("EMAIL_400", "Gửi email thất bại", HttpStatus.BAD_REQUEST),
+    SEND_EMAIL_FAILED("EMAIL_400", "Gửi email  thất bại", HttpStatus.BAD_REQUEST),
     AUTH_FAILED("AUTH_401", "Xác thực không thành công", HttpStatus.UNAUTHORIZED),
     LOGIN_AGAIN("LOGIN_401", "Session expired, please login again", HttpStatus.UNAUTHORIZED),
     TOKEN_EXPIRED("TOKEN_401", "Token het han", HttpStatus.BAD_REQUEST),
