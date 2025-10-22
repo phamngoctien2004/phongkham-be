@@ -73,7 +73,7 @@ public class AuthController {
     @GetMapping("/test")
     public ResponseEntity<?> test() {
         return ResponseEntity.ok(
-                "ok");
+                "ok2");
     }
 }
 
