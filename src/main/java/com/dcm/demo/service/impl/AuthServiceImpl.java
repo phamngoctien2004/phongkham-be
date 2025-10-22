@@ -124,16 +124,16 @@ public class AuthServiceImpl implements AuthService {
         System.out.println("Random 6 digits: " + number);
 
         request.setMessage("Mã OTP của bạn là: " + number);
-//        org.springframework.http.HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.parseMediaType("application/json; charset=UTF-8"));
-//        headers.add("Authorization", phone_api_key);
-//        HttpEntity<?> httpEntity = new HttpEntity<>(request, headers);
-//        RestTemplate restTemplate = new RestTemplate();
-//        restTemplate.postForEntity(
-//                ip_phone,
-//                httpEntity,
-//                OtpRequest.class
-//        );
+        org.springframework.http.HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("application/json; charset=UTF-8"));
+        headers.add("Authorization", phone_api_key);
+        HttpEntity<?> httpEntity = new HttpEntity<>(request, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.postForEntity(
+                ip_phone,
+                httpEntity,
+                OtpRequest.class
+        );
         redisTemplate.opsForValue().set("otp:" + request.getTo(), number, 300, TimeUnit.SECONDS);
     }
 
