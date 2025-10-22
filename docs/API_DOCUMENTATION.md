@@ -1,5 +1,5 @@
 # API Documentation - Hệ thống Quản lý Phòng khám
-
+ok
 ## Mục lục
 1. [Authentication API](#1-authentication-api)
 2. [Appointment API](#2-appointment-api)
