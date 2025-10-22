@@ -78,8 +78,9 @@ public class AuthServiceImpl implements AuthService {
     private LoginResponse loginPassword(LoginRequest request) {
         User user = userService.getUserByEmailOrPhone(request.getUsername());
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.AUTH_FAILED);
+
         }
 
         Patient patient = patientService.findByPhone(user.getPhone());

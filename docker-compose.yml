@@ -21,17 +21,6 @@ services:
       timeout: 3s
       retries: 5
 
-  mysql:
-    image: mysql:8.4
-    container_name: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: datn
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
   redis:
     image: redis:7
     container_name: redis
