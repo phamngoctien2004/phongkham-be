@@ -89,6 +89,8 @@ jobs:
           # port: 22
           script_stop: true
           script: |
+            sudo usermod -aG docker azureuser
+            newgrp docker
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
             cd app
             docker compose pull backend
