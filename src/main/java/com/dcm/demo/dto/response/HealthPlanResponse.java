@@ -12,7 +12,7 @@ public class HealthPlanResponse {
     private int id;
     private String code;
     private String name;
-    private double price;
+    private Double price;
     private String description;
     private String roomNumber;
     private String roomName;

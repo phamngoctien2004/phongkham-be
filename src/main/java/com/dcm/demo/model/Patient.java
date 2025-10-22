@@ -26,7 +26,7 @@ public class Patient {
     @Column(name = "ma_benh_nhan", unique = true, length = 20)
     private String code;
 
-    @Column(name = "ho_ten", nullable = false)
+    @Column(name = "ho_ten")
     private String fullName;
 
     @Column(name = "sdt", length = 20)

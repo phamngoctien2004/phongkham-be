@@ -43,21 +43,21 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setPayosOrder(request.getOrderCode());
         repository.save(invoice);
 
-        InvoiceDetail.Status status = InvoiceDetail.Status.DA_THANH_TOAN;
+        InvoiceDetail.Status status = InvoiceDetail.Status.CHUA_THANH_TOAN;
         if (request.getHealthPlanIds() != null && !request.getHealthPlanIds().isEmpty()) {
             HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanIds().get(0));
 //      benh nhan chon goi kham (goi kham bao gom phi kham benh)
             if (healthPlan != null && healthPlan.getType().equals(HealthPlan.ServiceType.DICH_VU) && healthPlan.getId() != 1) {
                 buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
                 updateTotal(invoice, healthPlan.getPrice());
-                return buildPayosResponse(invoice.getId(), healthPlan.getPrice().intValue());
+                return buildPayosResponse(invoice.getId(), healthPlan.getPrice().intValue(), invoice.getCode());
             }
 //      dich vu kham
             if (healthPlan != null && healthPlan.getId() != 1) {
                 buildInvoiceDetail(invoice, healthPlan.getId(), healthPlan.getPrice(), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
 //                buildInvoiceDetail(invoice, 1, BigDecimal.valueOf(defaultPrice), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
                 updateTotal(invoice, healthPlan.getPrice());
-                return buildPayosResponse(invoice.getId(), healthPlan.getPrice().intValue());
+                return buildPayosResponse(invoice.getId(), healthPlan.getPrice().intValue(), invoice.getCode());
             }
         }
 
@@ -66,13 +66,14 @@ public class InvoiceServiceImpl implements InvoiceService {
         buildInvoiceDetail(invoice, 1, doctor.getDegree().getExaminationFee(), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
         updateTotal(invoice, doctor.getDegree().getExaminationFee());
 
-        return buildPayosResponse(invoice.getId(),  doctor.getDegree().getExaminationFee().intValue());
+        return buildPayosResponse(invoice.getId(),  doctor.getDegree().getExaminationFee().intValue(), invoice.getCode());
     }
 
-    private InvoiceResponse buildPayosResponse(Integer id, Integer examFee) {
+    private InvoiceResponse buildPayosResponse(Integer id, Integer examFee, String code) {
         InvoiceResponse response = new InvoiceResponse();
         response.setId(id);
         response.setExamFee(examFee);
+        response.setCode(code);
         return response;
     }
 
@@ -174,5 +175,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public Invoice findByPayosOrder(Long orderCode) {
         return repository.findByPayosOrder(orderCode).orElse(null);
+    }
+
+    @Override
+    public Invoice findByCode(String code) {
+        return repository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Invoice not found with code: " + code));
     }
 }

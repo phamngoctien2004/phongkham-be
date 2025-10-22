@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -30,21 +31,6 @@ public class Appointment {
     @JoinColumn(name = "id_dich_vu_kham")
     private HealthPlan healthPlan;
 
-    @Column(name = "ho_ten", nullable = false)
-    private String fullName;
-
-    @Column(name = "sdt", nullable = false, length = 15)
-    private String phone;
-
-    @Column(name = "dia_chi", nullable = false)
-    private String address;
-
-    @Column(name = "email", nullable = false, length = 50)
-    private String email;
-
-    @Column(name = "ngay_sinh")
-    private LocalDate birth;
-
     @Column(name = "ngay_kham", nullable = false)
     private LocalDate date;
 
@@ -53,7 +39,7 @@ public class Appointment {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")
-    private AppointmentStatus status = AppointmentStatus.DA_XAC_NHAN;
+    private AppointmentStatus status = AppointmentStatus.CHO_THANH_TOAN;
 
     @Column(name = "trieu_chung", columnDefinition = "TEXT")
     private String symptoms;
@@ -70,8 +56,15 @@ public class Appointment {
     @JoinColumn(name = "id_benh_nhan")
     private Patient patient;
 
+    @Column(name="tong_tien")
+    private BigDecimal totalAmount;
+    @Column(name = "qr")
+    private String qr;
+
+    @Column(name = "ma_hd")
+    private String invoiceCode;
     public enum AppointmentStatus {
-        DA_XAC_NHAN, KHONG_DEN, DANG_KHAM
+        DA_XAC_NHAN, KHONG_DEN, HOAN_THANH, CHO_THANH_TOAN,HUY
     }
     @Override
     public String toString() {

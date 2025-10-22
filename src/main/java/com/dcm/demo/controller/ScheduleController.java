@@ -34,8 +34,8 @@ public class ScheduleController {
     }
     @GetMapping("/available")
     public ResponseEntity<?> getAvailableSlots(
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer doctorId,
             @RequestParam(required = false) Schedule.Shift shift

@@ -24,7 +24,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class HealthPlanServiceImpl implements HealthPlanService {
-    private final ScheduleService scheduleService;
     private final ExaminationServiceRepository repository;
     private final HealthPlanMapper mapper;
 
@@ -51,15 +50,8 @@ public class HealthPlanServiceImpl implements HealthPlanService {
     public HealthPlanResponse findResponseById(Integer id) {
         HealthPlan healthplan = findById(id);
         Department department = healthplan.getRoom().getDepartment();
-        List<SlotResponse> slotResponses = scheduleService.filterSchedules(department.getId(),
-                null,
-                LocalDate.now(),
-                LocalDate.now(),
-                scheduleService.getShift(LocalTime.now())
-        );
-        HealthPlanResponse response = mapper.toResponse(healthplan);
-        response.setDoctorsAssigned(slotResponses.get(0).getDoctors());
-        return response;
+
+        return mapper.toResponse(healthplan);
     }
 
     @Override

@@ -14,6 +14,7 @@ import java.util.List;
 public interface InvoiceService {
     Invoice findById(Integer id);
     Invoice findByPayosOrder(Long orderCode);
+    Invoice findByCode(String code);
     InvoiceResponse createInvoiceForQR(InvoiceRequest request);
     void createInvoiceForCash(MedicalRecord record);
     void updateTotal(Invoice invoice, BigDecimal amount);

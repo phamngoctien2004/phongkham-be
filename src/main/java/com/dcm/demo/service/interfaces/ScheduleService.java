@@ -14,11 +14,18 @@ import java.util.List;
 
 public interface ScheduleService {
     List<LeaveResponse> getLeaveByDoctor(LocalDate date, Leave.leaveStatus leaveStatus);
+
     ScheduleResponse create(ScheduleRequest scheduleRequest);
+
     void createLeave(LeaveRequest scheduleRequest);
+
     void deleteLeave(Integer id);
+
     void delete(Integer id);
+
     void updateLeave(LeaveRequest request);
+
     Schedule.Shift getShift(LocalTime time);
+
     List<SlotResponse> filterSchedules(Integer departmentId, Integer doctorId, LocalDate startDate, LocalDate endDate, Schedule.Shift shift);
 }

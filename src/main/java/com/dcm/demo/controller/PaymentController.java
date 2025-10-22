@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import java.util.Map;
 
@@ -41,5 +42,10 @@ public class PaymentController {
     public ApiResponse<?> getPaymentStatus(@PathVariable Long orderCode) {
         // Logic to get payment status
         return new ApiResponse<>(payosService.checkStatus(orderCode), "Payment status retrieved successfully");
+    }
+
+    @PostMapping("/appointment/{id}")
+    public ApiResponse<?> createLinkAppointment(@PathVariable Integer id) {
+        return new ApiResponse<>(payosService.createLinkAppointment(id), "Payment link created successfully");
     }
 }

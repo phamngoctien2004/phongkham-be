@@ -1,6 +1,5 @@
 package com.dcm.demo.dto.response;
 
-import com.dcm.demo.model.Schedule;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,5 +15,6 @@ public class SlotResponse {
     private String dateName;
     private int totalSlot;
     private List<DoctorResponse> doctors;
+
 }
 

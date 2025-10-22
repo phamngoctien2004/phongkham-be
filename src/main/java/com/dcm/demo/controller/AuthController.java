@@ -69,5 +69,11 @@ public class AuthController {
                 new ApiResponse<>("", "Reset password successful")
         );
     }
+
+    @GetMapping("/test")
+    public ResponseEntity<?> test() {
+        return ResponseEntity.ok(
+                "ok");
+    }
 }
 

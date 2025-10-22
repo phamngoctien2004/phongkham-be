@@ -9,6 +9,8 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -27,6 +29,7 @@ public final class DoctorResponse implements  ProfileData{
     private DepartmentResponse departmentResponse;
     private BigDecimal examinationFee;
     private boolean available = true;
+    private List<LocalTime> invalidTimes;
     private Schedule.Shift shift;
     private String roomNumber;
     private String roomName;

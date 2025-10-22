@@ -4,24 +4,21 @@ import com.dcm.demo.model.Appointment;
 import com.dcm.demo.model.User;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
 public class AppointmentResponse {
     private Integer id;
-    private String fullName;
-    private String phone;
-    private User.Gender gender;
-    private LocalDate birth;
-    private String email;
-    private String address;
+    private PatientResponse patientResponse;
     private HealthPlanResponse healthPlanResponse;
     private DoctorResponse doctorResponse;
-    private DepartmentResponse departmentResponse;
     private LocalDate date; // ngay kham
     private LocalTime time;
     private Appointment.AppointmentStatus status;
     private String symptoms;
-    private Integer patientId;
+    private String qr;
+    private String invoiceCode;
+    private BigDecimal totalAmount;
 }

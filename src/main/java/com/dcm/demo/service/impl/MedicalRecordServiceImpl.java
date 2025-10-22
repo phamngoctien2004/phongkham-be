@@ -7,32 +7,29 @@ import com.dcm.demo.dto.request.WebhookRequest;
 import com.dcm.demo.dto.response.InvoiceDetailResponse;
 import com.dcm.demo.dto.response.MedicalResponse;
 import com.dcm.demo.dto.response.PatientResponse;
+import com.dcm.demo.dto.response.PaymentEvent;
+import com.dcm.demo.enums.Event;
 import com.dcm.demo.exception.AppException;
 import com.dcm.demo.exception.ErrorCode;
 import com.dcm.demo.mapper.LabOrderMapper;
 import com.dcm.demo.mapper.MedicalMapper;
 import com.dcm.demo.model.*;
-import com.dcm.demo.repository.InvoiceDetailRepository;
-import com.dcm.demo.repository.LabOrderRepository;
-import com.dcm.demo.repository.MedicalRecordRepository;
-import com.dcm.demo.repository.RelationshipRepository;
+import com.dcm.demo.repository.*;
 import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,17 +43,12 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final RelationshipRepository relationshipRepository;
     private final HealthPlanService healthPlanService;
     private final MedicalMapper mapper;
-    private final LabOrderMapper labOrderMapper;
-    private final FileService fileService;
-    private final DepartmentService departmentService;
+    private final SimpMessagingTemplate messaging;
     private final InvoiceService invoiceService;
     private final InvoiceDetailRepository invoiceDetailRepository;
     private final LabOrderRepository labOrderRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final TemplateEngine templateEngine;
-    private final RestClient.Builder builder;
+    private final AppointmentRepository appointmentRepository;
     private BigDecimal defaultPrice = BigDecimal.valueOf(2000);
-
 
 
     @Override
@@ -109,7 +101,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         MedicalRecord record = findById(request.getMedicalRecordId());
         Invoice invoice = record.getInvoice();
         List<InvoiceDetail> invoiceDetails = invoiceDetailRepository.findByInvoiceIdAndHealthPlanIdIn(invoice.getId(), request.getHealthPlanIds());
-        for(InvoiceDetail detail : invoiceDetails) {
+        for (InvoiceDetail detail : invoiceDetails) {
             detail.setStatus(InvoiceDetail.Status.DA_THANH_TOAN);
             detail.setPaymentMethod(Invoice.PaymentMethod.TIEN_MAT);
             detail.setPaidAmount(detail.getFee());
@@ -195,7 +187,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             from = date.atStartOfDay();
             to = date.plusDays(1).atStartOfDay();
         }
-        return repository.findAll(keyword, from, to, status, null,null,pageable)
+        return repository.findAll(keyword, from, to, status, null, null, pageable)
                 .map(it -> buildResponse(it.getPatient(), it));
     }
 
@@ -216,7 +208,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         } else {
             departmentId = doctor.getDepartment().getId();
         }
-        return repository.findAll(keyword, from, to, status, doctorId, departmentId,pageable)
+        return repository.findAll(keyword, from, to, status, doctorId, departmentId, pageable)
                 .map(it -> buildResponse(it.getPatient(), it));
     }
 
@@ -231,6 +223,21 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             return;
         }
         handlePaymentV1(request, invoice);
+        if (data.getDescription().contains("DLK")) {
+            Integer id = Integer.parseInt(data.getDescription().substring(3));
+            Appointment appointment = appointmentRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Appointment not found"));
+            appointment.setStatus(Appointment.AppointmentStatus.DA_XAC_NHAN);
+            appointmentRepository.save(appointment);
+            log.info("Payment for DLK service received.");
+
+
+//         push event
+            messaging.convertAndSend(
+                    "/topic/appointments." + appointment.getId(),
+                    new PaymentEvent(Event.PAYMENT_SUCCESS, "Payment successful for appointment", appointment.getId())
+            );
+        }
     }
 
     private void handlePaymentV2(WebhookRequest.DataPayload data) {
@@ -313,11 +320,12 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         response.setPatientAddress(patient.getAddress());
         response.setPatientGender(patient.getGender());
         response.setPatientPhone(patient.getPhone());
-        if(record.getDoctor() != null){
+        if (record.getDoctor() != null) {
             response.setDoctorName(record.getDoctor().getFullName());
         }
         return response;
     }
+
     private MedicalResponse buildResponse(MedicalRecord record) {
         Patient patient = record.getPatient();
 
@@ -326,7 +334,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 //      lay danh sach chi tiet hoa don
 
         Invoice invoice = record.getInvoice();
-        if(invoice == null) {
+        if (invoice == null) {
             return response;
         }
         List<InvoiceDetail> invoiceDetails = invoice.getInvoiceDetails();

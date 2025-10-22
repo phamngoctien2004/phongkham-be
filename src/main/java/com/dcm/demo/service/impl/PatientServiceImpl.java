@@ -45,31 +45,108 @@ public class PatientServiceImpl implements PatientService {
     public PatientResponse update(PatientRequest request) {
         Patient patient = repository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
-        patient.setPhone(request.getPhone());
+        toPatient(request, patient);
+
+        if(request.getPhone() != null && !request.getPhone().isEmpty() && !request.getPhone().equals(patient.getPhone())) {
+            patient.setPhone(request.getPhone());
+            User user = userService.findByPhone(request.getPhone())
+                    .orElse(new User());
+
+//          neu chua co tai khoan thi tao moi, nguoc lai thi them quan he
+            Relationship relationship = buildRelationship(patient, user, null);
+            patient.getRelationships().add(relationship);
+
+            user.setEmail(request.getEmail());
+            user.setPhone(request.getPhone());
+            userService.save(user);
+        }
+
+        return patientMapper.toResponse(
+                repository.save(patient)
+        );
+    }
+
+    private void toPatient(PatientRequest request, Patient patient) {
         patient.setFullName(request.getFullName());
         patient.setAddress(request.getAddress());
         patient.setGender(request.getGender());
-        patient.setCccd(request.getCccd());
         patient.setBirth(request.getBirth());
         patient.setBloodType(request.getBloodType());
         patient.setWeight(request.getWeight());
         patient.setHeight(request.getHeight());
+        patient.setCccd(request.getCccd());
+    }
 
-        if (patient.getPhone() != null) {
-            User user = userService.findByPhone(patient.getPhone())
-                    .orElse(null);
-            if (user != null) {
+    @Override
+    public PatientResponse updateForBooking(PatientRequest request) {
+        Patient patient = repository.findById(request.getId())
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        Patient existingByCccd = repository.findByCccd(request.getCccd())
+                .orElse(null);
+//      benh nhan kham lan dau
+        if (existingByCccd == null) {
+            patient.setPhone(request.getPhone());
+            toPatient(request, patient);
+
+//          benh nhan chua tung kham -> chua co tai khoan -> tao tai khoan neu co so dien thoai
+            if (request.getPhone() != null && !request.getPhone().isEmpty()) {
+//              tim tai khoan theo so dien thoai
+                User user = userService.findByPhone(patient.getPhone())
+                        .orElse(new User());
+
+//          neu chua co tai khoan thi tao moi, nguoc lai thi them quan he
+                Relationship relationship = buildRelationship(patient, user, null);
+                patient.getRelationships().add(relationship);
+
+
                 user.setEmail(request.getEmail());
                 user.setPhone(request.getPhone());
                 userService.save(user);
             }
+            return patientMapper.toResponse(
+                    repository.save(patient)
+            );
         }
-        if (request.getPhoneLink() != null) {
 
+//      benh nhan da tung kham, dong bo thong tin benh da co
+        Relationship relationship = patient.getRelationships().get(0);
+        relationship.setPatient(existingByCccd);
+
+//      tao tai khoan moi neu cap nhat so dien thoai
+//      cap nhat so dien thoai (da co tai khoan)
+        if (existingByCccd.getPhone() != null && !request.getPhone().equals(existingByCccd.getPhone())) {
+            patient.setPhone(request.getPhone());
+            User user = userService.findByPhone(patient.getPhone())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            user.setPhone(request.getPhone());
+            user.setEmail(request.getEmail());
+            userService.save(user);
+
+            return patientMapper.toResponse(
+                    repository.save(existingByCccd)
+            );
         }
+
+//      tao moi tai khoan
+        if (existingByCccd.getPhone() == null && request.getPhone() != null) {
+            existingByCccd.setPhone(request.getPhone());
+
+            User user = new User();
+            user.setPhone(request.getPhone());
+            user.setEmail(request.getEmail());
+            Relationship relationship1 = buildRelationship(existingByCccd, user, null);
+            patient.getRelationships().add(relationship1);
+            userService.save(user);
+        }
+
         return patientMapper.toResponse(
-                repository.save(patient)
+                repository.save(existingByCccd)
         );
+    }
+
+    //  benh nhan chua tung kham
+    private void updateOrCreateUser(PatientRequest request, Patient patient) {
+
     }
 
     //    tao new user co lien ket voi tai khoan
@@ -99,7 +176,7 @@ public class PatientServiceImpl implements PatientService {
         if (request.getPhone() != null) {
             User newUser = userService.createAccountByPhone(request.getPhone());
 
-            Relationship relationship = this.buildRelationship(patient, newUser, "Bản thân");
+            Relationship relationship = this.buildRelationship(patient, newUser, "BAN_THAN");
             relationship.setVerified(true);
 
             patient.getRelationships().add(relationship);
@@ -108,7 +185,7 @@ public class PatientServiceImpl implements PatientService {
         if (request.getPhoneLink() != null) {
             User userLink = userService.createAccountByPhone(request.getPhoneLink());
 
-            Relationship relationship = this.buildRelationship(patient, userLink, "Người thân");
+            Relationship relationship = this.buildRelationship(patient, userLink, "NGUOI_THAN");
             relationship.setVerified(true);
 
             patient.getRelationships().add(relationship);
@@ -189,9 +266,6 @@ public class PatientServiceImpl implements PatientService {
 
             for (Relationship relationship : relationships) {
                 Patient patient = relationship.getPatient();
-                if (user.getPhone().equals(patient.getPhone())) {
-                    continue;
-                }
                 PatientResponse response = patientMapper.toResponse(patient);
                 response.setRelationship(relationship.getRelational());
                 response.setVerified(relationship.getVerified());
