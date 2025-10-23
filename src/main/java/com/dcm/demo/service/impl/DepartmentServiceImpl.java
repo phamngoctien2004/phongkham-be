@@ -66,7 +66,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public String getRoomFromDepartment(Department department) {
+    public String   getRoomFromDepartment(Department department) {
         Room room = department.getRooms().stream()
                 .filter(it -> it.getRoomNumber().contains("A"))
                 .findFirst()

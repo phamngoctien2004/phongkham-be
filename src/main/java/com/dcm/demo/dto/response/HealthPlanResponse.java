@@ -18,4 +18,5 @@ public class HealthPlanResponse {
     private String roomName;
     private HealthPlan.ServiceType type;
     private List<DoctorResponse> doctorsAssigned;
+    private List<HealthPlanResponse> subPlans;
 }

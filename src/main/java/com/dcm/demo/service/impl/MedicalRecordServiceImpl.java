@@ -4,14 +4,10 @@ import com.dcm.demo.Utils.ConvertUtil;
 import com.dcm.demo.dto.request.MedicalRequest;
 import com.dcm.demo.dto.request.PaymentRequest;
 import com.dcm.demo.dto.request.WebhookRequest;
-import com.dcm.demo.dto.response.InvoiceDetailResponse;
-import com.dcm.demo.dto.response.MedicalResponse;
-import com.dcm.demo.dto.response.PatientResponse;
-import com.dcm.demo.dto.response.PaymentEvent;
+import com.dcm.demo.dto.response.*;
 import com.dcm.demo.enums.Event;
 import com.dcm.demo.exception.AppException;
 import com.dcm.demo.exception.ErrorCode;
-import com.dcm.demo.mapper.LabOrderMapper;
 import com.dcm.demo.mapper.MedicalMapper;
 import com.dcm.demo.model.*;
 import com.dcm.demo.repository.*;
@@ -131,6 +127,12 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Override
     public void updateStatus(Integer id, MedicalRecord.RecordStatus status) {
         MedicalRecord record = repository.findById(id).orElseThrow(() -> new RuntimeException("Medical record not found"));
+        if (record.getStatus().equals(MedicalRecord.RecordStatus.CHO_KHAM)) {
+            User user = userService.getCurrentUser();
+            Doctor doctor = user.getDoctor();
+            record.setDoctor(doctor);
+        }
+        log.error("Update medical record id {} status from {} to {}", id, record.getStatus(), status);
         record.setStatus(status);
         repository.save(record);
     }
@@ -238,6 +240,24 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     new PaymentEvent(Event.PAYMENT_SUCCESS, "Payment successful for appointment", appointment.getId())
             );
         }
+    }
+
+    @Override
+    public InvoiceResponse getInvoiceByMedicalRecordId(Integer medicalRecordId) {
+        MedicalRecord record = findById(medicalRecordId);
+        Invoice invoice = record.getInvoice();
+        if (invoice == null) {
+            throw new RuntimeException("Invoice not found");
+        }
+        InvoiceResponse invoiceResponse = new InvoiceResponse();
+        invoiceResponse.setCode(invoice.getCode());
+        invoiceResponse.setTotalAmount(invoice.getTotalAmount().intValue());
+        invoiceResponse.setPaidAmount(invoice.getPaidAmount().intValue());
+        invoiceResponse.setStatus(invoice.getStatus());
+        invoiceResponse.setId(invoice.getId());
+        invoiceResponse.setPaymentMethod(invoice.getPaymentMethod().toString());
+        invoiceResponse.setDate(invoice.getPaymentDate());
+        return invoiceResponse;
     }
 
     private void handlePaymentV2(WebhookRequest.DataPayload data) {

@@ -1,12 +1,10 @@
 package com.dcm.demo.service.impl;
 
+import com.dcm.demo.dto.response.DegreeResponse;
 import com.dcm.demo.dto.response.DoctorResponse;
 import com.dcm.demo.dto.response.ProfileData;
 import com.dcm.demo.mapper.DoctorMapper;
-import com.dcm.demo.model.Department;
-import com.dcm.demo.model.Doctor;
-import com.dcm.demo.model.Room;
-import com.dcm.demo.model.User;
+import com.dcm.demo.model.*;
 import com.dcm.demo.repository.DoctorRepository;
 import com.dcm.demo.service.interfaces.DoctorService;
 import com.dcm.demo.service.interfaces.ProfileLoader;
@@ -61,11 +59,18 @@ public class DoctorServiceImpl implements DoctorService, ProfileLoader {
         response.setId(doctor.getId());
         response.setFullName(doctor.getFullName());
         response.setPosition(doctor.getPosition());
+
         response.setExaminationFee(doctor.getDegree().getExaminationFee());
         if (room != null) {
             response.setRoomNumber(room.getRoomNumber());
             response.setRoomName(room.getRoomName());
         }
+        Degree degree = doctor.getDegree();
+        DegreeResponse degreeResponse = new DegreeResponse();
+        degreeResponse.setDegreeId(degree.getDegreeId());
+        degreeResponse.setDegreeName(degree.getDegreeName());
+        degreeResponse.setExaminationFee(degree.getExaminationFee());
+        response.setDegreeResponse(degreeResponse);
         return response;
     }
 }

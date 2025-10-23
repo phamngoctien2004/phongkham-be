@@ -28,7 +28,7 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, In
                   AND (:status IS NULL OR mr.status = :status)
                   AND ( (:from IS NULL OR :to IS NULL) OR (mr.date >= :from AND mr.date < :to) )
                   AND (:doctorId IS NULL OR mr.doctor.id = :doctorId) 
-                  AND(:departmentId IS NULL OR r.department.id = :departmentId)
+                  AND(:departmentId IS NULL OR r.department.id = :departmentId AND mr.doctor.id IS NULL)
                 ORDER BY mr.date DESC
             """)
     Page<MedicalRecord> findAll(

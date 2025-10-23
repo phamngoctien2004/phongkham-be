@@ -104,4 +104,10 @@ public class MedicalController {
         );
     }
 
+    @GetMapping("/{id}/invoice")
+    public ResponseEntity<?> getMedicalRecordByInvoiceId(@PathVariable Integer id) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(medicalRecordService.getInvoiceByMedicalRecordId(id), "Get invoice by medical record id successfully")
+        );
+    }
 }

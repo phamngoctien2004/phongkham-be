@@ -6,6 +6,7 @@ import com.dcm.demo.helpers.FilterHelper;
 import com.dcm.demo.mapper.HealthPlanMapper;
 import com.dcm.demo.model.Department;
 import com.dcm.demo.model.HealthPlan;
+import com.dcm.demo.model.healthPlanDetail;
 import com.dcm.demo.repository.ExaminationServiceRepository;
 import com.dcm.demo.service.interfaces.HealthPlanService;
 import com.dcm.demo.service.interfaces.ScheduleService;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,8 +31,11 @@ public class HealthPlanServiceImpl implements HealthPlanService {
 
     @Override
     @Transactional
-    public List<HealthPlanResponse> getAllService(String keyword) {
+    public List<HealthPlanResponse> getAllService(String keyword, HealthPlan.ServiceType type) {
         Specification<HealthPlan> spec = FilterHelper.contain(keyword, List.of("name"));
+        if(type != null){
+            spec = spec.and(FilterHelper.equal("type", type));
+        }
         return repository.findAll(spec, Sort.by("code")).stream()
                 .map(it -> {
                     HealthPlanResponse response = mapper.toResponse(it);
@@ -55,6 +60,23 @@ public class HealthPlanServiceImpl implements HealthPlanService {
     }
 
     @Override
+    public HealthPlanResponse findDetail(Integer id) {
+        HealthPlan healthPlan = findById(id);
+        HealthPlanResponse healthPlanResponse = mapper.toResponse(healthPlan);
+        if(healthPlan.getType().equals(HealthPlan.ServiceType.DICH_VU)){
+            List<HealthPlanResponse> subPlans = new ArrayList<>();
+            List<healthPlanDetail> details = healthPlan.getHealthPlanDetails();
+            for(healthPlanDetail detail : details){
+                HealthPlan subPlan = detail.getServiceDetail();
+                HealthPlanResponse subPlanResponse = mapper.toResponse(subPlan);
+                subPlans.add(subPlanResponse);
+            }
+            healthPlanResponse.setSubPlans(subPlans);
+        }
+        return healthPlanResponse;
+    }
+
+    @Override
     public List<HealthPlan> findAllById(List<Integer> ids) {
         return repository.findAllById(ids);
     }
@@ -68,4 +90,6 @@ public class HealthPlanServiceImpl implements HealthPlanService {
         }
         return total;
     }
+
+
 }

@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
-    private final JwtService jwtService;
-    private final SendMessage sendMessage;
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
@@ -75,5 +74,6 @@ public class AuthController {
         return ResponseEntity.ok(
                 "ok2");
     }
+
 }
 

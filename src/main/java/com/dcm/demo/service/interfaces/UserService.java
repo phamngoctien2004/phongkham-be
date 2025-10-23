@@ -1,6 +1,7 @@
 package com.dcm.demo.service.interfaces;
 
 import com.dcm.demo.dto.request.ChangePasswordRequest;
+import com.dcm.demo.dto.request.EmailRequest;
 import com.dcm.demo.dto.request.ResetPassword;
 import com.dcm.demo.dto.request.UserRequest;
 import com.dcm.demo.dto.response.UserResponse;

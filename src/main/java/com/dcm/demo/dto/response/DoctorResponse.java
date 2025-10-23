@@ -22,7 +22,7 @@ public final class DoctorResponse implements  ProfileData{
     private LocalDate birth;
     private User.Gender gender;
     private String profileImage;
-    private Degree degreeResponse;
+    private DegreeResponse degreeResponse;
     private Integer exp;
     private String position;
     private UserResponse userResponse;
