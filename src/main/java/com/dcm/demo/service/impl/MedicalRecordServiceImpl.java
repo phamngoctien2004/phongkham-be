@@ -247,7 +247,6 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             appointmentRepository.save(appointment);
             log.error("Payment for DLK service received.");
 
-
 //         push event
             messaging.convertAndSend(
                     "/topic/appointments." + appointment.getId(),

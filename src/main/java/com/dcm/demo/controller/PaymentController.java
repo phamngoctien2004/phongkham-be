@@ -35,7 +35,7 @@ public class PaymentController {
     @GetMapping("/status/{orderCode}")
     public ApiResponse<?> getPaymentStatus(@PathVariable Long orderCode) {
         // Logic to get payment status
-        System.out.println("ok");
+        System.out.println("ok2") ;
         return new ApiResponse<>(payosService.checkStatus(orderCode), "Payment status retrieved successfully");
     }
 
