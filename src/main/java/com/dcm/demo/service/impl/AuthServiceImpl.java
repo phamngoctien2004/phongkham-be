@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -116,25 +118,34 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void sendOtp(OtpRequest request) {
-        String phone = request.getTo();
-        if (userService.findByPhone(phone).isEmpty()) {
-            throw new RuntimeException(" Số điện thoại chưa được đăng ký");
-        }
+        String phone = "+84" +  request.getTo().substring(1);
+//        if (userService.findByPhone(phone).isEmpty()) {
+//            throw new RuntimeException(" Số điện thoại chưa được đăng ký");
+//        }
+//        request.setTo(phone);
+        System.out.println(request.getTo());
         Random random = new Random();
         Integer number = 100000 + random.nextInt(900000);
         System.out.println("Random 6 digits: " + number);
 
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("to", request.getTo());
+        payload.put("message", request.getMessage());
+
+
         request.setMessage("ma cua ban la: " + number);
         org.springframework.http.HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("application/json; charset=UTF-8"));
-        headers.add("Authorization", phone_api_key);
-        HttpEntity<?> httpEntity = new HttpEntity<>(request, headers);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", phone_api_key);
+//        headers.add("Authorization", phone_api_key);
+        HttpEntity<?> httpEntity = new HttpEntity<>(payload, headers);
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.postForEntity(
+        Object o = restTemplate.postForEntity(
                 ip_phone,
                 httpEntity,
-                OtpRequest.class
+                String.class
         );
+        System.out.println(o.toString());
         redisTemplate.opsForValue().set("otp:" + request.getTo(), number, 300, TimeUnit.SECONDS);
     }
 
