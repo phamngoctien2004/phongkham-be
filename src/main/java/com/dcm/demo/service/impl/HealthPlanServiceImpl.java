@@ -6,6 +6,7 @@ import com.dcm.demo.helpers.FilterHelper;
 import com.dcm.demo.mapper.HealthPlanMapper;
 import com.dcm.demo.model.Department;
 import com.dcm.demo.model.HealthPlan;
+import com.dcm.demo.model.Room;
 import com.dcm.demo.model.healthPlanDetail;
 import com.dcm.demo.repository.ExaminationServiceRepository;
 import com.dcm.demo.service.interfaces.HealthPlanService;
@@ -69,9 +70,14 @@ public class HealthPlanServiceImpl implements HealthPlanService {
             for(healthPlanDetail detail : details){
                 HealthPlan subPlan = detail.getServiceDetail();
                 HealthPlanResponse subPlanResponse = mapper.toResponse(subPlan);
+                Room room = subPlan.getRoom();
+                subPlanResponse.setRoomName(room.getRoomName() + " - " + room.getRoomNumber());
                 subPlans.add(subPlanResponse);
             }
             healthPlanResponse.setSubPlans(subPlans);
+        }else{
+            Room room = healthPlan.getRoom();
+            healthPlanResponse.setRoomName(room.getRoomName() + " - " + room.getRoomNumber());
         }
         return healthPlanResponse;
     }

@@ -8,12 +8,7 @@ import com.dcm.demo.service.interfaces.InvoiceService;
 import com.dcm.demo.service.interfaces.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
-
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -33,10 +28,10 @@ public class PaymentController {
     @PostMapping("/webhook")
     public void handleWebhook(@RequestBody WebhookRequest webhookRequest) {
         // Logic to handle webhook notifications
-//            medicalRecordService.webhookPayosForCheckStatus(webhookRequest);
+        medicalRecordService.webhookPayosForCheckStatus(webhookRequest);
     }
 
-//     loi o day nhe
+    //     loi o day nhe
     @GetMapping("/status/{orderCode}")
     public ApiResponse<?> getPaymentStatus(@PathVariable Long orderCode) {
         // Logic to get payment status

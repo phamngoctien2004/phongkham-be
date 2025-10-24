@@ -78,16 +78,30 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             medicalRecord.setHealthPlan(healthPlan);
         }
         MedicalRecord saved = repository.save(medicalRecord);
-//      thanh toan online
-        if (request.getInvoiceId() != null) {
-            Invoice invoice = invoiceService.findById(request.getInvoiceId());
+
+//      da dat lich va thanh toan
+        if (request.getAppointmentId() != null) {
+            Appointment appointment = appointmentRepository.findById(request.getAppointmentId())
+                    .orElseThrow(() -> new RuntimeException("Appointment not found"));
+            String invoiceCode = appointment.getInvoiceCode();
+            Invoice invoice = invoiceService.findByCode(invoiceCode);
             invoice.setMedicalRecord(saved);
             invoiceService.save(invoice);
+            log.error("Lien ket phieu kham voi hoa don dat lich thanh cong");
+        } else {
+//          thanh toan online
+            if (request.getInvoiceId() != null) {
+                Invoice invoice = invoiceService.findById(request.getInvoiceId());
+                invoice.setMedicalRecord(saved);
+                invoiceService.save(invoice);
+            }
+//          thanh toan tien mat
+            else {
+                invoiceService.createInvoiceForCash(saved);
+            }
         }
-//      thanh toan tien mat
-        else {
-            invoiceService.createInvoiceForCash(saved);
-        }
+
+
         return saved;
     }
 
@@ -231,7 +245,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     .orElseThrow(() -> new RuntimeException("Appointment not found"));
             appointment.setStatus(Appointment.AppointmentStatus.DA_XAC_NHAN);
             appointmentRepository.save(appointment);
-            log.info("Payment for DLK service received.");
+            log.error("Payment for DLK service received.");
 
 
 //         push event
@@ -239,7 +253,14 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     "/topic/appointments." + appointment.getId(),
                     new PaymentEvent(Event.PAYMENT_SUCCESS, "Payment successful for appointment", appointment.getId())
             );
+            return;
         }
+        log.error("Payment for QR 1");
+        messaging.convertAndSend(
+                "/topic/invoice." + invoice.getId(),
+                new PaymentEvent(Event.PAYMENT_SUCCESS, "Payment successful", invoice.getId())
+        );
+
     }
 
     @Override
@@ -285,6 +306,11 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         });
 
         invoiceService.updatePaidAmount(invoice, BigDecimal.valueOf(data.getAmount()));
+        messaging.convertAndSend(
+                "/topic/invoice." + invoice.getId(),
+                new PaymentEvent(Event.PAYMENT_SUCCESS, "Payment successful", invoice.getId())
+        );
+        log.error("Payment for QR 22222.");
     }
 
     private void handlePaymentV1(WebhookRequest request, Invoice invoice) {

@@ -34,6 +34,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final PatientMapper patientMapper;
     private final UserService userService;
     private final InvoiceService invoiceService;
+
     @Override
     @Transactional
     public AppointmentResponse createAppointment(AppointmentRequest request) {
@@ -105,8 +106,6 @@ public class AppointmentServiceImpl implements AppointmentService {
             healthPlanResponse.setName(healthPlan.getName());
             response.setHealthPlanResponse(healthPlanResponse);
         }
-        ;
-
 
         return response;
     }
@@ -157,6 +156,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         ));
         if (date != null) {
             spec = spec.and(FilterHelper.equal("date", date));
+        }
+        if(status == null){
+            spec = spec.and(FilterHelper.equal("status", Appointment.AppointmentStatus.DA_XAC_NHAN));
         }
         if (status != null) {
             spec = spec.and(FilterHelper.equal("status", status));

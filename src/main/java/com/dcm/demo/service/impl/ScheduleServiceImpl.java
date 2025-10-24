@@ -8,18 +8,11 @@ import com.dcm.demo.dto.response.ScheduleResponse;
 import com.dcm.demo.dto.response.SlotResponse;
 import com.dcm.demo.exception.AppException;
 import com.dcm.demo.exception.ErrorCode;
-import com.dcm.demo.mapper.LeaveMapper;
 import com.dcm.demo.mapper.ScheduleMapper;
-import com.dcm.demo.model.Doctor;
-import com.dcm.demo.model.Leave;
-import com.dcm.demo.model.Schedule;
-import com.dcm.demo.model.User;
+import com.dcm.demo.model.*;
 import com.dcm.demo.repository.LeaveRepository;
 import com.dcm.demo.repository.ScheduleRepository;
-import com.dcm.demo.service.interfaces.AppointmentService;
-import com.dcm.demo.service.interfaces.DoctorService;
-import com.dcm.demo.service.interfaces.ScheduleService;
-import com.dcm.demo.service.interfaces.UserService;
+import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +31,8 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleRepository repository;
     private final LeaveRepository seRepository;
     private final AppointmentService appointmentService;
+    private final DepartmentService departmentService;
+    ;
     private final ScheduleMapper mapper;
 
     @Override
@@ -211,30 +206,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         return results;
     }
-    public List<SlotResponse> filterForBook(
-            Integer departmentId,
-            Integer doctorId,
-            LocalDate startDate,
-            LocalDate endDate,
-            Schedule.Shift shift
-    ) {
-        List<SlotResponse> results = new ArrayList<>();
-        LocalDate currentDate = startDate;
-        while (!currentDate.isAfter(endDate)) {
-            List<Schedule> schedules = repository.findByOption(
-                    doctorId,
-                    departmentId,
-                    currentDate.getDayOfWeek(),
-                    shift
-            );
 
-            SlotResponse slotResponse = buildSlotResponse(schedules, currentDate);
-            results.add(slotResponse);
-            currentDate = currentDate.plusDays(1);
-        }
-
-        return results;
-    }
     private SlotResponse buildSlotResponse(List<Schedule> schedules, LocalDate currentDate) {
         List<DoctorResponse> doctorResponses = schedules.stream().map(schedule -> {
             Doctor doctor = schedule.getDoctor();
@@ -244,7 +216,9 @@ public class ScheduleServiceImpl implements ScheduleService {
             doctorResponse.setPosition(doctor.getPosition());
             doctorResponse.setShift(schedule.getShift());
             doctorResponse.setAvailable(isSlotAvailable(schedule, currentDate));
-
+            doctorResponse.setExaminationFee(doctor.getDegree().getExaminationFee());
+            Department department = doctor.getDepartment();
+            doctorResponse.setRoomName(departmentService.getRoomFromDepartment(department));
 //          tra ve khung gio da duoc dat (danh cho dat lich)
             List<LocalTime> bookedTimes = appointmentService.getTimeBooked(doctor.getId(), currentDate, schedule.getShift());
             doctorResponse.setInvalidTimes(bookedTimes);
@@ -255,7 +229,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         slotResponse.setDateName(currentDate.getDayOfWeek().name());
         slotResponse.setDoctors(doctorResponses);
         slotResponse.setTotalSlot(doctorResponses.size());
-
 
 
         return slotResponse;

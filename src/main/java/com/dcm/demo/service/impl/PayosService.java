@@ -41,7 +41,7 @@ public class PayosService {
     public PaymentResponse createLinkPayment(PaymentRequest paymentRequest) {
 
         try {
-            if (paymentRequest.getMedicalRecordId() == null) {
+            if (paymentRequest.getMedicalRecordId() == null || paymentRequest.getMedicalRecordId() == 0) {
                 return createLinkPaymentV1(paymentRequest);
             }
             return createLinkPaymentV2(paymentRequest);
@@ -105,7 +105,7 @@ public class PayosService {
                 .returnUrl("http://localhost:8080")
                 .cancelUrl("http://localhost:8080")
                 .build();
-        return new PaymentResponse(medicalRecord.getId(), payOS.createPaymentLink(paymentData).getQrCode(), orderCode);
+        return new PaymentResponse(invoice.getId(), payOS.createPaymentLink(paymentData).getQrCode(), orderCode);
     }
 
     @Transactional
