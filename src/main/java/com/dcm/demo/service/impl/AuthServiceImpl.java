@@ -127,10 +127,10 @@ public class AuthServiceImpl implements AuthService {
         Random random = new Random();
         Integer number = 100000 + random.nextInt(900000);
         System.out.println("Random 6 digits: " + number);
-
+        String message = "Mã của bạn là: " + number;
         Map<String, Object> payload = new HashMap<>();
         payload.put("to", request.getTo());
-        payload.put("message", request.getMessage());
+        payload.put("message", message);
 
 
         request.setMessage("ma cua ban la: " + number);
