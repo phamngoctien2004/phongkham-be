@@ -124,7 +124,7 @@ public class AuthServiceImpl implements AuthService {
         Integer number = 100000 + random.nextInt(900000);
         System.out.println("Random 6 digits: " + number);
 
-        request.setMessage("Mã OTP của bạn là: " + number);
+        request.setMessage("ma cua ban la: " + number);
         org.springframework.http.HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/json; charset=UTF-8"));
         headers.add("Authorization", phone_api_key);
