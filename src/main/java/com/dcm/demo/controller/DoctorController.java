@@ -23,6 +23,12 @@ public class DoctorController {
                 new ApiResponse<>(doctorService.findAll(), "Fetched all doctors successfully")
         );
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getDoctorById(@PathVariable Integer id) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(doctorService.findResponseById(id), "Fetched doctor successfully")
+        );
+    }
     @GetMapping("/me")
     public ResponseEntity<?> getMyInfo() {
         return ResponseEntity.ok(

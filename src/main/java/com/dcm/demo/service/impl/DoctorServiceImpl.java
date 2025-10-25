@@ -1,6 +1,7 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.response.DegreeResponse;
+import com.dcm.demo.dto.response.DepartmentResponse;
 import com.dcm.demo.dto.response.DoctorResponse;
 import com.dcm.demo.dto.response.ProfileData;
 import com.dcm.demo.mapper.DoctorMapper;
@@ -34,6 +35,13 @@ public class DoctorServiceImpl implements DoctorService, ProfileLoader {
         return repository.findAllByOrderByDepartmentIdAscDegreeExaminationFeeDesc().stream()
                 .map(this::buildResponse)
                 .toList();
+    }
+
+    @Override
+    public DoctorResponse findResponseById(Integer id) {
+        return repository.findById(id)
+                .map(this::buildResponse)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
     }
 
     @Override
@@ -71,6 +79,11 @@ public class DoctorServiceImpl implements DoctorService, ProfileLoader {
         degreeResponse.setDegreeName(degree.getDegreeName());
         degreeResponse.setExaminationFee(degree.getExaminationFee());
         response.setDegreeResponse(degreeResponse);
+
+        DepartmentResponse departmentResponse = new DepartmentResponse();
+        departmentResponse.setId(department.getId());
+        departmentResponse.setName(department.getName());
+        response.setDepartmentResponse(departmentResponse);
         return response;
     }
 }
