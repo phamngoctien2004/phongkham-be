@@ -75,7 +75,7 @@ public class MedicalRecord {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")
-    private RecordStatus status = RecordStatus.DANG_KHAM;
+    private RecordStatus status = RecordStatus.CHO_KHAM;
 
     public enum RecordStatus {
         CHO_KHAM, DANG_KHAM, CHO_XET_NGHIEM, HOAN_THANH, HUY

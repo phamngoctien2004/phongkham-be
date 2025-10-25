@@ -1,7 +1,6 @@
 package com.dcm.demo.controller;
 
 import com.dcm.demo.service.interfaces.ExportHtmlService;
-import com.dcm.demo.service.interfaces.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

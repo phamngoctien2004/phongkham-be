@@ -49,6 +49,8 @@ public interface LabOrderRepository extends JpaRepository<LabOrder, Integer> , J
                 AND ( (:from IS NULL OR :to IS NULL) OR (l.orderDate >= :from AND l.orderDate < :to) )
                 AND (:departmentId IS NULL OR (r.department.id = :departmentId) )
                 AND (h.id != 1)
+                AND (h.type != 'CHUYEN_KHOA')
+                          
             """)
     Page<LabOrder> findAllWithPagination(
             @Param("departmentId") Integer departmentId,
