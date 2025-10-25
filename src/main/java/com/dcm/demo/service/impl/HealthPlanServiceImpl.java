@@ -53,6 +53,20 @@ public class HealthPlanServiceImpl implements HealthPlanService {
     }
 
     @Override
+    public List<HealthPlanResponse> displayClientHealthPlans() {
+        Specification<HealthPlan> spec = FilterHelper.contain("1", List.of("status"));
+
+        return repository.findAll(spec, Sort.by("code")).stream()
+                .map(it -> {;
+                    HealthPlanResponse response = mapper.toResponse(it);
+                    response.setRoomNumber(it.getRoom().getRoomNumber());
+                    response.setRoomName(it.getRoom().getRoomName());
+                    return response;
+                })
+                .toList();
+    }
+
+    @Override
     public HealthPlanResponse findResponseById(Integer id) {
         HealthPlan healthplan = findById(id);
         Department department = healthplan.getRoom().getDepartment();

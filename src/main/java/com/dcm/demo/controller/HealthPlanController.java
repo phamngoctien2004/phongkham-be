@@ -24,6 +24,13 @@ public class HealthPlanController {
         return ResponseEntity.ok(healthPlanService.findResponseById(id));
     }
 
+    @GetMapping("/optional")
+    public ResponseEntity<?> getOptional() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(healthPlanService.displayClientHealthPlans() , "Fetched optional services successfully")
+        );
+    }
+
     @GetMapping("/optional/{id}")
     public ResponseEntity<?> getOptionalById(@PathVariable Integer id) {
         return ResponseEntity.ok(
