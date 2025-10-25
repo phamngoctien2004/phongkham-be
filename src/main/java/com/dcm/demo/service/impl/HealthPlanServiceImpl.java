@@ -53,9 +53,11 @@ public class HealthPlanServiceImpl implements HealthPlanService {
     }
 
     @Override
-    public List<HealthPlanResponse> displayClientHealthPlans() {
-        Specification<HealthPlan> spec = FilterHelper.contain("1", List.of("status"));
-
+    public List<HealthPlanResponse> displayClientHealthPlans(HealthPlan.ServiceType type) {
+        Specification<HealthPlan> spec = FilterHelper.equal("1", List.of("status"));
+        if(type != null){
+            spec = spec.and(FilterHelper.equal("type", type));
+        }
         return repository.findAll(spec, Sort.by("code")).stream()
                 .map(it -> {;
                     HealthPlanResponse response = mapper.toResponse(it);

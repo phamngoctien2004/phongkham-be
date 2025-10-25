@@ -25,9 +25,9 @@ public class HealthPlanController {
     }
 
     @GetMapping("/optional")
-    public ResponseEntity<?> getOptional() {
+    public ResponseEntity<?> getOptional(@RequestParam(required = false) HealthPlan.ServiceType type) {
         return ResponseEntity.ok(
-                new ApiResponse<>(healthPlanService.displayClientHealthPlans() , "Fetched optional services successfully")
+                new ApiResponse<>(healthPlanService.displayClientHealthPlans(type) , "Fetched optional services successfully")
         );
     }
 

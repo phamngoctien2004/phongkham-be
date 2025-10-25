@@ -9,7 +9,7 @@ import java.util.List;
 public interface HealthPlanService {
     List<HealthPlanResponse> getAllService(String keyword, HealthPlan.ServiceType type);
     HealthPlan findById(Integer id);
-    List<HealthPlanResponse> displayClientHealthPlans();
+    List<HealthPlanResponse> displayClientHealthPlans(HealthPlan.ServiceType type);
     HealthPlanResponse findResponseById(Integer id);
     HealthPlanResponse findDetail(Integer id);
     List<HealthPlan> findAllById(List<Integer> ids);
