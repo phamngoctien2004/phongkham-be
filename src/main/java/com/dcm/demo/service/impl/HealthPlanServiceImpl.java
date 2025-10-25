@@ -54,7 +54,7 @@ public class HealthPlanServiceImpl implements HealthPlanService {
 
     @Override
     public List<HealthPlanResponse> displayClientHealthPlans(HealthPlan.ServiceType type) {
-        Specification<HealthPlan> spec = FilterHelper.equal("status", 1);
+        Specification<HealthPlan> spec = FilterHelper.equal("status", true);
         if(type != null){
             spec = spec.and(FilterHelper.equal("type", type));
         }
