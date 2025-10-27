@@ -157,6 +157,7 @@ public class PayosService {
                     .cancelUrl("http://localhost:5173/payment/cancel")
                     .build();
             CheckoutResponseData responseData = payOS.createPaymentLink(paymentData);
+            System.out.println(responseData.getCheckoutUrl());
             appointment.setQr(responseData.getQrCode());
             appointment.setInvoiceCode(invoiceResponse.getCode());
             appointmentService.save(appointment);

@@ -4,8 +4,14 @@ import com.dcm.demo.dto.request.OtpRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -23,30 +29,33 @@ public class SendMessage {
         Random random = new Random();
         Integer number = 100000 + random.nextInt(900000);
         System.out.println("Random 6 digits: " + number);
+        String message = "you code is " + number;
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("to", request.getTo());
+        payload.put("message", message);
 
-        request.setMessage("Mã OTP của bạn là: " + number);
-        
-        // gui otp qua dien thoai
-//        org.springframework.http.HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.parseMediaType("application/json; charset=UTF-8"));
+
+        request.setMessage("ma cua ban la: " + number);
+        org.springframework.http.HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", phone_api_key);
 //        headers.add("Authorization", phone_api_key);
-//        HttpEntity<?> httpEntity = new HttpEntity<>(request, headers);
-//        RestTemplate restTemplate = new RestTemplate();
-//        restTemplate.postForEntity(
-//                ip_phone,
-//                httpEntity,
-//                OtpRequest.class
-//        );
-        redisTemplate.opsForValue().set("otp:sync:" + request.getTo(), number, 300, TimeUnit.SECONDS);
-        // Gửi OTP qua SMS (giả lập)
-        System.out.println("Sending OTP " + number + " to phone number: " + request.getTo());
+        HttpEntity<?> httpEntity = new HttpEntity<>(payload, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        Object o = restTemplate.postForEntity(
+                ip_phone,
+                httpEntity,
+                String.class
+        );
+        System.out.println(o.toString());
+        redisTemplate.opsForValue().set("otp:" + request.getTo(), number, 300, TimeUnit.SECONDS);
     }
     public void checkOtp(String phone, Integer otp) {
-        Integer cachedOtp = (Integer) redisTemplate.opsForValue().get("otp:sync:" + phone);
+        Integer cachedOtp = (Integer) redisTemplate.opsForValue().get("otp:" + phone);
         if (cachedOtp == null || !cachedOtp.equals(otp)) {
             throw new RuntimeException("Invalid or expired OTP");
         }
         // Xóa OTP sau khi xác thực thành công
-        redisTemplate.delete("otp:sync:" + phone);
+        redisTemplate.delete("otp:" + phone);
     }
 }

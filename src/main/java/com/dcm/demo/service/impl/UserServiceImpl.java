@@ -12,12 +12,14 @@ import com.dcm.demo.repository.UserRepository;
 import com.dcm.demo.service.interfaces.JwtService;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -50,8 +52,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse findById(Integer id) {
         return userMapper.toResponse(
                 userRepository.findById(id)
-                        .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOTFOUND))
-        );
+                        .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOTFOUND)));
     }
 
     @Override
@@ -63,7 +64,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createAccountByPhone(String phone) {
         User existUser = userRepository.findByPhone(phone).orElse(null);
-        if(existUser != null){
+        if (existUser != null) {
             return existUser;
         }
         User user = new User();
@@ -114,10 +115,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getCurrentUser() {
+        log.info("🔍 Getting current user from SecurityContext...");
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null) {
+            log.error("❌ Authentication is NULL in SecurityContext!");
+            throw new AppException(ErrorCode.RECORD_NOTFOUND);
+        }
+
+        log.info("✅ Authentication found: {} (Type: {})",
+                authentication.getName(),
+                authentication.getClass().getSimpleName());
+
         int id = Integer.parseInt(authentication.getName());
-        return userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOTFOUND));
+
+        log.info("✅ User found: {} (ID: {})", user.getName(), user.getId());
+        return user;
     }
 
 }

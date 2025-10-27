@@ -118,35 +118,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void sendOtp(OtpRequest request) {
-        String phone = "+84" +  request.getTo().substring(1);
-//        if (userService.findByPhone(phone).isEmpty()) {
-//            throw new RuntimeException(" Số điện thoại chưa được đăng ký");
-//        }
-//        request.setTo(phone);
-        System.out.println(request.getTo());
-        Random random = new Random();
-        Integer number = 100000 + random.nextInt(900000);
-        System.out.println("Random 6 digits: " + number);
-        String message = "you code is " + number;
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("to", request.getTo());
-        payload.put("message", message);
-
-
-        request.setMessage("ma cua ban la: " + number);
-        org.springframework.http.HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", phone_api_key);
-//        headers.add("Authorization", phone_api_key);
-        HttpEntity<?> httpEntity = new HttpEntity<>(payload, headers);
-        RestTemplate restTemplate = new RestTemplate();
-        Object o = restTemplate.postForEntity(
-                ip_phone,
-                httpEntity,
-                String.class
-        );
-        System.out.println(o.toString());
-        redisTemplate.opsForValue().set("otp:" + request.getTo(), number, 300, TimeUnit.SECONDS);
+        if (userService.findByPhone(request.getTo()).isEmpty()) {
+            throw new RuntimeException(" Số điện thoại chưa được đăng ký");
+        }
+        sendMessage.sendOtp(request);
     }
 
     @Override

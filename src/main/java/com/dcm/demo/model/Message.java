@@ -7,39 +7,36 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "chat_message")
+@Table(name = "tin_nhan")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatMessage {
+public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_chat_message")
-    private Integer chatMessageId;
+    @Column(name = "id")
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_chat_session", nullable = false)
-    private ChatSession chatSession;
+    @JoinColumn(name = "id_phong_chat", nullable = false)
+    private Conversation conversation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_nguoi_gui", nullable = false)
     private User sender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_nguoi_nhan", nullable = false)
-    private User receiver;
-
-    @Column(name = "noi_dung", nullable = false, columnDefinition = "TEXT")
-    private String content;
+    @Column(name = "noi_dung")
+    private String message;
 
     @CreationTimestamp
     @Column(name = "thoi_gian_gui")
     private LocalDateTime sentTime;
-    @Override
-    public String toString() {
-        return "";
-    }
+
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MessageImage> images = new ArrayList<>();
 }

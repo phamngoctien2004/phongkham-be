@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
@@ -44,10 +47,12 @@ public class SecurityConfig {
 
     private final String[] WhiteList = {
             "/api/auth/**",
-            "/api/**",
-            "/ws/**",
-            "/avatars/**",
-            "/api/payments/**"
+            "/api/doctors/**",
+            "/api/services/**", // Authentication endpoints (login, register, etc.)
+            "/ws/**", // WebSocket handshake endpoint
+            "/avatars/**", // Public avatar images
+            "/api/payments/**" // Payment callback endpoints
+            // NOTE: Removed "/api/**" - other APIs should require authentication
     };
 
     @Bean
@@ -56,17 +61,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         req -> req
                                 .requestMatchers(WhiteList).permitAll()
-                                .anyRequest().authenticated()
-                )
+                                .anyRequest().authenticated())
                 .oauth2ResourceServer(
                         oauth2 -> oauth2
                                 .jwt(
                                         jwt -> jwt
                                                 .decoder(jwtDecoder())
-                                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                                )
-                                .authenticationEntryPoint(authenticationEntryPoint())
-                )
+                                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                                .authenticationEntryPoint(authenticationEntryPoint()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .build();
@@ -75,13 +77,14 @@ public class SecurityConfig {
     @Bean
     JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder.withSecretKey(
-                new SecretKeySpec(Decoders.BASE64.decode(secretKey), "HmacSHA256")
-        ).build();
+                new SecretKeySpec(Decoders.BASE64.decode(secretKey), "HmacSHA256")).build();
     }
+
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cors = new CorsConfiguration();
@@ -90,8 +93,7 @@ public class SecurityConfig {
         cors.addAllowedHeader("*");
         cors.setAllowCredentials(true);
 
-
-//        áp dụng cors cho phép gửi đến tất cả api
+        // áp dụng cors cho phép gửi đến tất cả api
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cors);
 
@@ -109,9 +111,17 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationManager jwtAuthManager() {
+        var provider = new JwtAuthenticationProvider(jwtDecoder());
+        provider.setJwtAuthenticationConverter(jwtAuthenticationConverter());
+        return new ProviderManager(provider);
+    }
+
+    @Bean
     public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     AuthenticationEntryPoint authenticationEntryPoint() {
         return (request, response, authException) -> {
