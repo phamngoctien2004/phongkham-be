@@ -145,6 +145,9 @@ public class ConversationService {
         Conversation conversation = new Conversation();
         conversation.setPatient(user);
         conversation.setResponder("AI-" + System.currentTimeMillis());
+        conversation.setLastMessage(0);
+        conversation.setLastReadAdmin(0);
+        conversation.setLastReadPatient(0);
         repository.save(conversation);
         return toDTO(conversation);
     }

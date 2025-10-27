@@ -48,7 +48,8 @@ public class SecurityConfig {
     private final String[] WhiteList = {
             "/api/auth/**",
             "/api/doctors/**",
-            "/api/services/**", // Authentication endpoints (login, register, etc.)
+            "/api/services/**",
+            "/api/**", // Authentication endpoints (login, register, etc.)
             "/ws/**", // WebSocket handshake endpoint
             "/avatars/**", // Public avatar images
             "/api/payments/**" // Payment callback endpoints
