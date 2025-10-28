@@ -52,7 +52,7 @@ public class PatientServiceImpl implements PatientService {
                     .orElse(new User());
 
 //          neu chua co tai khoan thi tao moi, nguoc lai thi them quan he
-            Relationship relationship = buildRelationship(patient, user, null);
+            Relationship relationship = buildRelationship(patient, user, request.getRelationshipName());
             patient.getRelationships().add(relationship);
 
             user.setEmail(request.getEmail());
