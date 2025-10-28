@@ -283,12 +283,8 @@ public class PatientServiceImpl implements PatientService {
         Patient patient = this.buildPatient(request);
         Relationship relationship = this.buildRelationship(patient, user, request.getRelationshipName());
 
-        relationship.setVerified(false);
         patient.getRelationships().add(relationship);
         repository.save(patient);
-
-//      gui otp
-        sendMessage.sendOtp(new OtpRequest(request.getSync(), "null"));
     }
 
     @Override

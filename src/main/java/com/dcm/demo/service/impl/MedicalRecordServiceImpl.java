@@ -217,8 +217,10 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
         User user = userService.getCurrentUser();
         Doctor doctor = user.getDoctor();
+        log.error("check doctor id: {}", doctor.getId());
         Integer doctorId = null;
         Integer departmentId = null;
+        log.error("check isAllDepartment: {}", isAllDepartment);
         if (!isAllDepartment) {
             doctorId = doctor.getId();
         } else {
