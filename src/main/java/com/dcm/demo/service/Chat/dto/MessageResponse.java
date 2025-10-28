@@ -17,4 +17,5 @@ public class MessageResponse {
     private int totalUnread;
     private int totalMessage;
     private boolean hasMoreOld;
+    private boolean test;
 }
