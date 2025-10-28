@@ -1,6 +1,5 @@
 package com.dcm.demo.service.impl;
 
-import com.dcm.demo.dto.request.OtpRequest;
 import com.dcm.demo.dto.request.PatientRequest;
 import com.dcm.demo.dto.request.VerifyOtpRequest;
 import com.dcm.demo.dto.response.PatientResponse;
@@ -47,7 +46,7 @@ public class PatientServiceImpl implements PatientService {
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
         toPatient(request, patient);
 
-        if(request.getPhone() != null && !request.getPhone().isEmpty() && !request.getPhone().equals(patient.getPhone())) {
+        if (request.getPhone() != null && !request.getPhone().isEmpty() && !request.getPhone().equals(patient.getPhone())) {
             patient.setPhone(request.getPhone());
             User user = userService.findByPhone(request.getPhone())
                     .orElse(new User());
@@ -277,14 +276,16 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public void addRelationship(PatientRequest request) {
+    public PatientResponse addRelationship(PatientRequest request) {
 //      tao benh nhan tam
         User user = userService.getCurrentUser();
         Patient patient = this.buildPatient(request);
         Relationship relationship = this.buildRelationship(patient, user, request.getRelationshipName());
 
         patient.getRelationships().add(relationship);
-        repository.save(patient);
+        return patientMapper.toResponse(
+                repository.save(patient)
+        );
     }
 
     @Override

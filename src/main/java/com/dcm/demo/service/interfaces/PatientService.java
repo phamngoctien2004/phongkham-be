@@ -44,7 +44,7 @@ public interface PatientService {
 
     Relationship buildRelationship(Patient patient, User user, String relational);
 
-    void addRelationship(PatientRequest request);
+    PatientResponse addRelationship(PatientRequest request);
 
     void syncRelationship(VerifyOtpRequest request);
 

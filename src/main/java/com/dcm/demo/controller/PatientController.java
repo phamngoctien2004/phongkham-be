@@ -62,9 +62,8 @@ public class PatientController {
     }
     @PostMapping("/relationships")
     public ResponseEntity<?> addRelationship(@RequestBody PatientRequest request) {
-        patientService.addRelationship(request);
         return ResponseEntity.ok(
-                new ApiResponse<>("", "Add relationship successfully")
+                new ApiResponse<>(patientService.addRelationship(request),"Add relationship successfully")
         );
     }
     @PostMapping("/relationships/verify")
