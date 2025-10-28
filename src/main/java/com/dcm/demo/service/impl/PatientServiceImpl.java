@@ -46,18 +46,38 @@ public class PatientServiceImpl implements PatientService {
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
         toPatient(request, patient);
 
-        if (request.getPhone() != null && !request.getPhone().isEmpty() && !request.getPhone().equals(patient.getPhone())) {
-            patient.setPhone(request.getPhone());
-            User user = userService.findByPhone(request.getPhone())
+        if (request.getPhone() != null && !request.getPhone().isEmpty()
+                && patient.getPhone() != null
+                && !request.getPhone().equals(patient.getPhone())
+        ) {
+            User user = userService.findByPhone(patient.getPhone())
                     .orElse(new User());
+            patient.setPhone(request.getPhone());
+
 
 //          neu chua co tai khoan thi tao moi, nguoc lai thi them quan he
-            Relationship relationship = buildRelationship(patient, user, request.getRelationshipName());
-            patient.getRelationships().add(relationship);
+            if (user.getId() == null) {
+                Relationship relationship = buildRelationship(patient, user, request.getRelationshipName());
+                patient.getRelationships().add(relationship);
+            }
 
-            user.setEmail(request.getEmail());
+            user.setRole(User.Role.BENH_NHAN);
+            if(request.getEmail() != null)
+            {
+                user.setEmail(request.getEmail());
+            }
             user.setPhone(request.getPhone());
             userService.save(user);
+        }
+
+        if(request.getRelationshipName() != null && !request.getRelationshipName().isEmpty()){
+            for (Relationship relationship : patient.getRelationships()) {
+                Patient linkedPatient = relationship.getPatient();
+                if(linkedPatient.getId().equals(patient.getId())){
+                    relationship.setRelational(request.getRelationshipName());
+                    break;
+                }
+            }
         }
 
         return patientMapper.toResponse(
@@ -265,6 +285,9 @@ public class PatientServiceImpl implements PatientService {
 
             for (Relationship relationship : relationships) {
                 Patient patient = relationship.getPatient();
+                if(user.getPhone().equals(patient.getPhone())) {
+                    continue;
+                }
                 PatientResponse response = patientMapper.toResponse(patient);
                 response.setRelationship(relationship.getRelational());
                 response.setVerified(relationship.getVerified());

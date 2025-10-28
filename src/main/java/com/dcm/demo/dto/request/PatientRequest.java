@@ -23,6 +23,6 @@ public class PatientRequest {
 //  lien ket tai khoan
 
     private String  phoneLink;
-    private String relationshipName;
+    private String relationshipName = "";
     private String sync;
 }
