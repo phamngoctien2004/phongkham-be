@@ -30,12 +30,12 @@ public class Conversation {
     private String responder;
 
     @Column(name = "last_read_patient")
-    private Integer lastReadPatient;
+    private Integer lastReadPatient = 0;
     @Column(name = "last_read_ad")
-    private Integer lastReadAdmin;
+    private Integer lastReadAdmin = 0;
 
     @Column(name = "last_message")
-    private Integer lastMessage;
+    private Integer lastMessage = 0;
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Message> messages = new ArrayList<>();
