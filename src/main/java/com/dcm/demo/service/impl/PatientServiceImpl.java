@@ -285,9 +285,9 @@ public class PatientServiceImpl implements PatientService {
 
             for (Relationship relationship : relationships) {
                 Patient patient = relationship.getPatient();
-                if(user.getPhone().equals(patient.getPhone())) {
-                    continue;
-                }
+//                if(user.getPhone().equals(patient.getPhone())) {
+//                    continue;
+//                }
                 PatientResponse response = patientMapper.toResponse(patient);
                 response.setRelationship(relationship.getRelational());
                 response.setVerified(relationship.getVerified());

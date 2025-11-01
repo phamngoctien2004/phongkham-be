@@ -40,21 +40,21 @@ public class AppointmentServiceImpl implements AppointmentService {
     public AppointmentResponse createAppointment(AppointmentRequest request) {
         Appointment appointment = mapper.toEntity(request);
 //
-//        if (request.getHealthPlanId() != null) {
-//            HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
-//            appointment.setTotalAmount(healthPlan.getPrice());
-//            appointment.setHealthPlan(healthPlan);
-//        }
-//        if (request.getDoctorId() != null) {
-//            Doctor doctor = doctorService.findById(request.getDoctorId());
-//            Degree degree = doctor.getDegree();
-//            appointment.setTotalAmount(degree.getExaminationFee());
-//            appointment.setDoctor(doctor);
-//        }
+        if (request.getHealthPlanId() != null) {
+            HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
+            appointment.setTotalAmount(healthPlan.getPrice());
+            appointment.setHealthPlan(healthPlan);
+        }
+        if (request.getDoctorId() != null) {
+            Doctor doctor = doctorService.findById(request.getDoctorId());
+            Degree degree = doctor.getDegree();
+            appointment.setTotalAmount(degree.getExaminationFee());
+            appointment.setDoctor(doctor);
+        }
 
         Patient patient = patientService.findEntityById(request.getPatientId());
         appointment.setPatient(patient);
-        appointment.setStatus(Appointment.AppointmentStatus.CHO_THANH_TOAN);
+        appointment.setStatus(Appointment.AppointmentStatus.DA_XAC_NHAN);
         repository.save(appointment);
         return this.toResponse(appointment);
     }
@@ -82,7 +82,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
 
         return repository.findByDoctorIdAndDateAndTimeIsBetweenAndStatusIn(doctorId, date, to, end, List.of(
-                        Appointment.AppointmentStatus.CHO_THANH_TOAN,
                         Appointment.AppointmentStatus.DA_XAC_NHAN
                 )).stream()
                 .map(Appointment::getTime)

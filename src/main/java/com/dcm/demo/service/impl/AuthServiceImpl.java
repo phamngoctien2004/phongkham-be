@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
 
         userResponse.setCreatedPassword(user.getPassword() != null && !user.getPassword().isEmpty());
         return new LoginResponse(
-                jwtService.generate(user.getId(), user.getRole().name(), 60),
+                jwtService.generate(user.getId(), user.getRole().name(), 6000),
                 userResponse
         );
     }
@@ -89,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
         UserResponse userResponse = userMapper.toResponse(user);
         userResponse.setName(patient.getFullName());
         return new LoginResponse(
-                jwtService.generate(user.getId(), user.getRole().name(), 60),
+                jwtService.generate(user.getId(), user.getRole().name(), 6000),
                 userResponse
         );
     }

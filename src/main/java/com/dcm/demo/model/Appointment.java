@@ -39,11 +39,12 @@ public class Appointment {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "trang_thai")
-    private AppointmentStatus status = AppointmentStatus.CHO_THANH_TOAN;
+    private AppointmentStatus status = AppointmentStatus.DA_XAC_NHAN;
 
     @Column(name = "trieu_chung", columnDefinition = "TEXT")
     private String symptoms;
-
+    @Column(name = "tong_tien")
+    private BigDecimal totalAmount;
     @CreationTimestamp
     @Column(name = "ngay_dat_lich")
     private LocalDateTime bookingDate;
@@ -56,8 +57,10 @@ public class Appointment {
     @JoinColumn(name = "id_benh_nhan")
     private Patient patient;
 
+
+
     public enum AppointmentStatus {
-        DA_XAC_NHAN, KHONG_DEN, HOAN_THANH, CHO_THANH_TOAN,HUY
+        DA_XAC_NHAN, KHONG_DEN, HOAN_THANH,HUY
     }
     @Override
     public String toString() {
