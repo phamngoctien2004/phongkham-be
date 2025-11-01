@@ -1,5 +1,6 @@
 package com.dcm.demo.service.impl;
 
+import com.dcm.demo.dto.request.HealthPlanRequest;
 import com.dcm.demo.dto.response.HealthPlanResponse;
 import com.dcm.demo.dto.response.SlotResponse;
 import com.dcm.demo.helpers.FilterHelper;
@@ -12,6 +13,8 @@ import com.dcm.demo.repository.ExaminationServiceRepository;
 import com.dcm.demo.service.interfaces.HealthPlanService;
 import com.dcm.demo.service.interfaces.ScheduleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.connection.SortParameters;
@@ -45,6 +48,17 @@ public class HealthPlanServiceImpl implements HealthPlanService {
                     return response;
                 })
                 .toList();
+    }
+
+    @Override
+    public Page<HealthPlanResponse> getAllService(String keyword, BigDecimal priceFrom, BigDecimal priceTo, HealthPlan.ServiceType type, Pageable pageable) {
+        return repository.findAll(keyword, priceFrom, priceTo, type, pageable)
+                .map(it -> {
+                    HealthPlanResponse response = mapper.toResponse(it);
+                    response.setRoomNumber(it.getRoom().getRoomNumber());
+                    response.setRoomName(it.getRoom().getRoomName());
+                    return response;
+                });
     }
 
     @Override
@@ -99,19 +113,17 @@ public class HealthPlanServiceImpl implements HealthPlanService {
     }
 
     @Override
-    public List<HealthPlan> findAllById(List<Integer> ids) {
-        return repository.findAllById(ids);
+    public HealthPlanResponse create(HealthPlanRequest request) {
+        return null;
     }
 
     @Override
-    public BigDecimal calcTotalService(List<Integer> ids) {
-        List<HealthPlan> healthPlans = repository.findAllById(ids);
-        BigDecimal total = BigDecimal.ZERO;
-        for (HealthPlan healthPlan : healthPlans) {
-            total = total.add(healthPlan.getPrice());
-        }
-        return total;
+    public HealthPlanResponse update(HealthPlanRequest request) {
+        return null;
     }
 
+    @Override
+    public void delete(Integer id) {
 
+    }
 }

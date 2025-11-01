@@ -4,7 +4,7 @@ spring:
   application:
     name: demo
   datasource:
-    url: jdbc:mysql://${DB_HOST:127.0.0.1}:3306/datn2
+    url: jdbc:mysql://${DB_HOST:127.0.0.1}:3306/datn
     username: ${MYSQL_USERNAME:root}
     password: ${MYSQL_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -19,6 +19,11 @@ spring:
         enabled: false
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+  cache:
+      type: redis
+      redis:
+        time-to-live: 1800000 # TTL 30 phút (ms)
+        cache-null-values: false
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html

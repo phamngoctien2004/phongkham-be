@@ -4,11 +4,11 @@ import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.service.impl.MeService;
 import com.dcm.demo.service.interfaces.DoctorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -23,12 +23,25 @@ public class DoctorController {
                 new ApiResponse<>(doctorService.findAll(), "Fetched all doctors successfully")
         );
     }
+
+    @GetMapping("/admin")
+    public ResponseEntity<?> getAllDoctorsForAdmin(@RequestParam(name = "keyword", required = false) String keyword,
+                                                   @RequestParam(name = "departmentId", required = false) Integer departmentId,
+                                                   @RequestParam(name = "degreeId", required = false) Integer degreeId,
+                                                   @PageableDefault(size = 10)
+                                                   Pageable pageable) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(doctorService.findAllByPage(pageable, keyword, departmentId, degreeId), "Fetched all doctors for admin successfully")
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getDoctorById(@PathVariable Integer id) {
         return ResponseEntity.ok(
                 new ApiResponse<>(doctorService.findResponseById(id), "Fetched doctor successfully")
         );
     }
+
     @GetMapping("/me")
     public ResponseEntity<?> getMyInfo() {
         return ResponseEntity.ok(

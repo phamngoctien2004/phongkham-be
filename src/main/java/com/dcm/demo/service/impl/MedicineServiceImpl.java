@@ -1,6 +1,7 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.Utils.ConvertUtil;
+import com.dcm.demo.dto.request.MedicineRequest;
 import com.dcm.demo.dto.response.MedicineResponse;
 import com.dcm.demo.helpers.FilterHelper;
 import com.dcm.demo.model.Medicine;
@@ -24,6 +25,26 @@ public class MedicineServiceImpl implements MedicineService {
         Specification<Medicine> specification = FilterHelper.contain(keyword, "name");
         return medicineRepository.findAll(specification, pageable)
                 .map(ConvertUtil::convert);
+    }
+
+    @Override
+    public MedicineResponse findMedicineById(Integer id) {
+        return null;
+    }
+
+    @Override
+    public MedicineResponse create(MedicineRequest request) {
+        return null;
+    }
+
+    @Override
+    public MedicineResponse update(MedicineRequest request) {
+        return null;
+    }
+
+    @Override
+    public void delete(Integer id) {
+
     }
 }
 

@@ -81,13 +81,12 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
 //      da dat lich va thanh toan
         if (request.getAppointmentId() != null) {
-            Appointment appointment = appointmentRepository.findById(request.getAppointmentId())
-                    .orElseThrow(() -> new RuntimeException("Appointment not found"));
-            String invoiceCode = appointment.getInvoiceCode();
-            Invoice invoice = invoiceService.findByCode(invoiceCode);
-            invoice.setMedicalRecord(saved);
-            invoiceService.save(invoice);
-            log.error("Lien ket phieu kham voi hoa don dat lich thanh cong");
+//            Appointment appointment = appointmentRepository.findById(request.getAppointmentId())
+//                    .orElseThrow(() -> new RuntimeException("Appointment not found"));
+//            Invoice invoice = invoiceService.findByCode(invoiceCode);
+//            invoice.setMedicalRecord(saved);
+//            invoiceService.save(invoice);
+//            log.error("Lien ket phieu kham voi hoa don dat lich thanh cong");
         } else {
 //          thanh toan online
             if (request.getInvoiceId() != null) {

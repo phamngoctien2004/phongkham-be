@@ -3,7 +3,6 @@ package com.dcm.demo.controller;
 import com.dcm.demo.dto.request.AppointmentRequest;
 import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.service.interfaces.AppointmentService;
-import com.dcm.demo.service.interfaces.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ReceptionistController {
     private final AppointmentService appointmentService;
-    private final MedicalRecordService medicalRecordService;
 
     @PostMapping("/confirm")
     public ResponseEntity<?> changeStatusAppointment(@RequestBody AppointmentRequest request) {
@@ -25,6 +23,5 @@ public class ReceptionistController {
                 new ApiResponse<>("", message)
         );
     }
-
 
 }

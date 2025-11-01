@@ -56,13 +56,6 @@ public class Appointment {
     @JoinColumn(name = "id_benh_nhan")
     private Patient patient;
 
-    @Column(name="tong_tien")
-    private BigDecimal totalAmount;
-    @Column(name = "qr")
-    private String qr;
-
-    @Column(name = "ma_hd")
-    private String invoiceCode;
     public enum AppointmentStatus {
         DA_XAC_NHAN, KHONG_DEN, HOAN_THANH, CHO_THANH_TOAN,HUY
     }

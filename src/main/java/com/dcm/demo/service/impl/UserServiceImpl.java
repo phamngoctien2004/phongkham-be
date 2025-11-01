@@ -13,6 +13,8 @@ import com.dcm.demo.service.interfaces.JwtService;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,22 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final JwtService jwtService;
+
+    @Override
+    public Page<UserResponse> findAll(Pageable pageable, String keyword, User.Role role) {
+        return userRepository.findAll(pageable, keyword, role)
+                .map(this::toResponse);
+    }
+
+    private UserResponse toResponse(User user) {
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setName(user.getName());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setPhone(user.getPhone());
+        userResponse.setRole(user.getRole());
+        return userResponse;
+    }
 
     @Override
     public User getUserByEmailOrPhone(String emailOrPhone) {
@@ -105,6 +123,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Integer id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if(user.getRelationships() != null && !user.getRelationships().isEmpty()){
+            throw new RuntimeException( "Cannot delete user with existing relationships");
+        }
         userRepository.deleteById(id);
     }
 

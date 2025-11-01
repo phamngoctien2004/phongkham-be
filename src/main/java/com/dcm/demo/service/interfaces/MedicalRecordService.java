@@ -15,18 +15,31 @@ import java.util.List;
 
 public interface MedicalRecordService {
     MedicalRecord create(MedicalRequest request);
-//    void updatePaymentForLabOrder(MedicalRequest.UpdatePaymentRequest request);
+
+    //    void updatePaymentForLabOrder(MedicalRequest.UpdatePaymentRequest request);
     void updateMedicalRecordInvoiceForCash(PaymentRequest request);
+
     void update(MedicalRequest request);
+
     void updateStatus(Integer id, MedicalRecord.RecordStatus status);
+
     List<MedicalResponse> me();
+
     List<MedicalResponse> getRelationMedicalRecord(String cccd);
+
     void updateTotal(MedicalRecord medicalRecord, BigDecimal total);
+
     MedicalRecord findById(Integer id);
+
     MedicalResponse getDetailById(Integer id);
+
     List<MedicalResponse> findByPatientId(Integer patientId);
+
     Page<MedicalResponse> findAll(String keyword, MedicalRecord.RecordStatus status, LocalDate date, Pageable pageable);
-    Page<MedicalResponse> findAllByDoctor(String keyword, MedicalRecord.RecordStatus status, LocalDate date, boolean isAllDepartment,Pageable pageable);
+
+    Page<MedicalResponse> findAllByDoctor(String keyword, MedicalRecord.RecordStatus status, LocalDate date, boolean isAllDepartment, Pageable pageable);
+
     void webhookPayosForCheckStatus(WebhookRequest request);
-    InvoiceResponse  getInvoiceByMedicalRecordId(Integer medicalRecordId);
+
+    InvoiceResponse getInvoiceByMedicalRecordId(Integer medicalRecordId);
 }

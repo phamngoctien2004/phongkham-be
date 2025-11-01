@@ -1,5 +1,6 @@
 package com.dcm.demo.service.impl;
 
+import com.dcm.demo.dto.request.DoctorRequest;
 import com.dcm.demo.dto.response.DegreeResponse;
 import com.dcm.demo.dto.response.DepartmentResponse;
 import com.dcm.demo.dto.response.DoctorResponse;
@@ -11,6 +12,8 @@ import com.dcm.demo.service.interfaces.DoctorService;
 import com.dcm.demo.service.interfaces.ProfileLoader;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,10 +41,32 @@ public class DoctorServiceImpl implements DoctorService, ProfileLoader {
     }
 
     @Override
+    public Page<DoctorResponse> findAllByPage(Pageable pageable, String keyword, Integer departmentId, Integer degreeId) {
+
+        return repository.findAll(pageable, keyword, departmentId, degreeId)
+                .map(this::buildResponse);
+    }
+
+    @Override
     public DoctorResponse findResponseById(Integer id) {
         return repository.findById(id)
                 .map(this::buildResponse)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
+    }
+
+    @Override
+    public DoctorResponse create(DoctorRequest doctorRequest) {
+        return null;
+    }
+
+    @Override
+    public DoctorResponse update(DoctorRequest doctorRequest) {
+        return null;
+    }
+
+    @Override
+    public void delete(Integer id) {
+
     }
 
     @Override

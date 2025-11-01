@@ -1,5 +1,6 @@
 package com.dcm.demo.service.impl;
 
+import com.dcm.demo.dto.request.DegreeRequest;
 import com.dcm.demo.dto.response.DegreeResponse;
 import com.dcm.demo.repository.DegreeRepository;
 import com.dcm.demo.service.interfaces.DegreeService;
@@ -25,5 +26,25 @@ public class DegreeServiceImpl implements DegreeService {
                     return response;
                 })
                 .toList();
+    }
+
+    @Override
+    public DegreeResponse findById(Integer id) {
+        return null;
+    }
+
+    @Override
+    public DegreeResponse create(DegreeRequest degreeRequest) {
+        return null;
+    }
+
+    @Override
+    public DegreeResponse update(DegreeRequest degreeRequest) {
+        return null;
+    }
+
+    @Override
+    public void delete(Integer id) {
+
     }
 }

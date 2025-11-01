@@ -1,7 +1,7 @@
 package com.dcm.demo.service.impl;
 
+import com.dcm.demo.dto.request.FilterRequest;
 import com.dcm.demo.dto.request.InvoiceRequest;
-import com.dcm.demo.dto.response.InvoiceDetailResponse;
 import com.dcm.demo.dto.response.InvoiceResponse;
 import com.dcm.demo.mapper.InvoiceMapper;
 import com.dcm.demo.model.*;
@@ -11,12 +11,16 @@ import com.dcm.demo.service.interfaces.DoctorService;
 import com.dcm.demo.service.interfaces.HealthPlanService;
 import com.dcm.demo.service.interfaces.InvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -29,8 +33,26 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final HealthPlanService healthPlanService;
     private final InvoiceMapper mapper;
     private final RedisTemplate<String, Object> redisTemplate;
-    private Integer defaultPrice = 2000;
 
+    @Override
+    public Page<InvoiceResponse> findAll(String keyword, Invoice.PaymentStatus status, Invoice.PaymentMethod method, LocalDate fromDate, LocalDate toDate, Pageable pageable){
+
+        return repository.findAll(pageable, keyword,
+                status,
+                method,
+                LocalDateTime.of(fromDate, LocalTime.MIN),
+                LocalDateTime.of(toDate, toDate.equals(fromDate) ? LocalTime.MAX : LocalTime.MIN))
+                .map(this::toResponse);
+    }
+
+    private InvoiceResponse toResponse(Invoice invoice) {
+        InvoiceResponse response = mapper.toResponse(invoice);
+
+        Patient p = invoice.getPatient();
+        response.setPatientName(p != null ? p.getFullName() : "-");
+
+        return response;
+    }
     @Override
     public Invoice findById(Integer id) {
         return repository.findById(id).orElseThrow(() -> new RuntimeException("Invoice not found with id: " + id));
@@ -66,7 +88,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         buildInvoiceDetail(invoice, 1, doctor.getDegree().getExaminationFee(), status, Invoice.PaymentMethod.CHUYEN_KHOAN, BigDecimal.ZERO);
         updateTotal(invoice, doctor.getDegree().getExaminationFee());
 
-        return buildPayosResponse(invoice.getId(),  doctor.getDegree().getExaminationFee().intValue(), invoice.getCode());
+        return buildPayosResponse(invoice.getId(), doctor.getDegree().getExaminationFee().intValue(), invoice.getCode());
     }
 
     private InvoiceResponse buildPayosResponse(Integer id, Integer examFee, String code) {
@@ -169,7 +191,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
         invoiceDetailRepository.save(detail);
     }
-
 
 
     @Override

@@ -39,18 +39,18 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional
     public AppointmentResponse createAppointment(AppointmentRequest request) {
         Appointment appointment = mapper.toEntity(request);
-
-        if (request.getHealthPlanId() != null) {
-            HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
-            appointment.setTotalAmount(healthPlan.getPrice());
-            appointment.setHealthPlan(healthPlan);
-        }
-        if (request.getDoctorId() != null) {
-            Doctor doctor = doctorService.findById(request.getDoctorId());
-            Degree degree = doctor.getDegree();
-            appointment.setTotalAmount(degree.getExaminationFee());
-            appointment.setDoctor(doctor);
-        }
+//
+//        if (request.getHealthPlanId() != null) {
+//            HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
+//            appointment.setTotalAmount(healthPlan.getPrice());
+//            appointment.setHealthPlan(healthPlan);
+//        }
+//        if (request.getDoctorId() != null) {
+//            Doctor doctor = doctorService.findById(request.getDoctorId());
+//            Degree degree = doctor.getDegree();
+//            appointment.setTotalAmount(degree.getExaminationFee());
+//            appointment.setDoctor(doctor);
+//        }
 
         Patient patient = patientService.findEntityById(request.getPatientId());
         appointment.setPatient(patient);
@@ -230,9 +230,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     public boolean checkPayment(Integer id) {
         Appointment appointment = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
-        Invoice invoice = invoiceService.findByCode(appointment.getInvoiceCode());
+//        Invoice invoice = invoiceService.findByCode(appointment.getInvoiceCode());
 
-        return invoice.getStatus() == Invoice.PaymentStatus.DA_THANH_TOAN;
+        return false;
     }
 
     void sendEmailAppointmentSuccess(String phone, String email) {

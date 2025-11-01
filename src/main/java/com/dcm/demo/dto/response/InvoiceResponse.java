@@ -11,7 +11,9 @@ import java.util.List;
 public class InvoiceResponse {
     private Integer id;
     private String code;
+    private String patientName;
     private String paymentMethod;
+    private LocalDateTime paymentDate;
     private Integer totalAmount;
     private Integer paidAmount;
     private Invoice.PaymentStatus status;

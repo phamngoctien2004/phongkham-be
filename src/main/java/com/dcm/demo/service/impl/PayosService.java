@@ -158,8 +158,6 @@ public class PayosService {
                     .build();
             CheckoutResponseData responseData = payOS.createPaymentLink(paymentData);
             System.out.println(responseData.getCheckoutUrl());
-            appointment.setQr(responseData.getQrCode());
-            appointment.setInvoiceCode(invoiceResponse.getCode());
             appointmentService.save(appointment);
             return new PaymentResponse(invoiceResponse.getId(), responseData.getQrCode(), orderCode);
         } catch (Exception ignored) {
