@@ -4,11 +4,12 @@ import com.dcm.demo.model.HealthPlan;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class HealthPlanResponse {
+public class HealthPlanResponse implements Serializable {
     private int id;
     private String code;
     private String name;

@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -27,7 +28,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Page<UserResponse> findAll(Pageable pageable, String keyword, User.Role role) {
@@ -42,6 +43,7 @@ public class UserServiceImpl implements UserService {
         userResponse.setEmail(user.getEmail());
         userResponse.setPhone(user.getPhone());
         userResponse.setRole(user.getRole());
+        userResponse.setStatus(user.getStatus());
         return userResponse;
     }
 
@@ -107,13 +109,17 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(request.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOTFOUND));
         user.setEmail(request.getEmail());
-
+        user.setName(request.getName());
+        user.setRole(request.getRole());
         return userMapper.toResponse(userRepository.save(user));
     }
 
     @Override
     public void changePassword(ChangePasswordRequest request) {
-
+        User user = userRepository.findById(request.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOTFOUND));
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 
     @Override

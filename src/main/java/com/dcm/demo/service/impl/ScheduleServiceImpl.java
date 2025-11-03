@@ -2,17 +2,21 @@ package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.LeaveRequest;
 import com.dcm.demo.dto.request.ScheduleRequest;
-import com.dcm.demo.dto.response.DoctorResponse;
 import com.dcm.demo.dto.response.LeaveResponse;
 import com.dcm.demo.dto.response.ScheduleResponse;
 import com.dcm.demo.dto.response.SlotResponse;
 import com.dcm.demo.exception.AppException;
 import com.dcm.demo.exception.ErrorCode;
 import com.dcm.demo.mapper.ScheduleMapper;
-import com.dcm.demo.model.*;
+import com.dcm.demo.model.Doctor;
+import com.dcm.demo.model.Leave;
+import com.dcm.demo.model.Schedule;
+import com.dcm.demo.model.User;
 import com.dcm.demo.repository.LeaveRepository;
 import com.dcm.demo.repository.ScheduleRepository;
-import com.dcm.demo.service.interfaces.*;
+import com.dcm.demo.service.interfaces.DoctorService;
+import com.dcm.demo.service.interfaces.ScheduleService;
+import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +34,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final UserService userService;
     private final ScheduleRepository repository;
     private final LeaveRepository seRepository;
-    private final AppointmentService appointmentService;
-    private final DepartmentService departmentService;
-    ;
+
     private final ScheduleMapper mapper;
+    private final ScheduleQueryService sqs;
 
     @Override
     public List<LeaveResponse> getLeaveByDoctor(LocalDate date, Leave.leaveStatus leaveStatus) {
@@ -192,61 +195,18 @@ public class ScheduleServiceImpl implements ScheduleService {
         List<SlotResponse> results = new ArrayList<>();
         LocalDate currentDate = startDate;
         while (!currentDate.isAfter(endDate)) {
-            List<Schedule> schedules = repository.findByOption(
-                    doctorId,
+
+            SlotResponse slotResponse = sqs.getSlotsOfDay(
                     departmentId,
-                    currentDate.getDayOfWeek(),
+                    doctorId,
+                    currentDate,
                     shift
             );
-
-            SlotResponse slotResponse = buildSlotResponse(schedules, currentDate);
             results.add(slotResponse);
             currentDate = currentDate.plusDays(1);
         }
 
         return results;
-    }
-
-    private SlotResponse buildSlotResponse(List<Schedule> schedules, LocalDate currentDate) {
-        List<DoctorResponse> doctorResponses = schedules.stream().map(schedule -> {
-            Doctor doctor = schedule.getDoctor();
-            DoctorResponse doctorResponse = new DoctorResponse();
-            doctorResponse.setId(doctor.getId());
-            doctorResponse.setFullName(doctor.getFullName());
-            doctorResponse.setPosition(doctor.getPosition());
-            doctorResponse.setShift(schedule.getShift());
-            doctorResponse.setAvailable(isSlotAvailable(schedule, currentDate));
-            doctorResponse.setExaminationFee(doctor.getDegree().getExaminationFee());
-            Department department = doctor.getDepartment();
-            doctorResponse.setRoomName(departmentService.getRoomFromDepartment(department));
-//          tra ve khung gio da duoc dat (danh cho dat lich)
-            List<LocalTime> bookedTimes = appointmentService.getTimeBooked(doctor.getId(), currentDate, schedule.getShift());
-            doctorResponse.setInvalidTimes(bookedTimes);
-            return doctorResponse;
-        }).toList();
-        SlotResponse slotResponse = new SlotResponse();
-        slotResponse.setDate(currentDate);
-        slotResponse.setDateName(currentDate.getDayOfWeek().name());
-        slotResponse.setDoctors(doctorResponses);
-        slotResponse.setTotalSlot(doctorResponses.size());
-
-
-        return slotResponse;
-    }
-
-    private boolean isSlotAvailable(Schedule schedule, LocalDate date) {
-        List<Leave> leaves = seRepository.findByDateAndDoctorIdAndLeaveStatus(
-                date, schedule.getDoctor().getId(), Leave.leaveStatus.DA_DUYET
-        );
-
-        for (Leave leave : leaves) {
-            LocalTime startTime = leave.getStartTime();
-            LocalTime endTime = leave.getEndTime();
-            if (startTime.isBefore(schedule.getEndTime()) && endTime.isAfter(schedule.getStartTime())) {
-                return false; // Slot is not available
-            }
-        }
-        return true; // Slot is available
     }
 
 }

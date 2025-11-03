@@ -19,7 +19,7 @@ public class Doctor {
     @Column(name = "id_bac_si")
     private Integer id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "id_nguoi_dung")
     private User user;
 

@@ -2,6 +2,7 @@ package com.dcm.demo.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Degree {
 
     @Id
@@ -24,6 +26,9 @@ public class Degree {
 
     @Column(name = "phi_kham", nullable = false, precision = 12, scale = 0)
     private BigDecimal examinationFee;
+
+    @Column(name = "ma_chuc_danh")
+    private String code;
     @Override
     public String toString() {
         return "";

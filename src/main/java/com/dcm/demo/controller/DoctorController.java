@@ -1,5 +1,6 @@
 package com.dcm.demo.controller;
 
+import com.dcm.demo.dto.request.DoctorRequest;
 import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.service.impl.MeService;
 import com.dcm.demo.service.interfaces.DoctorService;
@@ -46,6 +47,26 @@ public class DoctorController {
     public ResponseEntity<?> getMyInfo() {
         return ResponseEntity.ok(
                 new ApiResponse<>(meService.me(), "Fetched my info successfully")
+        );
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createDoctor(@RequestBody DoctorRequest doctorRequest) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(doctorService.create(doctorRequest), "Created doctor successfully")
+        );
+    }
+    @PutMapping
+    public ResponseEntity<?> updateDoctor(@RequestBody DoctorRequest doctorRequest) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(doctorService.update(doctorRequest), "Updated doctor successfully")
+        );
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteDoctor(@PathVariable Integer id) {
+        doctorService.delete(id);
+        return ResponseEntity.ok(
+                new ApiResponse<>("", "Deleted doctor successfully")
         );
     }
 }

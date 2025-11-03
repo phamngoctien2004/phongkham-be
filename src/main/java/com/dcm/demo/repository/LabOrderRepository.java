@@ -16,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface LabOrderRepository extends JpaRepository<LabOrder, Integer> , JpaSpecificationExecutor<LabOrder> {
     Optional<LabOrder> findByMedicalRecordCode (String code);
-
+    boolean existsByHealthPlanId(Integer healthPlanId);
 
     @Query("""
                 SELECT l FROM LabOrder l

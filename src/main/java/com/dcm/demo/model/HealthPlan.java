@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -43,15 +44,15 @@ public class HealthPlan {
     private Room room;
 
 //    danh sach chi tiet cua goi kham
-    @OneToMany(mappedBy = "service")
-    private List<healthPlanDetail> healthPlanDetails;
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<healthPlanDetail> healthPlanDetails = new ArrayList<>();
 
 //    danh sach xet nghiep thuoc cac goi kham nao
     @OneToMany(mappedBy = "serviceDetail")
-    private List<healthPlanDetail> belongHealthPlan;
+    private List<healthPlanDetail> belongHealthPlan = new ArrayList<>();
 
     @OneToMany(mappedBy = "healthPlan", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HealthPlanParam> healthPlanParams;
+    private List<HealthPlanParam> healthPlanParams = new ArrayList<>();
 
     public enum ServiceType {
         DICH_VU, XET_NGHIEM, CHUAN_DOAN_HINH_ANH, KHAC, CHUYEN_KHOA

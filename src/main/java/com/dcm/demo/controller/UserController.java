@@ -1,5 +1,6 @@
 package com.dcm.demo.controller;
 
+import com.dcm.demo.dto.request.ChangePasswordRequest;
 import com.dcm.demo.dto.request.UserRequest;
 import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.dto.response.UserResponse;
@@ -62,5 +63,14 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-
+    @PutMapping
+    public ResponseEntity<UserResponse> updateUser(@RequestBody UserRequest userRequest) {
+        UserResponse response = userService.updateUser(userRequest);
+        return ResponseEntity.ok(response);
+    }
+    @PostMapping("/change-password")
+    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequest request) {
+        userService.changePassword(request);
+        return ResponseEntity.noContent().build();
+    }
 }

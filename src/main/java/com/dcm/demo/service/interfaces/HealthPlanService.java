@@ -2,6 +2,7 @@ package com.dcm.demo.service.interfaces;
 
 import com.dcm.demo.dto.request.HealthPlanRequest;
 import com.dcm.demo.dto.response.HealthPlanResponse;
+import com.dcm.demo.dto.response.ParamResponse;
 import com.dcm.demo.model.HealthPlan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ public interface HealthPlanService {
     List<HealthPlanResponse> displayClientHealthPlans(HealthPlan.ServiceType type);
     HealthPlanResponse findResponseById(Integer id);
     HealthPlanResponse findDetail(Integer id);
+    List<ParamResponse> findParamsByServiceId(Integer serviceId);
     HealthPlanResponse create(HealthPlanRequest request);
     HealthPlanResponse update(HealthPlanRequest request);
     void delete(Integer id);

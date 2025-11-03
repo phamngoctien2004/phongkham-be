@@ -12,5 +12,7 @@ public class RoomDTO {
 
     private String roomNumber;
 
+    private Integer departmentId;
+
     private String departmentName;
 }

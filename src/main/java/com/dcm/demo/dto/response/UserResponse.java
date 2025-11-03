@@ -4,12 +4,13 @@ import com.dcm.demo.model.User;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public final class UserResponse implements ProfileData {
+public final class UserResponse implements ProfileData, Serializable {
     private Integer id;
     private String email;
     private String phone;

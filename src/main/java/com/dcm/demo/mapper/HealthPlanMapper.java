@@ -9,6 +9,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Mapper(componentModel = "spring")
 public interface HealthPlanMapper {
-    HealthPlan toEntity(HealthPlanRequest userRequest);
+    HealthPlan toEntity(HealthPlanRequest request);
     HealthPlanResponse toResponse(HealthPlan user);
 }

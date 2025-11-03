@@ -19,4 +19,5 @@ public class UserRequest {
     private String password;
     private String phone;
     private User.Role role;
+    private String name;
 }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public final class DoctorResponse implements  ProfileData{
+public final class DoctorResponse implements  ProfileData, Serializable {
     private Integer id;
     private String fullName;
     private String phone;

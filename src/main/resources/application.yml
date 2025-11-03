@@ -23,7 +23,6 @@ spring:
       type: redis
       redis:
         time-to-live: 1800000 # TTL 30 phút (ms)
-        cache-null-values: false
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html

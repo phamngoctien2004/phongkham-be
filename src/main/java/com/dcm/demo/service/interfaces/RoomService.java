@@ -8,4 +8,8 @@ import java.util.List;
 
 public interface RoomService {
     Page<RoomDTO> findAll(Pageable pageable, String keyword, List<Integer> departmentId);
+    RoomDTO findById(Integer id);
+    RoomDTO create(RoomDTO roomDTO);
+    RoomDTO update(RoomDTO roomDTO);
+    void delete(Integer id);
 }

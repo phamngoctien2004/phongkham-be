@@ -7,13 +7,21 @@ import com.dcm.demo.dto.response.DoctorResponse;
 import com.dcm.demo.dto.response.ProfileData;
 import com.dcm.demo.mapper.DoctorMapper;
 import com.dcm.demo.model.*;
+import com.dcm.demo.repository.DegreeRepository;
+import com.dcm.demo.repository.DepartmentRepository;
 import com.dcm.demo.repository.DoctorRepository;
 import com.dcm.demo.service.interfaces.DoctorService;
 import com.dcm.demo.service.interfaces.ProfileLoader;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +30,14 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DoctorServiceImpl implements DoctorService, ProfileLoader {
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
     private final DoctorRepository repository;
+    private final DegreeRepository degreeRepository;
     private final DoctorMapper mapper;
+    private final DepartmentRepository departmentRepository;
 
     @Override
     public Doctor findById(Integer id) {
@@ -33,8 +45,9 @@ public class DoctorServiceImpl implements DoctorService, ProfileLoader {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Cacheable(value = "doctors", key = "'all'")
     public List<DoctorResponse> findAll() {
+        log.info("Fetching all doctors from database");
         return repository.findAllByOrderByDepartmentIdAscDegreeExaminationFeeDesc().stream()
                 .map(this::buildResponse)
                 .toList();
@@ -48,25 +61,63 @@ public class DoctorServiceImpl implements DoctorService, ProfileLoader {
     }
 
     @Override
+    @Cacheable(value = "doctors", key = "#id")
     public DoctorResponse findResponseById(Integer id) {
+        log.info("Fetching doctors from database with id: {}", id);
         return repository.findById(id)
                 .map(this::buildResponse)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
     }
 
     @Override
+    @CacheEvict(value = "doctors", key = "'all'")
+    @CachePut(value = "doctors", key = "#result.id")
+    @Transactional(rollbackFor = Exception.class)
     public DoctorResponse create(DoctorRequest doctorRequest) {
-        return null;
+        Doctor doctor = mapper.toEntity(doctorRequest);
+
+        Integer degreeId = doctorRequest.getDegreeId();
+        Integer departmentId = doctorRequest.getDepartmentId();
+
+        Degree degree = degreeRepository.findById(degreeId).orElse(null);
+        doctor.setDegree(degree);
+        assert degree != null;
+        doctor.setPosition(degree.getCode() + ". " + doctor.getFullName());
+
+        Department department = departmentRepository.findById(departmentId).orElse(null);
+        doctor.setDepartment(department);
+
+        User user = new User();
+        user.setEmail(doctorRequest.getEmail());
+        user.setName(doctorRequest.getFullName());
+        user.setPhone(doctorRequest.getPhone());
+        user.setRole(User.Role.BAC_SI);
+        user.setPassword(passwordEncoder.encode(doctorRequest.getPhone()));
+        user.setDoctor(doctor);
+        doctor.setUser(user);
+
+        return buildResponse(repository.save(doctor));
     }
 
     @Override
+    @CachePut(value = "doctors", key = "#doctorRequest.id")
+    @CacheEvict(value = "doctors", key = "'all'")
     public DoctorResponse update(DoctorRequest doctorRequest) {
-        return null;
+        Doctor doctor = repository.findById(doctorRequest.getId())
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+        buildDoctor(doctor, doctorRequest);
+        return buildResponse(repository.save(doctor));
     }
 
     @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "doctors", key = "'all'"),
+                    @CacheEvict(value = "doctors", key = "#id")
+            }
+    )
     public void delete(Integer id) {
-
+        repository.deleteById(id);
     }
 
     @Override
@@ -84,31 +135,54 @@ public class DoctorServiceImpl implements DoctorService, ProfileLoader {
 
     private DoctorResponse buildResponse(Doctor doctor) {
         Department department = doctor.getDepartment();
-        Room room = department.getRooms().stream()
-                .filter(r -> r.getRoomNumber().contains("A"))
-                .findFirst()
-                .orElse(null);
-        DoctorResponse response = new DoctorResponse();
+        Degree degree = doctor.getDegree();
+
+        DoctorResponse response = mapper.toResponse(doctor);
         response.setId(doctor.getId());
         response.setFullName(doctor.getFullName());
         response.setPosition(doctor.getPosition());
 
-        response.setExaminationFee(doctor.getDegree().getExaminationFee());
-        if (room != null) {
-            response.setRoomNumber(room.getRoomNumber());
-            response.setRoomName(room.getRoomName());
-        }
-        Degree degree = doctor.getDegree();
-        DegreeResponse degreeResponse = new DegreeResponse();
-        degreeResponse.setDegreeId(degree.getDegreeId());
-        degreeResponse.setDegreeName(degree.getDegreeName());
-        degreeResponse.setExaminationFee(degree.getExaminationFee());
-        response.setDegreeResponse(degreeResponse);
 
-        DepartmentResponse departmentResponse = new DepartmentResponse();
-        departmentResponse.setId(department.getId());
-        departmentResponse.setName(department.getName());
-        response.setDepartmentResponse(departmentResponse);
+        if (department.getRooms() != null) {
+            Room room = department.getRooms().stream()
+                    .filter(r -> r.getRoomNumber().contains("A"))
+                    .findFirst()
+                    .orElse(null);
+            if (room != null) {
+                response.setRoomNumber(room.getRoomNumber());
+                response.setRoomName(room.getRoomName());
+            }
+            DepartmentResponse departmentResponse = new DepartmentResponse();
+            departmentResponse.setId(department.getId());
+            departmentResponse.setName(department.getName());
+            response.setDepartmentResponse(departmentResponse);
+        }
+        if (degree.getDegreeName() != null) {
+            DegreeResponse degreeResponse = new DegreeResponse();
+            degreeResponse.setDegreeId(degree.getDegreeId());
+            degreeResponse.setDegreeName(degree.getDegreeName());
+            degreeResponse.setExaminationFee(degree.getExaminationFee());
+            response.setDegreeResponse(degreeResponse);
+            response.setExaminationFee(degree.getExaminationFee());
+        }
+
         return response;
+    }
+
+    private void buildDoctor(Doctor doctor, DoctorRequest request) {
+        doctor.setPhone(request.getPhone());
+        doctor.setAddress(request.getAddress());
+        doctor.setBirth(request.getBirth());
+        doctor.setGender(request.getGender());
+        doctor.setFullName(request.getFullName());
+        doctor.setExp(request.getExp());
+
+        Degree degree = degreeRepository.findById(request.getDegreeId()).orElse(null);
+        doctor.setDegree(degree);
+        assert degree != null;
+        doctor.setPosition(degree.getCode() + ". " + doctor.getFullName());
+
+        Department department = departmentRepository.findById(request.getDepartmentId()).orElse(null);
+        doctor.setDepartment(department);
     }
 }
