@@ -13,7 +13,6 @@ import com.dcm.demo.service.interfaces.PatientService;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,11 +28,12 @@ public class ConversationService {
     private final UserService userService;
     private final PatientService patientService;
     private final MessageService messageService;
+
     public List<ConversationDTO> getAll() {
-        User user  = userService.getCurrentUser();
+        User user = userService.getCurrentUser();
         User.Role role = user.getRole();
 
-        if(role.equals(User.Role.LE_TAN)){
+        if (role.equals(User.Role.LE_TAN)) {
             Specification<Conversation> spec = FilterHelper.equal("responder", "LE_TAN");
 
             return repository.findAll(spec).stream()
@@ -56,27 +56,36 @@ public class ConversationService {
                 })
                 .toList());
 
-        if(conversations.isEmpty()){
+        if (conversations.isEmpty()) {
             ConversationDTO conversationDTO = create("LE_TAN");
             conversationDTOs.add(conversationDTO);
             log.info("Created default conversation for patient: {}", patient.getFullName());
         }
-            return conversationDTOs;
+        return conversationDTOs;
+    }
+
+    public List<ConversationDTO> getAllAiConversations() {
+        User user = userService.getCurrentUser();
+
+        return repository.findByPatientIdAndResponder(user.getId(), "AI").stream()
+                .map(this::toDTO)
+                .toList();
     }
 
     public MessageResponse loadMessageFirst(Integer conversationId) {
         Conversation conversation = repository.findById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found with id: " + conversationId));
-        User user  = userService.getCurrentUser();
+
+        User user = userService.getCurrentUser();
         User.Role role = user.getRole();
 
 //tham so khoi tao
         Integer lastReadId = 0;
 
 
-        if(role.equals(User.Role.LE_TAN)){
+        if (role.equals(User.Role.LE_TAN)) {
             lastReadId = conversation.getLastReadAdmin();
-        }else{
+        } else {
             lastReadId = conversation.getLastReadPatient();
         }
         int totalMessage = messageService.countMessageByConversation(conversation.getId());
@@ -88,11 +97,11 @@ public class ConversationService {
         List<Message> messages;
 
 //      truong hop chua doc tin nhan nao
-        if(lastReadId.equals(latestMessageId)) {
+        if (lastReadId.equals(latestMessageId)) {
             messages = messageService.findLatestMessage(conversationId);
         }
 //      truong hop doc xung quanh tin nhan 30
-        else{
+        else {
             messages = messageService.findMessagesAroundUnread(
                     conversationId,
                     lastReadId
@@ -129,10 +138,10 @@ public class ConversationService {
                 .build();
     }
 
-    ConversationDTO create(String responder) {
-        User user  = userService.getCurrentUser();
+    public ConversationDTO create(String responder) {
+        User user = userService.getCurrentUser();
 
-        if(responder.equals("LE_TAN")){
+        if (responder.equals("LE_TAN")) {
             Patient patient = patientService.findByPhone(user.getPhone());
             Conversation conversation = new Conversation();
             conversation.setPatient(user);
@@ -144,7 +153,8 @@ public class ConversationService {
 
         Conversation conversation = new Conversation();
         conversation.setPatient(user);
-        conversation.setResponder("AI-" + System.currentTimeMillis());
+        conversation.setResponder("AI");
+        conversation.setName("New Chat");
         conversation.setLastMessage(0);
         conversation.setLastReadAdmin(0);
         conversation.setLastReadPatient(0);
@@ -156,11 +166,19 @@ public class ConversationService {
     ConversationDTO updateLastRead(Integer conversationId, User.Role role, Integer lastReadId) {
         Conversation conversation = repository.findById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found with id: " + conversationId));
-        if(role.equals(User.Role.LE_TAN)){
+        if (role.equals(User.Role.LE_TAN)) {
             conversation.setLastReadAdmin(lastReadId);
-        }else{
+        } else {
             conversation.setLastReadPatient(lastReadId);
         }
+        repository.save(conversation);
+        return toDTO(conversation);
+    }
+
+    public ConversationDTO updateName(Integer conversationId, String name){
+        Conversation conversation = repository.findById(conversationId)
+                .orElseThrow(() -> new RuntimeException("Conversation not found with id: " + conversationId));
+        conversation.setName(name);
         repository.save(conversation);
         return toDTO(conversation);
     }
@@ -168,9 +186,10 @@ public class ConversationService {
     public List<ConversationDTO> toDTOs(List<Conversation> conversations) {
         return conversations.stream().map(this::toDTO).toList();
     }
+
     public ConversationDTO toDTO(Conversation conversation) {
         ConversationDTO dto = new ConversationDTO();
-        dto.setId(conversation.getId().toString());
+        dto.setId(conversation.getId());
         dto.setPatientName(conversation.getName());
         dto.setResponder(conversation.getResponder());
         return dto;

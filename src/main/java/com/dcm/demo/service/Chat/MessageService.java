@@ -46,16 +46,19 @@ public class MessageService {
         Message savedMessage = messageRepository.save(message);
 
         User user = savedMessage.getSender();
-        User.Role role = savedMessage.getSender().getRole();
-        Conversation conversation = conversationRepository.findById(savedMessage.getConversation().getId())
-                .orElseThrow(() -> new RuntimeException("Conversation not found"));
-        conversation.setLastMessage(savedMessage.getId());
-        if(role.equals(User.Role.LE_TAN)){
-            conversation.setLastReadAdmin(savedMessage.getId());
-        } else {
-            conversation.setLastReadPatient(savedMessage.getId());
+        if(user != null){
+            User.Role role = savedMessage.getSender().getRole();
+            Conversation conversation = conversationRepository.findById(savedMessage.getConversation().getId())
+                    .orElseThrow(() -> new RuntimeException("Conversation not found"));
+            conversation.setLastMessage(savedMessage.getId());
+            if(role.equals(User.Role.LE_TAN)){
+                conversation.setLastReadAdmin(savedMessage.getId());
+            } else {
+                conversation.setLastReadPatient(savedMessage.getId());
+            }
+            conversationRepository.save(conversation);
         }
-        conversationRepository.save(conversation);
+
         return toDTO(savedMessage);
     }
     public void clearMessage(Integer conversationId) {
@@ -105,7 +108,7 @@ public class MessageService {
         MessageDTO dto = new MessageDTO();
         dto.setId(message.getId());
         dto.setConversationId(message.getConversation().getId());
-        dto.setSenderId(message.getSender().getId());
+        dto.setSenderId(message.getSender() != null ? message.getSender().getId() : null);
         dto.setMessage(message.getMessage());
         dto.setSentTime(message.getSentTime());
         dto.setLastMessageConversation(message.getId());
@@ -116,18 +119,21 @@ public class MessageService {
     }
 
     public Message toEntity(MessageDTO dto) {
-        log.info("🔍 Converting MessageDTO to Entity. Getting current user...");
 
         Message message = new Message();
         User user = userService.getCurrentUser();
-
-        log.info("✅ Got current user: {} (ID: {})", user.getName(), user.getId());
 
         Conversation conversation = new Conversation();
         conversation.setId(dto.getConversationId());
         message.setConversation(conversation);
         // Note: Conversation and Sender should be set separately
-        message.setSender(user);
+
+        if(dto.getSenderId() != null){
+            message.setSender(user);
+        }else{
+            message.setSender(null);
+        }
+
         message.setMessage(dto.getMessage());
         message.setSentTime(dto.getSentTime());
         return message;

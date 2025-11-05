@@ -33,8 +33,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final EmailService emailService;
     private final PatientMapper patientMapper;
     private final UserService userService;
-    private final InvoiceService invoiceService;
-
+    private final NotificationService notificationService;
     @Override
     @Transactional
     public AppointmentResponse createAppointment(AppointmentRequest request) {
@@ -56,6 +55,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setPatient(patient);
         appointment.setStatus(Appointment.AppointmentStatus.DA_XAC_NHAN);
         repository.save(appointment);
+        notificationService.send("Bệnh nhân " + patient.getFullName() +" đã đặt lịch khám ", Notification.NotificationType.DAT_LICH, appointment.getId());
         return this.toResponse(appointment);
     }
 

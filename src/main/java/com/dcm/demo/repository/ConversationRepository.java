@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation, Integer>, JpaSpecificationExecutor<Conversation> {
     List<Conversation> findByPatientId(Integer userId);
+    List<Conversation> findByPatientIdAndResponder(Integer userId, String responder);
+
 }

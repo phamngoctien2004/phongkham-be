@@ -1,6 +1,14 @@
 package com.dcm.demo.service.interfaces;
 
+import com.dcm.demo.dto.response.NotificationResponse;
+import com.dcm.demo.model.Notification;
+
+import java.util.List;
+
 public interface NotificationService {
-    void sendToTopic(String topic, Object data);
-    void sendToUser(String userId, String dest, Object data);
+    NotificationResponse findByUser();
+
+    void send(String title, Notification.NotificationType type, Integer id);
+
+    void markAsRead();
 }

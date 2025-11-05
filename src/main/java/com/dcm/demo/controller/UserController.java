@@ -6,6 +6,7 @@ import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.dto.response.UserResponse;
 import com.dcm.demo.model.User;
 import com.dcm.demo.service.impl.MeService;
+import com.dcm.demo.service.interfaces.NotificationService;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
     private final MeService meService;
-
+    private final NotificationService notificationService;
     @GetMapping
     public ResponseEntity<?> getUser(@RequestParam(required = false) String keyword,
                                                 @RequestParam(required = false) User.Role role,
@@ -71,6 +72,19 @@ public class UserController {
     @PostMapping("/change-password")
     public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequest request) {
         userService.changePassword(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/notifications")
+    public ResponseEntity<?> getUserNotifications() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(notificationService.findByUser(), "Fetched user notifications successfully")
+        );
+    }
+
+    @PostMapping("/notifications/mark-as-read")
+    public ResponseEntity<Void> markNotificationsAsRead() {
+        notificationService.markAsRead();
         return ResponseEntity.noContent().build();
     }
 }

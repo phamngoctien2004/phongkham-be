@@ -21,4 +21,5 @@ public class MessageDTO {
     private Integer lastMessageConversation;
     private LocalDateTime sentTime;
     private List<String> urls;
+    private boolean isCreateNewAIConversation;
 }

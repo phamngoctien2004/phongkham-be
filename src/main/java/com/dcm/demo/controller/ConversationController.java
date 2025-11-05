@@ -21,13 +21,19 @@ public class ConversationController {
                 new ApiResponse<>(conversationService.getAll(), "Lấy danh sách cuộc trò chuyện thành công")
         );
     }
-
+    @GetMapping("/ai")
+    public ResponseEntity<?> getAllAIConversations() {
+        return ResponseEntity.ok(
+                new ApiResponse<>(conversationService.getAllAiConversations(), "Lấy danh sách cuộc trò chuyện AI thành công")
+        );
+    }
     @GetMapping("/{conversationId}/messages")
     public ResponseEntity<?> loadMessageFirst(@PathVariable Integer conversationId) {
         return ResponseEntity.ok(
                 new ApiResponse<>(conversationService.loadMessageFirst(conversationId), "Lấy lịch sử trò chuyện thành công")
         );
     }
+
     @GetMapping("/{conversationId}/messages/more")
     public ResponseEntity<?> loadMoreMessages(
             @PathVariable Integer conversationId,
@@ -36,7 +42,14 @@ public class ConversationController {
                 new ApiResponse<>(conversationService.loadMoreOldMessage(conversationId, beforeId), "Lấy thêm tin nhắn thành công")
         );
     }
+    @PutMapping("/{conversationId}")
+    public ResponseEntity<?> update(@PathVariable Integer conversationId, @RequestParam String name) {
 
+        return ResponseEntity.ok(
+                new ApiResponse<>(conversationService.updateName(conversationId, name), "Cập nhật tên cuộc trò chuyện thành công")
+        );
+
+    }
     @DeleteMapping("/{conversationId}/messages/clear" )
     public ResponseEntity<?> clearMessages(@PathVariable Integer conversationId) {
         conversationService.clearMessage(conversationId);
@@ -44,4 +57,5 @@ public class ConversationController {
                 new ApiResponse<>(null, "Xóa tin nhắn thành công")
         );
     }
+
 }

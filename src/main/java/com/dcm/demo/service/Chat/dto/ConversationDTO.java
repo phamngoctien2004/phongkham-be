@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class ConversationDTO {
-    private String id;
+    private Integer id;
     private String patientName;
     private String responder;
     private boolean isNewMessage;
