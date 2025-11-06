@@ -49,6 +49,7 @@ public class ConversationService {
 
         List<Conversation> conversations = repository.findByPatientId(user.getId());
         List<ConversationDTO> conversationDTOs = new ArrayList<>(conversations.stream()
+                .filter(it -> !it.getResponder().equals("AI"))
                 .map(it -> {
                     ConversationDTO dto = toDTO(it);
                     dto.setNewMessage(!it.getLastReadPatient().equals(it.getLastMessage()));
