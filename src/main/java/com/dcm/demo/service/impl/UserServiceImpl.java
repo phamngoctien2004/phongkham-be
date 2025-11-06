@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserResponse> findAll(Pageable pageable, String keyword, User.Role role) {
-        System.out.println("ok");
+        System.out.println("ok2");
         return userRepository.findAll(pageable, keyword, role)
                 .map(this::toResponse);
     }
