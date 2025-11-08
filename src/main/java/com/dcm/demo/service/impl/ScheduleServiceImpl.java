@@ -18,6 +18,8 @@ import com.dcm.demo.service.interfaces.DoctorService;
 import com.dcm.demo.service.interfaces.ScheduleService;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -147,16 +149,26 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "scheduleSlotsByDay", allEntries = true)
     public void updateLeave(LeaveRequest request) {
         var leave = seRepository.findById(request.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.RECORD_NOTFOUND));
         if (leave.getLeaveStatus() != Leave.leaveStatus.CHO_DUYET) {
             throw new RuntimeException("Cannot update approved leave");
         }
-        leave.setLeaveStatus(request.getLeaveStatus());
-        leave.setReason(request.getReason());
-        leave.setDate(request.getDay());
-        setTimeByShift(leave, request.getShifts().get(0));
+        if(request.getLeaveStatus() != null){
+            leave.setLeaveStatus(request.getLeaveStatus());
+        }
+        if(request.getReason() != null){
+            leave.setReason(request.getReason());
+        }
+        if(request.getDay() != null){
+            leave.setDate(request.getDay());
+        }
+        if(request.getShifts() != null && !request.getShifts().isEmpty()){
+            setTimeByShift(leave, request.getShifts().get(0));
+        }
+
         seRepository.save(leave);
 
 //        Doctor doctor = leave.getDoctor();
