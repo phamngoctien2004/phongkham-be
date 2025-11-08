@@ -50,7 +50,7 @@ public class ScheduleController {
                 ), "get available slots success")
         );
     }
-    @GetMapping("leave/me")
+    @GetMapping("/leave/me")
     public ResponseEntity<?> getMyLeaves(
             @RequestParam(required = false) LocalDate date,
             @RequestParam(required = false) Leave.leaveStatus status
@@ -81,6 +81,15 @@ public class ScheduleController {
         );
     }
 
-
+    @GetMapping("/leave/doctor/{doctorId}")
+    public ResponseEntity<?> getMyLeaves(
+            @PathVariable Integer doctorId,
+            @RequestParam(required = false) LocalDate date,
+            @RequestParam(required = false) Leave.leaveStatus status
+    ) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(scheduleService.getLeaveByDoctorId(doctorId, date, status), "get my leaves success")
+        );
+    }
 
 }

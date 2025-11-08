@@ -53,6 +53,15 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .toList();
     }
 
+    @Override
+    public List<LeaveResponse> getLeaveByDoctorId(Integer doctorId, LocalDate date, Leave.leaveStatus leaveStatus) {
+        Doctor doctor = doctorService.findById(doctorId);
+
+        return seRepository.findByDateAndLeaveStatus(date, leaveStatus, doctor.getId()).stream()
+                .map(this::buildLeaveResponse)
+                .toList();
+    }
+
     LeaveResponse buildLeaveResponse(Leave leave) {
         LeaveResponse response = new LeaveResponse();
         response.setId(leave.getId());

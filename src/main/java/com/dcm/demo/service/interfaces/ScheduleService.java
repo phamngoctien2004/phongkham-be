@@ -14,6 +14,7 @@ import java.util.List;
 
 public interface ScheduleService {
     List<LeaveResponse> getLeaveByDoctor(LocalDate date, Leave.leaveStatus leaveStatus);
+    List<LeaveResponse> getLeaveByDoctorId(Integer doctorId, LocalDate date, Leave.leaveStatus leaveStatus);
 
     ScheduleResponse create(ScheduleRequest scheduleRequest);
 
