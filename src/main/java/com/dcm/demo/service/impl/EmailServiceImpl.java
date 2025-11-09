@@ -50,6 +50,12 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Override
+    @Async
+    public void sendNewsletterToAllUsers(EmailRequest emailRequest) {
+
+    }
+
     //  Convert model into context of thymleaf
     private String processTemplate(String template, Map<String, Object> model) {
         Context context = new Context();

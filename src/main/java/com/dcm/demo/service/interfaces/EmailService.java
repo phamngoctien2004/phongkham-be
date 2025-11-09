@@ -8,4 +8,5 @@ public interface EmailService {
     void sendHtml(String to, String subject, String text);
     void sendTemplate(String to, String subject, String template, Map<String, Object> dataContext);
     void sendFormMessage(EmailRequest emailRequest);
+    void sendNewsletterToAllUsers(EmailRequest emailRequest);
 }

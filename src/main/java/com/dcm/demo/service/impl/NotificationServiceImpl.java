@@ -1,6 +1,8 @@
 package com.dcm.demo.service.impl;
 
+import com.dcm.demo.dto.request.EmailRequest;
 import com.dcm.demo.dto.response.NotificationResponse;
+import com.dcm.demo.helpers.FilterHelper;
 import com.dcm.demo.model.Notification;
 import com.dcm.demo.model.User;
 import com.dcm.demo.repository.NotificationRepository;
@@ -8,6 +10,9 @@ import com.dcm.demo.service.interfaces.NotificationService;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +48,7 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setTypeId(id);
         Notification saved = repository.save(notification);
 
-        if(type.equals(Notification.NotificationType.DAT_LICH)) {
+        if (type.equals(Notification.NotificationType.DAT_LICH)) {
             template.convertAndSend("/topic/notifications/book." + id, saved);
         }
     }
@@ -65,15 +70,47 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
 
-
         repository.saveAll(notifications);
+    }
+
+    @Override
+    public Page<Notification> findAllNotificationsSystem(Pageable pageable) {
+        Specification<Notification> spec = FilterHelper.equal("type", Notification.NotificationType.HE_THONG);
+        return repository.findAll(spec, pageable);
+    }
+
+    @Override
+    public Notification findById(Integer id) {
+        return repository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Notification create(Notification notification) {
+        notification.setType(Notification.NotificationType.HE_THONG);
+        return repository.save(notification);
+    }
+
+    @Override
+    public Notification update(Notification notification) {
+        Notification existing = repository.findById(notification.getId()).orElseThrow(
+                () -> new RuntimeException("Notification not found")
+        );
+        existing.setTitle(notification.getTitle());
+        existing.setContent(notification.getContent());
+        existing.setImage(notification.getImage());
+        return repository.save(existing);
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        repository.deleteById(id);
     }
 
     private NotificationResponse buildNotificationResponse(List<Notification> notifications, boolean isAdmin) {
         NotificationResponse response = new NotificationResponse();
         response.setNotifications(notifications);
         long unreadCount;
-        if (!   isAdmin) {
+        if (!isAdmin) {
             unreadCount = notifications.stream().filter(n -> !n.getIsUserRead()).count();
         } else {
             unreadCount = notifications.stream().filter(n -> !n.getIsAdminRead()).count();

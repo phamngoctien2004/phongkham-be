@@ -1,11 +1,13 @@
 package com.dcm.demo.controller;
 
 import com.dcm.demo.dto.request.ChangePasswordRequest;
+import com.dcm.demo.dto.request.EmailRequest;
 import com.dcm.demo.dto.request.UserRequest;
 import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.dto.response.UserResponse;
 import com.dcm.demo.model.User;
 import com.dcm.demo.service.impl.MeService;
+import com.dcm.demo.service.impl.NotificationSendingService;
 import com.dcm.demo.service.interfaces.NotificationService;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class UserController {
     private final UserService userService;
     private final MeService meService;
     private final NotificationService notificationService;
+    private final NotificationSendingService notificationSendingService;
     @GetMapping
     public ResponseEntity<?> getUser(@RequestParam(required = false) String keyword,
                                                 @RequestParam(required = false) User.Role role,
@@ -85,6 +88,11 @@ public class UserController {
     @PostMapping("/notifications/mark-as-read")
     public ResponseEntity<Void> markNotificationsAsRead() {
         notificationService.markAsRead();
+        return ResponseEntity.noContent().build();
+    }
+    @PostMapping("/send-newsletter/{id}")
+    public ResponseEntity<Void> sendNewsletterToAllUsers(@PathVariable("id") Integer notificationId) {
+        notificationSendingService.sendNewsletterToAllUsers(notificationId);
         return ResponseEntity.noContent().build();
     }
 }

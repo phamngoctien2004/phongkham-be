@@ -1,6 +1,7 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.request.ChangePasswordRequest;
+import com.dcm.demo.dto.request.EmailRequest;
 import com.dcm.demo.dto.request.ResetPassword;
 import com.dcm.demo.dto.request.UserRequest;
 import com.dcm.demo.dto.response.UserResponse;
@@ -9,17 +10,21 @@ import com.dcm.demo.exception.ErrorCode;
 import com.dcm.demo.mapper.UserMapper;
 import com.dcm.demo.model.User;
 import com.dcm.demo.repository.UserRepository;
-import com.dcm.demo.service.interfaces.JwtService;
+import com.dcm.demo.service.interfaces.EmailService;
+import com.dcm.demo.service.interfaces.NotificationService;
 import com.dcm.demo.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -28,7 +33,13 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public List<User> findAll() {
+        return userRepository.findByRole(User.Role.BENH_NHAN);
+    }
 
     @Override
     public Page<UserResponse> findAll(Pageable pageable, String keyword, User.Role role) {
@@ -165,5 +176,6 @@ public class UserServiceImpl implements UserService {
         log.info("✅ User found: {} (ID: {})", user.getName(), user.getId());
         return user;
     }
+
 
 }

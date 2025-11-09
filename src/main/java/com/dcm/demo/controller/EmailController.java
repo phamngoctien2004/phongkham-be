@@ -17,4 +17,10 @@ public class EmailController {
         emailService.sendFormMessage(request);
         return new ApiResponse<>("", "Send email successfully");
     }
+
+    @PostMapping("/newsletter")
+    public ApiResponse<?> sendNewsletterEmail(@RequestBody EmailRequest request) {
+        emailService.sendNewsletterToAllUsers(request);
+        return new ApiResponse<>("", "Send newsletter email successfully");
+    }
 }

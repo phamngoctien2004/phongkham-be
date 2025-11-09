@@ -99,6 +99,8 @@ public class ReportServiceImpl implements ReportService {
                 com.dcm.demo.model.Appointment.AppointmentStatus.HOAN_THANH);
         Long cancelledAppointments = appointmentRepository.countByDateRangeAndStatus(fromDate, toDate,
                 com.dcm.demo.model.Appointment.AppointmentStatus.HUY);
+        Long noShowAppointments = appointmentRepository.countByDateRangeAndStatus(fromDate, toDate,
+                com.dcm.demo.model.Appointment.AppointmentStatus.KHONG_DEN);
 
         // Lịch khám theo bác sĩ
         List<Object[]> byDoctorData = appointmentRepository.getAppointmentsByDoctor(fromDate, toDate);
@@ -111,6 +113,7 @@ public class ReportServiceImpl implements ReportService {
                         .totalAppointments(((Number) row[3]).intValue())
                         .completedAppointments(((Number) row[4]).intValue())
                         .cancelledAppointments(((Number) row[5]).intValue())
+                        .noShowAppointments(((Number) row[6]).intValue())
                         .build())
                 .collect(Collectors.toList());
 
@@ -149,7 +152,7 @@ public class ReportServiceImpl implements ReportService {
                 .confirmedAppointments(confirmedAppointments != null ? confirmedAppointments.intValue() : 0)
                 .completedAppointments(completedAppointments != null ? completedAppointments.intValue() : 0)
                 .cancelledAppointments(cancelledAppointments != null ? cancelledAppointments.intValue() : 0)
-                .noShowAppointments(0)
+                .noShowAppointments(noShowAppointments != null ? noShowAppointments.intValue() : 0)
                 .appointmentsByDoctor(appointmentsByDoctor)
                 .appointmentsByDepartment(appointmentsByDepartment)
                 .appointmentsByDay(appointmentsByDay)

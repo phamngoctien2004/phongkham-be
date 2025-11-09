@@ -58,10 +58,10 @@ public class Appointment {
     private Patient patient;
 
 
-
     public enum AppointmentStatus {
-        DA_XAC_NHAN, KHONG_DEN, HOAN_THANH,HUY
+        DA_XAC_NHAN, KHONG_DEN, HOAN_THANH, HUY
     }
+
     @Override
     public String toString() {
         return "";

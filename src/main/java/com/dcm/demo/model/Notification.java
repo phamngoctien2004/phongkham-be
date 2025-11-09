@@ -36,6 +36,11 @@ public class Notification {
     private Integer receiverId;
     @Column(name = "loai_id")
     private Integer typeId;
+    @Column(name = "anh")
+    private String image;
+    @Column(name = "noi_dung")
+    private String content;
+
     @Column(name = "loai_thong_bao")
     @Enumerated(EnumType.STRING)
     private NotificationType type;

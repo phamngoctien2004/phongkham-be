@@ -35,6 +35,7 @@ public class AppointmentReportResponse {
         private Integer totalAppointments;
         private Integer completedAppointments;
         private Integer cancelledAppointments;
+        private Integer noShowAppointments;
     }
 
     @Data
@@ -58,4 +59,3 @@ public class AppointmentReportResponse {
         private Integer completedCount;
     }
 }
-

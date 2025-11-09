@@ -25,4 +25,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
         AND (:role IS NULL OR u.role = :role)
 """)
     Page<User> findAll(Pageable pageable, String keyword, User.Role role);
+
 }
