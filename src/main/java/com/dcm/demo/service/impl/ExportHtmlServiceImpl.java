@@ -1,8 +1,6 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.dto.response.HtmlExportDto;
-import com.dcm.demo.exception.AppException;
-import com.dcm.demo.exception.ErrorCode;
 import com.dcm.demo.model.*;
 import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +22,7 @@ public class ExportHtmlServiceImpl implements ExportHtmlService {
     private final DepartmentService departmentService;
     private final InvoiceService invoiceService;
     private final UserService userService;
+
     @Override
     public String exportMedicalRecordHtml(Integer id) {
         MedicalRecord medicalRecord = medicalRecordService.findById(id);
@@ -105,7 +104,6 @@ public class ExportHtmlServiceImpl implements ExportHtmlService {
 
         return templateEngine.process("pdfs/hoadon.html", ctx);
     }
-
 
 
 }

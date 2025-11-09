@@ -48,7 +48,7 @@ spring:
       max-request-size: 200MB
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:defaultSecretKeyForDevelopmentOnlyPleaseChangeInProduction123456789}
   access_ttl: 60
   refresh_ttl: 43200
 
@@ -70,6 +70,3 @@ r2:
   access_key: d927fe84a0c82ed69fe9d5a914689a2c
   secret_key: 03d4db385f4ae750d969964ddbb09d130cb647dfd170daad64ee58097a0cce03
   endpoint: https://348b437eb42cb30d353b601b82e8a9a9.r2.cloudflarestorage.com/phongkham
-
-
-
