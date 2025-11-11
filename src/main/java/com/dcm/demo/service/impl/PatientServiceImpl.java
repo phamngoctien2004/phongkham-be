@@ -1,6 +1,7 @@
 package com.dcm.demo.service.impl;
 
 import com.dcm.demo.config.aes.AesGcmCrypto;
+import com.dcm.demo.config.aes.CryptoUtils;
 import com.dcm.demo.dto.request.PatientRequest;
 import com.dcm.demo.dto.request.VerifyOtpRequest;
 import com.dcm.demo.dto.response.PatientResponse;
@@ -218,6 +219,7 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public Patient findByPhone(String phone) {
+//        phone = CryptoUtils.encrypt(phone);
         return repository.findByPhone(phone).orElse(null);
     }
 

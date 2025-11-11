@@ -6,7 +6,14 @@ import com.dcm.demo.dto.response.MedicineResponse;
 import com.dcm.demo.dto.response.PreDetailResponse;
 import com.dcm.demo.dto.response.PrescriptionResponse;
 import com.dcm.demo.model.*;
+import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.JsonKeysetWriter;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.config.TinkConfig;
+import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class ConvertUtil {
@@ -86,4 +93,7 @@ public class ConvertUtil {
         detail.setMedicine(medicine);
         return detail;
     }
+
+
+
 }

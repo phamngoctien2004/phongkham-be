@@ -1,9 +1,11 @@
 package com.dcm.demo.config.aes;
 
+import com.google.crypto.tink.CleartextKeysetHandle;
 import com.google.crypto.tink.DeterministicAead;
+import com.google.crypto.tink.JsonKeysetReader;
 import com.google.crypto.tink.KeysetHandle;
-import com.google.crypto.tink.daead.DeterministicAeadKeyTemplates;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import com.google.crypto.tink.config.TinkConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,27 +16,30 @@ import java.security.GeneralSecurityException;
 import java.util.Base64;
 
 @Configuration
-@EnableConfigurationProperties(CryptoProps.class)
 public class CryptoConfig {
-    @Bean
-    public SecretKey aesKey(CryptoProps props) {
-        byte[] key = Base64.getDecoder().decode(props.getKeyBase64());
-        if (key.length != 32) {
-            throw new IllegalArgumentException("Yêu cầu khoá AES 256-bit (32 bytes).");
-        }
-        return new SecretKeySpec(key, "AES");
-    }
-
-    @Bean
-    public AesGcmCrypto aesGcmCrypto(SecretKey aesKey) {
-        return new AesGcmCrypto(aesKey);
-    }
+    @Value("${security.crypto.aes.key-base64}")
+    private String aesKeyBase64;
+//
+//    @Bean
+//    public SecretKey aesKey() {
+//        byte[] key = Base64.getDecoder().decode(aesKeyBase64);
+//        if (key.length != 32) {
+//            throw new IllegalArgumentException("Yêu cầu khoá AES 256-bit (32 bytes).");
+//        }
+//        return new SecretKeySpec(key, "AES");
+//    }
+//
+//    @Bean
+//    public AesGcmCrypto aesGcmCrypto(SecretKey aesKey) {
+//        return new AesGcmCrypto(aesKey);
+//    }
 
     @Bean
     public DeterministicAead deterministicAead() throws GeneralSecurityException, IOException {
-        com.google.crypto.tink.config.TinkConfig.register();
-        // Keyset có thể nằm trong Secret Manager / ENV / file được mã hoá
-        KeysetHandle handle = KeysetHandle.generateNew(DeterministicAeadKeyTemplates.AES256_SIV);
+        TinkConfig.register();
+        String keysetJson = "{\"primaryKeyId\":1032924696,\"key\":[{\"keyData\":{\"typeUrl\":\"type.googleapis.com/google.crypto.tink.AesSivKey\",\"value\":\"EkCJQD81yUnGiDvzZrVJDTsdyB9I2hZ/CLHjeXa5wh9w2hLknNLXjJpq+aU0VqBKvzKR/5JZ+tCSkurGKw9AAN6G\",\"keyMaterialType\":\"SYMMETRIC\"},\"status\":\"ENABLED\",\"keyId\":1032924696,\"outputPrefixType\":\"TINK\"}]}\n";
+        KeysetHandle handle = CleartextKeysetHandle.read(JsonKeysetReader.withString(keysetJson));
         return handle.getPrimitive(DeterministicAead.class);
     }
+
 }
