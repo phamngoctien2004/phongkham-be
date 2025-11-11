@@ -196,6 +196,12 @@
             <artifactId>spring-security-messaging</artifactId>
         </dependency>
         <!-- pom.xml -->
+        <dependency>
+            <groupId>com.google.crypto.tink</groupId>
+            <artifactId>tink</artifactId>
+            <version>1.13.0</version>
+        </dependency>
+
     </dependencies>
 
 	<build>

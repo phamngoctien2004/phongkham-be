@@ -1,29 +1,33 @@
 package com.dcm.demo.config.aes;
 
+import com.google.crypto.tink.DeterministicAead;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-@Converter(autoApply = false) // false: bạn gắn @Convert cho từng trường; true: áp dụng cho mọi String (cẩn thận!)
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.util.Base64;
+
+@Converter(autoApply = false)
 public class CryptoConverter implements AttributeConverter<String, String> {
 
-    private AesGcmCrypto crypto;
+    private DeterministicAead daead; // AES-SIV
+    private static final byte[] AAD = new byte[0];
 
-    // Lấy bean lazy lần đầu dùng
-    private AesGcmCrypto getCrypto() {
-        if (crypto == null) {
-            crypto = ApplicationContextProvider.getBean(AesGcmCrypto.class);
-        }
-        return crypto;
+    private DeterministicAead p() {
+        if (daead == null) daead = ApplicationContextProvider.getBean(DeterministicAead.class);
+        return daead;
     }
 
     @Override
     public String convertToDatabaseColumn(String attribute) {
         if (attribute == null) return null;
         try {
-            // AAD có thể là tên entity|field, hoặc null
-            return getCrypto().encryptToBase64(attribute, null);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Không thể mã hoá trường", ex);
+            byte[] ct = p().encryptDeterministically(attribute.getBytes(StandardCharsets.UTF_8), AAD);
+
+            return Base64.getEncoder().encodeToString(ct); // không cần IV, chỉ Base64(ct)
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Encrypt error", e);
         }
     }
 
@@ -31,9 +35,10 @@ public class CryptoConverter implements AttributeConverter<String, String> {
     public String convertToEntityAttribute(String dbData) {
         if (dbData == null) return null;
         try {
-            return getCrypto().decryptFromBase64(dbData, null);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Không thể giải mã trường", ex);
+            byte[] pt = p().decryptDeterministically(Base64.getDecoder().decode(dbData), AAD);
+            return new String(pt, StandardCharsets.UTF_8);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Decrypt error", e);
         }
     }
 }
