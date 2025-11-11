@@ -1,5 +1,6 @@
 package com.dcm.demo.service.impl;
 
+import com.dcm.demo.config.aes.AesGcmCrypto;
 import com.dcm.demo.dto.request.PatientRequest;
 import com.dcm.demo.dto.request.VerifyOtpRequest;
 import com.dcm.demo.dto.response.PatientResponse;
@@ -26,7 +27,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class PatientServiceImpl implements PatientService {
-
     private final PatientRepository repository;
     private final UserService userService;
     private final UserMapper userMapper;

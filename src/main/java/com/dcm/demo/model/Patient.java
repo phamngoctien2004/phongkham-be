@@ -1,5 +1,7 @@
 package com.dcm.demo.model;
 
+import com.dcm.demo.config.aes.AesGcmCrypto;
+import com.dcm.demo.config.aes.CryptoConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,15 +29,20 @@ public class Patient {
     private String code;
 
     @Column(name = "ho_ten")
+    @Convert(converter = CryptoConverter.class)
     private String fullName;
 
-    @Column(name = "sdt", length = 20)
+    @Column(name = "sdt")
+    @Convert(converter = CryptoConverter.class)
     private String phone;
 
-    @Column(name = "dia_chi", columnDefinition = "TEXT")
+    @Column(name = "dia_chi")
+    @Convert(converter = CryptoConverter.class)
+
     private String address;
 
-    @Column(name = "CCCD", columnDefinition = "TEXT")
+    @Column(name = "CCCD")
+    @Convert(converter = CryptoConverter.class)
     private String cccd;
 
     @Column(name = "ngay_sinh")

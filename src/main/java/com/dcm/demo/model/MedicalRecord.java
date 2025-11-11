@@ -1,5 +1,6 @@
 package com.dcm.demo.model;
 
+import com.dcm.demo.config.aes.CryptoConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,7 +30,7 @@ public class MedicalRecord {
     private Patient patient;
 
     @OneToMany(mappedBy = "medicalRecord")
-    private List<LabOrder>  labOrders;
+    private List<LabOrder> labOrders;
 
     @ManyToOne
     @JoinColumn(name = "id_goi_kham")
@@ -53,18 +54,23 @@ public class MedicalRecord {
     private LocalDateTime date;
 
     @Column(name = "trieu_chung_chinh", columnDefinition = "TEXT")
+    @Convert(converter = CryptoConverter.class)
     private String symptoms;
 
     @Column(name = "kham_lam_sang", columnDefinition = "TEXT")
+    @Convert(converter = CryptoConverter.class)
     private String clinicalExamination;
 
     @Column(name = "chan_doan", columnDefinition = "TEXT")
+    @Convert(converter = CryptoConverter.class)
     private String diagnosis;
 
     @Column(name = "ke_hoach_dieu_tri", columnDefinition = "TEXT")
+    @Convert(converter = CryptoConverter.class)
     private String treatmentPlan;
 
     @Column(name = "ghi_chu_bac_si", columnDefinition = "TEXT")
+    @Convert(converter = CryptoConverter.class)
     private String note;
 
     @Column(name = "phi_kham", precision = 15, scale = 2)
@@ -80,6 +86,7 @@ public class MedicalRecord {
     public enum RecordStatus {
         CHO_KHAM, DANG_KHAM, CHO_XET_NGHIEM, HOAN_THANH, HUY
     }
+
     @Override
     public String toString() {
         return "";
