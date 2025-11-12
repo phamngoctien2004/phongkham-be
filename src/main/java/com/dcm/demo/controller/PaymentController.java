@@ -39,8 +39,8 @@ public class PaymentController {
         return new ApiResponse<>(payosService.checkStatus(orderCode), "Payment status retrieved successfully");
     }
 
-    @PostMapping("/appointment/{id}")
-    public ApiResponse<?> createLinkAppointment(@PathVariable Integer id) {
-        return new ApiResponse<>(payosService.createLinkAppointment(id), "Payment link created successfully");
-    }
+//    @PostMapping("/appointment/{id}")
+//    public ApiResponse<?> createLinkAppointment(@PathVariable Integer id) {
+//        return new ApiResponse<>(payosService.createLinkAppointment(id), "Payment link created successfully");
+//    }
 }

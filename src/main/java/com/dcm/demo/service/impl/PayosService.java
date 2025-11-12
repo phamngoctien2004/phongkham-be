@@ -5,7 +5,8 @@ import com.dcm.demo.dto.request.PaymentRequest;
 import com.dcm.demo.dto.response.InvoiceResponse;
 import com.dcm.demo.dto.response.PaymentResponse;
 import com.dcm.demo.dto.response.PayosResponse;
-import com.dcm.demo.model.*;
+import com.dcm.demo.model.Invoice;
+import com.dcm.demo.model.MedicalRecord;
 import com.dcm.demo.service.interfaces.AppointmentService;
 import com.dcm.demo.service.interfaces.InvoiceService;
 import com.dcm.demo.service.interfaces.MedicalRecordService;
@@ -18,8 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import vn.payos.PayOS;
-import vn.payos.type.CheckoutResponseData;
-import vn.payos.type.PaymentData;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkRequest;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -69,15 +70,16 @@ public class PayosService {
         }
         InvoiceResponse invoiceResponse = invoiceService.createInvoiceForQR(invoiceRequest);
         System.out.println("Invoice ID: " + invoiceResponse.getId());
-        PaymentData paymentData = PaymentData
+        CreatePaymentLinkRequest req = CreatePaymentLinkRequest
                 .builder()
                 .orderCode(orderCode)
-                .amount(invoiceResponse.getExamFee())
+                .amount((long)invoiceResponse.getExamFee())
                 .description("Thanh toán hoa đơn ")
                 .returnUrl("http://localhost:8080")
                 .cancelUrl("http://localhost:8080")
                 .build();
-        return new PaymentResponse(invoiceResponse.getId(), payOS.createPaymentLink(paymentData).getQrCode(), orderCode);
+        CreatePaymentLinkResponse res = payOS.paymentRequests().create(req);;
+        return new PaymentResponse(invoiceResponse.getId(), res.getQrCode(), orderCode);
     }
 
     private PaymentResponse createLinkPaymentV2(PaymentRequest paymentRequest) throws Exception {
@@ -97,15 +99,17 @@ public class PayosService {
                 .map(String::valueOf)
                 .collect(Collectors.joining("D"));
 
-        PaymentData paymentData = PaymentData
+        CreatePaymentLinkRequest req = CreatePaymentLinkRequest
                 .builder()
                 .orderCode(orderCode)
-                .amount(total.intValue())
+                .amount(total.longValue())
                 .description(description)
                 .returnUrl("http://localhost:8080")
                 .cancelUrl("http://localhost:8080")
                 .build();
-        return new PaymentResponse(invoice.getId(), payOS.createPaymentLink(paymentData).getQrCode(), orderCode);
+        CreatePaymentLinkResponse res = payOS.paymentRequests().create(req);;
+
+        return new PaymentResponse(invoice.getId(), res.getQrCode(), orderCode);
     }
 
     @Transactional
@@ -124,44 +128,44 @@ public class PayosService {
         return "PAID".equalsIgnoreCase(response.getData().getStatus());
     }
 
-
-    public PaymentResponse createLinkAppointment(Integer id) {
-        try {
-            Long orderCode = System.currentTimeMillis() / 1000;
-            Appointment appointment = appointmentService.findById(id);
-            int amount = 0;
-            String description = "DLK-" + appointment.getId();
-            InvoiceRequest invoiceRequest = new InvoiceRequest();
-            invoiceRequest.setPaymentMethod(Invoice.PaymentMethod.CHUYEN_KHOAN);
-            invoiceRequest.setOrderCode(orderCode);
-
-            if (appointment.getDoctor() != null) {
-                Doctor doctor = appointment.getDoctor();
-                Degree degree = doctor.getDegree();
-                amount += degree.getExaminationFee().intValue();
-                invoiceRequest.setDoctorId(doctor.getId());//     loi o day nhe
-
-            } else {
-                HealthPlan healthPlan = appointment.getHealthPlan();
-                amount += healthPlan.getPrice().intValue();
-                invoiceRequest.setHealthPlanIds(List.of(healthPlan.getId()));
-            }
-
-            InvoiceResponse invoiceResponse = invoiceService.createInvoiceForQR(invoiceRequest);
-            PaymentData paymentData = PaymentData
-                    .builder()
-                    .orderCode(orderCode)
-                    .amount(amount)
-                    .description(description)
-                    .returnUrl("http://localhost:5173/payment/success")
-                    .cancelUrl("http://localhost:5173/payment/cancel")
-                    .build();
-            CheckoutResponseData responseData = payOS.createPaymentLink(paymentData);
-            System.out.println(responseData.getCheckoutUrl());
-            appointmentService.save(appointment);
-            return new PaymentResponse(invoiceResponse.getId(), responseData.getQrCode(), orderCode);
-        } catch (Exception ignored) {
-            throw new RuntimeException("Error creating payment link for appointment: " + ignored.getMessage());
-        }
-    }
+//
+//    public PaymentResponse createLinkAppointment(Integer id) {
+//        try {
+//            Long orderCode = System.currentTimeMillis() / 1000;
+//            Appointment appointment = appointmentService.findById(id);
+//            int amount = 0;
+//            String description = "DLK-" + appointment.getId();
+//            InvoiceRequest invoiceRequest = new InvoiceRequest();
+//            invoiceRequest.setPaymentMethod(Invoice.PaymentMethod.CHUYEN_KHOAN);
+//            invoiceRequest.setOrderCode(orderCode);
+//
+//            if (appointment.getDoctor() != null) {
+//                Doctor doctor = appointment.getDoctor();
+//                Degree degree = doctor.getDegree();
+//                amount += degree.getExaminationFee().intValue();
+//                invoiceRequest.setDoctorId(doctor.getId());//     loi o day nhe
+//
+//            } else {
+//                HealthPlan healthPlan = appointment.getHealthPlan();
+//                amount += healthPlan.getPrice().intValue();
+//                invoiceRequest.setHealthPlanIds(List.of(healthPlan.getId()));
+//            }
+//
+//            InvoiceResponse invoiceResponse = invoiceService.createInvoiceForQR(invoiceRequest);
+//            PaymentData paymentData = PaymentData
+//                    .builder()
+//                    .orderCode(orderCode)
+//                    .amount(amount)
+//                    .description(description)
+//                    .returnUrl("http://localhost:5173/payment/success")
+//                    .cancelUrl("http://localhost:5173/payment/cancel")
+//                    .build();
+//            CheckoutResponseData responseData = payOS.createPaymentLink(paymentData);
+//            System.out.println(responseData.getCheckoutUrl());
+//            appointmentService.save(appointment);
+//            return new PaymentResponse(invoiceResponse.getId(), responseData.getQrCode(), orderCode);
+//        } catch (Exception ignored) {
+//            throw new RuntimeException("Error creating payment link for appointment: " + ignored.getMessage());
+//        }
+//    }
 }

@@ -2,7 +2,6 @@ package com.dcm.demo.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import vn.payos.type.CheckoutResponseData;
 
 @Data
 @AllArgsConstructor
