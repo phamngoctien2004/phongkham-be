@@ -5,6 +5,7 @@ import com.dcm.demo.dto.response.ApiResponse;
 import com.dcm.demo.model.Appointment;
 import com.dcm.demo.service.interfaces.AppointmentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

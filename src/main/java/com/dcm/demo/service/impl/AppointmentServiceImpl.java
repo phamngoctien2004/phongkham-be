@@ -11,6 +11,8 @@ import com.dcm.demo.model.*;
 import com.dcm.demo.repository.AppointmentRepository;
 import com.dcm.demo.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,6 +26,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository repository;
     private final AppointmentMapper mapper;
@@ -34,8 +37,14 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final PatientMapper patientMapper;
     private final UserService userService;
     private final NotificationService notificationService;
+
     @Override
     @Transactional
+    @CacheEvict(value = "scheduleSlotsByDay", key = "T(String).valueOf('dep-null')" +
+            " + '-' + T(String).valueOf(#request.doctorId ?: 'doc-null')" +
+            " + '-' + #request.date.toString()" +
+            " + '-' + T(String).valueOf('shift-null')"
+    )
     public AppointmentResponse createAppointment(AppointmentRequest request) {
         Appointment appointment = mapper.toEntity(request);
 //
@@ -55,8 +64,29 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setPatient(patient);
         appointment.setStatus(Appointment.AppointmentStatus.DA_XAC_NHAN);
         repository.save(appointment);
-        notificationService.send("Bệnh nhân " + patient.getFullName() +" đã đặt lịch khám ", Notification.NotificationType.DAT_LICH, appointment.getId());
-        return this.toResponse(appointment);
+        notificationService.send("Bệnh nhân " + patient.getFullName() + " đã đặt lịch khám ", Notification.NotificationType.DAT_LICH, appointment.getId());
+
+        AppointmentResponse response = this.toResponse(appointment);
+        try {
+            User user = userService.getCurrentUser();
+
+            emailService.sendTemplate(
+                    user.getEmail(),
+                    "Thông báo đặt lịch thành công",
+                    "appointment",
+                    Map.of("doctorName", response.getDoctorResponse().getFullName(),
+                            "appointmentDate", response.getDate(),
+                            "appointmentTime", response.getTime(),
+                            "patientName", response.getPatientResponse().getFullName(),
+                            "fee", response.getTotalAmount() + " VND"
+                    )
+
+            );
+            log.info("Send email appointment success to " + user.getEmail());
+        } catch (Exception e) {
+            System.out.println("Send email error: " + e.getMessage());
+        }
+        return response;
     }
 
     @Override
@@ -156,7 +186,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (date != null) {
             spec = spec.and(FilterHelper.equal("date", date));
         }
-        if(status == null){
+        if (status == null) {
             spec = spec.and(FilterHelper.equal("status", Appointment.AppointmentStatus.DA_XAC_NHAN));
         }
         if (status != null) {

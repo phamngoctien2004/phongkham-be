@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Thông báo đật lịch khám thành công</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+
+        .header {
+            background-color: #0066cc;
+            color: #fff;
+            padding: 30px 20px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            margin: 0 0 8px 0;
+            font-weight: normal;
+        }
+
+        .greeting {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .content {
+            padding: 25px 20px;
+        }
+
+        .notification-title {
+            color: #222;
+            font-size: 20px;
+            margin: 0 0 15px 0;
+            font-weight: bold;
+        }
+
+        .notification-image {
+            width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .notification-content {
+            color: #444;
+            font-size: 15px;
+            /* white-space: pre-wrap; */
+            margin: 0;
+        }
+
+        .detail-row {
+            padding: 10px 0;
+
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .footer {
+            background-color: #f9f9f9;
+            padding: 15px 20px;
+            border-top: 1px solid #ddd;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Thông báo đật lịch khám thành công</h1>
+        <p class="greeting">Xin chào <span th:text="${patientName}">User</span>,</p>
+    </div>
+
+    <div class="content">
+        <div class="notification-content">
+            <div class="booking-details">
+                <div class="detail-row">
+                    <span class="detail-label">Tên bệnh nhân:</span>
+                    <span class="detail-value" th:text="${patientName}">Pham ngoc t</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Bác sĩ:</span>
+                    <span class="detail-value" th:text="${doctorName}">BS. Trần Thị B</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Ngày khám:</span>
+                    <span class="detail-value" th:text="${appointmentDate}">20/01/2025</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Giờ khám:</span>
+                    <span class="detail-value" th:text="${appointmentTime}">09:00 - 09:30</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phí khám:</span>
+                    <span class="detail-value" th:text="${fee}">200.000 VNĐ</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+        <p>&copy; 2025 Company Name. All rights reserved.</p>
+    </div>
+</div>
+</body>
+
+</html>
