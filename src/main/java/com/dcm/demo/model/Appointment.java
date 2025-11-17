@@ -23,11 +23,11 @@ public class Appointment {
     @Column(name = "id_dat_lich")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_bac_si")
     private Doctor doctor;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_dich_vu_kham")
     private HealthPlan healthPlan;
 
@@ -57,6 +57,8 @@ public class Appointment {
     @JoinColumn(name = "id_benh_nhan")
     private Patient patient;
 
+    @Column(name="email")
+    private String email;
 
     public enum AppointmentStatus {
         DA_XAC_NHAN, KHONG_DEN, HOAN_THANH, HUY

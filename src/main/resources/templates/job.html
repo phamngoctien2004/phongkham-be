@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title}">Thông báo đật lịch khám thành công</title>
+    <title th:text="${title}">Thông báo sắp tới ngày khám bệnh</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -90,7 +90,7 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1 th:text="${title}">Thông báo đật lịch khám thành công</h1>
+        <h1 th:text="${title}">Thông báo sắp tới ngày khám bệnh</h1>
         <p class="greeting">Xin chào <span th:text="${patientName}">User</span>,</p>
     </div>
 
@@ -98,11 +98,14 @@
         <div class="notification-content">
             <div class="booking-details">
                 <div class="detail-row">
+                    <span class="detail-label">Thông báo lịch khám bệnh của bạn bắt đầu vào ngày mai chi tiết:</span>
+                </div>
+                <div class="detail-row">
                     <span class="detail-label">Tên bệnh nhân:</span>
                     <span class="detail-value" th:text="${patientName}">Pham ngoc t</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label" th:text="${label}">Bác sĩ:</span>
+                    <span class="detail-label">Bác sĩ:</span>
                     <span class="detail-value" th:text="${doctorName}">BS. Trần Thị B</span>
                 </div>
                 <div class="detail-row">

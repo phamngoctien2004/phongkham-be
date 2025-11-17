@@ -79,4 +79,11 @@ public class AppointmentController {
                 new ApiResponse<>(appointmentService.checkPayment(id), "Payment status retrieved successfully")
         );
     }
+    @PostMapping("/send-email-success/{id}")
+    public ResponseEntity<?> sendEmailSuccess(@PathVariable Integer id) {
+        appointmentService.sendEmailAppointmentSuccess(id);
+        return ResponseEntity.ok(
+                new ApiResponse<>("", "Payment status retrieved successfully")
+        );
+    }
 }

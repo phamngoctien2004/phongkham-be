@@ -24,4 +24,5 @@ public interface AppointmentService {
     List<AppointmentResponse> findAllByDate();
     void save(Appointment appointment);
     boolean checkPayment(Integer id);
+    void sendEmailAppointmentSuccess(Integer id);
 }

@@ -16,6 +16,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,34 +61,15 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointment.setTotalAmount(degree.getExaminationFee());
             appointment.setDoctor(doctor);
         }
-
+        User user = userService.getCurrentUser();
         Patient patient = patientService.findEntityById(request.getPatientId());
         appointment.setPatient(patient);
         appointment.setStatus(Appointment.AppointmentStatus.DA_XAC_NHAN);
+        appointment.setEmail(user.getEmail());
         repository.save(appointment);
         notificationService.send("Bệnh nhân " + patient.getFullName() + " đã đặt lịch khám ", Notification.NotificationType.DAT_LICH, appointment.getId());
 
-        AppointmentResponse response = this.toResponse(appointment);
-        try {
-            User user = userService.getCurrentUser();
-
-            emailService.sendTemplate(
-                    user.getEmail(),
-                    "Thông báo đặt lịch thành công",
-                    "appointment",
-                    Map.of("doctorName", response.getDoctorResponse().getFullName(),
-                            "appointmentDate", response.getDate(),
-                            "appointmentTime", response.getTime(),
-                            "patientName", response.getPatientResponse().getFullName(),
-                            "fee", response.getTotalAmount() + " VND"
-                    )
-
-            );
-            log.info("Send email appointment success to " + user.getEmail());
-        } catch (Exception e) {
-            System.out.println("Send email error: " + e.getMessage());
-        }
-        return response;
+        return this.toResponse(appointment);
     }
 
     @Override
@@ -264,13 +247,60 @@ public class AppointmentServiceImpl implements AppointmentService {
         return false;
     }
 
-    void sendEmailAppointmentSuccess(String phone, String email) {
-        String subject = "Appointment Confirmation";
-        String template = "welcome";
-        Map<String, Object> dataContext = Map.of(
-                "phoneNumber", phone
-        );
-        emailService.sendTemplate(email, subject, template, dataContext);
+    @Scheduled(cron = "0 0 8 * * *", zone = "Asia/Ho_Chi_Minh")
+    public void sendReminderAppointments() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        List<Appointment> appointments = repository.findByDate(tomorrow);
+
+        for (Appointment appointment : appointments) {
+            try {
+                Patient patient = appointment.getPatient();
+                Doctor doctor = appointment.getDoctor();
+                emailService.sendTemplate(
+                        appointment.getEmail(),
+                        "Appointment Reminder",
+                        "job",
+                        Map.of(
+                                "doctorName", doctor != null ? doctor.getFullName() : "N/A",
+                                "appointmentDate", appointment.getDate(),
+                                "appointmentTime", appointment.getTime(),
+                                "patientName", patient.getFullName(),
+                                "fee", appointment.getTotalAmount() + " VND"
+                        ));
+            } catch (Exception e) {
+                log.error("Failed to send reminder email for appointment ID " + appointment.getId() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    @Async
+    public void sendEmailAppointmentSuccess(Integer id) {
+        Appointment appointment = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+        Doctor doctor = appointment.getDoctor();
+        HealthPlan healthPlan = appointment.getHealthPlan();
+        Patient patient = appointment.getPatient();
+        Map<String, Object> map = new java.util.HashMap<>(Map.of("doctorName", doctor != null ? doctor.getFullName() : healthPlan.getName(),
+                "appointmentDate", appointment.getDate(),
+                "appointmentTime", appointment.getTime(),
+                "patientName", patient.getFullName(),
+                "fee", appointment.getTotalAmount() + " VND"
+        ));
+        if (healthPlan != null) {
+            map.put("label", "Dịch vụ khám");
+        }
+        try {
+            emailService.sendTemplate(
+                    appointment.getEmail(),
+                    "Thông báo đặt lịch thành công",
+                    "appointment",
+                    map
+            );
+            log.info("Send email appointment success to {}", appointment.getEmail());
+        } catch (Exception e) {
+            System.out.println("Send email error: " + e.getMessage());
+        }
     }
 
 
