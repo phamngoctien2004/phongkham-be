@@ -41,13 +41,27 @@ public class ExportHtmlServiceImpl implements ExportHtmlService {
         params.put("appointmentDate", medicalRecord.getDate().toLocalDate());
         params.put("appointmentTime", medicalRecord.getDate().toLocalTime());
 
-        params.put("doctorName", doctor.getFullName());
-        params.put("roomName", departmentService.getRoomFromDepartment(doctor.getDepartment()));
-        params.put("departmentName", doctor.getDepartment().getName());
-
         Locale locale = new Locale("vi", "VN");
         NumberFormat currencyVN = NumberFormat.getCurrencyInstance(locale);
-        String formattedFee = currencyVN.format(medicalRecord.getFee()); // ví dụ examFee = 150000 → "150.000 ₫"
+        String formattedFee;// ví dụ examFee = 150000 → "150.000 ₫"
+
+        if (doctor != null) {
+            params.put("doctorName", doctor.getFullName());
+            params.put("roomName", departmentService.getRoomFromDepartment(doctor.getDepartment()));
+            params.put("departmentName", doctor.getDepartment().getName());
+            formattedFee = currencyVN.format(medicalRecord.getFee());
+        } else {
+
+            HealthPlan healthPlan = medicalRecord.getHealthPlan();
+            Room room = healthPlan.getRoom();
+            Department department = room.getDepartment();
+
+            params.put("service", "Dịch vụ khám");
+            params.put("doctorName", healthPlan.getName());
+            params.put("departmentName", department.getName());
+            params.put("roomName", room.getRoomName() + " - " + room.getRoomNumber());
+            formattedFee = currencyVN.format(healthPlan.getPrice());
+        }
 
         params.put("examFee", formattedFee);
         Context ctx = new Context();

@@ -46,7 +46,7 @@ public class Doctor {
     @JoinColumn(name = "id_khoa")
     private Department department;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_bang_cap")
     private Degree degree;
 
