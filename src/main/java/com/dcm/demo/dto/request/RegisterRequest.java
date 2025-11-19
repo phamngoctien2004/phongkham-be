@@ -22,7 +22,6 @@ public class RegisterRequest {
     private LocalDate birth;
     private User.Gender gender;
 
-    @Min(value = 6)
     private String password;
     private String confirmPassword;
 }
