@@ -67,6 +67,7 @@ public class AppointmentController {
     @PutMapping("/confirm")
     public ResponseEntity<?> confirmAppointment(@RequestBody AppointmentRequest appointmentRequest) {
         appointmentService.changeStatusAppointment(appointmentRequest);
+        System.out.println("a");
         return ResponseEntity.ok(
                 new ApiResponse<>("", "Appointment confirmed successfully")
         );
