@@ -4,6 +4,7 @@ import com.dcm.demo.dto.request.AppointmentRequest;
 import com.dcm.demo.dto.response.AppointmentResponse;
 import com.dcm.demo.dto.response.DoctorResponse;
 import com.dcm.demo.dto.response.HealthPlanResponse;
+import com.dcm.demo.dto.response.InvalidService;
 import com.dcm.demo.helpers.FilterHelper;
 import com.dcm.demo.mapper.AppointmentMapper;
 import com.dcm.demo.mapper.PatientMapper;
@@ -45,11 +46,10 @@ public class AppointmentServiceImpl implements AppointmentService {
     @CacheEvict(value = "scheduleSlotsByDay", key = "T(String).valueOf('dep-null')" +
             " + '-' + T(String).valueOf(#request.doctorId ?: 'doc-null')" +
             " + '-' + #request.date.toString()" +
-            " + '-' + T(String).valueOf('shift-null')"
-    )
+            " + '-' + T(String).valueOf('shift-null')")
     public AppointmentResponse createAppointment(AppointmentRequest request) {
         Appointment appointment = mapper.toEntity(request);
-//
+        //
         if (request.getHealthPlanId() != null) {
             HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
             appointment.setTotalAmount(healthPlan.getPrice());
@@ -67,7 +67,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStatus(Appointment.AppointmentStatus.DA_XAC_NHAN);
         appointment.setEmail(user.getEmail());
         repository.save(appointment);
-        notificationService.send("Bệnh nhân " + patient.getFullName() + " đã đặt lịch khám ", Notification.NotificationType.DAT_LICH, appointment.getId());
+        notificationService.send("Bệnh nhân " + patient.getFullName() + " đã đặt lịch khám ",
+                Notification.NotificationType.DAT_LICH, appointment.getId());
 
         return this.toResponse(appointment);
     }
@@ -93,10 +94,8 @@ public class AppointmentServiceImpl implements AppointmentService {
             end = LocalTime.of(23, 0);
         }
 
-
         return repository.findByDoctorIdAndDateAndTimeIsBetweenAndStatusIn(doctorId, date, to, end, List.of(
-                        Appointment.AppointmentStatus.DA_XAC_NHAN
-                )).stream()
+                Appointment.AppointmentStatus.DA_XAC_NHAN)).stream()
                 .map(Appointment::getTime)
                 .toList();
     }
@@ -143,9 +142,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
         appointment.setStatus(request.getStatus());
 
-//      nguoi xac nhan (khi nao co jwt moi chay duoc)
-//        User user = userService.getCurrentUser();
-//        appointment.setConfirmedBy(user);
+        // nguoi xac nhan (khi nao co jwt moi chay duoc)
+        // User user = userService.getCurrentUser();
+        // appointment.setConfirmedBy(user);
         repository.save(appointment);
         if ("DA_XAC_NHAN".equals(request.getStatus().name())) {
             return "Appointment confirmed successfully";
@@ -162,10 +161,10 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Page<AppointmentResponse> findByPhone(String phone, LocalDate date, Appointment.AppointmentStatus status, Pageable pageable) {
+    public Page<AppointmentResponse> findByPhone(String phone, LocalDate date, Appointment.AppointmentStatus status,
+            Pageable pageable) {
         Specification<Appointment> spec = FilterHelper.contain(phone, List.of(
-                "phone"
-        ));
+                "phone"));
         if (date != null) {
             spec = spec.and(FilterHelper.equal("date", date));
         }
@@ -201,7 +200,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Page<AppointmentResponse> findMyAppointment(LocalDate date, Appointment.AppointmentStatus status, Pageable pageable) {
+    public Page<AppointmentResponse> findMyAppointment(LocalDate date, Appointment.AppointmentStatus status,
+            Pageable pageable) {
         User user = userService.getCurrentUser();
         Patient patient = patientService.findByPhone(user.getPhone());
 
@@ -242,7 +242,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     public boolean checkPayment(Integer id) {
         Appointment appointment = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
-//        Invoice invoice = invoiceService.findByCode(appointment.getInvoiceCode());
+        // Invoice invoice = invoiceService.findByCode(appointment.getInvoiceCode());
 
         return false;
     }
@@ -265,10 +265,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                                 "appointmentDate", appointment.getDate(),
                                 "appointmentTime", appointment.getTime(),
                                 "patientName", patient.getFullName(),
-                                "fee", appointment.getTotalAmount() + " VND"
-                        ));
+                                "fee", appointment.getTotalAmount() + " VND"));
             } catch (Exception e) {
-                log.error("Failed to send reminder email for appointment ID " + appointment.getId() + ": " + e.getMessage());
+                log.error("Failed to send reminder email for appointment ID " + appointment.getId() + ": "
+                        + e.getMessage());
             }
         }
     }
@@ -281,12 +281,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         Doctor doctor = appointment.getDoctor();
         HealthPlan healthPlan = appointment.getHealthPlan();
         Patient patient = appointment.getPatient();
-        Map<String, Object> map = new java.util.HashMap<>(Map.of("doctorName", doctor != null ? doctor.getFullName() : healthPlan.getName(),
-                "appointmentDate", appointment.getDate(),
-                "appointmentTime", appointment.getTime(),
-                "patientName", patient.getFullName(),
-                "fee", appointment.getTotalAmount() + " VND"
-        ));
+        Map<String, Object> map = new java.util.HashMap<>(
+                Map.of("doctorName", doctor != null ? doctor.getFullName() : healthPlan.getName(),
+                        "appointmentDate", appointment.getDate(),
+                        "appointmentTime", appointment.getTime(),
+                        "patientName", patient.getFullName(),
+                        "fee", appointment.getTotalAmount() + " VND"));
         if (healthPlan != null) {
             map.put("label", "Dịch vụ khám");
         }
@@ -295,13 +295,19 @@ public class AppointmentServiceImpl implements AppointmentService {
                     appointment.getEmail(),
                     "Thông báo đặt lịch thành công",
                     "appointment",
-                    map
-            );
+                    map);
             log.info("Send email appointment success to {}", appointment.getEmail());
         } catch (Exception e) {
             System.out.println("Send email error: " + e.getMessage());
         }
     }
 
-
+    @Override
+    public InvalidService getInvalidServices(LocalDate date, LocalTime time, Integer serviceId) {
+        List<LocalTime> invalidTimes = repository.findInvalidHealthPlan(date, time, serviceId);
+        InvalidService invalidService = new InvalidService();
+        invalidService.setInvalidTimes(invalidTimes);
+        invalidService.setId(serviceId);
+        return invalidService;
+    }
 }

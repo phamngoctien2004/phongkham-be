@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -21,35 +22,31 @@ public class AppointmentController {
     @PostMapping
     public ResponseEntity<?> bookAppointment(@RequestBody AppointmentRequest request) {
         return ResponseEntity.ok(
-                new ApiResponse<>(appointmentService.createAppointment(request), "Appointment booked successfully")
-        );
+                new ApiResponse<>(appointmentService.createAppointment(request), "Appointment booked successfully"));
     }
 
     @PutMapping
     public ResponseEntity<?> updateAppointment(@RequestBody AppointmentRequest request) {
         appointmentService.update(request);
         return ResponseEntity.ok(
-                new ApiResponse<>("", "Appointment updated successfully")
-        );
+                new ApiResponse<>("", "Appointment updated successfully"));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getAppointmentsForPayment(@PathVariable Integer id) {
         return ResponseEntity.ok(
-                new ApiResponse<>(appointmentService.getAppointmentResponse(id), "success")
-        );
+                new ApiResponse<>(appointmentService.getAppointmentResponse(id), "success"));
     }
 
     @GetMapping
     public ResponseEntity<?> getAppointmentsByPhone(@RequestParam(value = "phone", required = false) String filter,
-                                                    @RequestParam(value = "date", required = false) LocalDate date,
-                                                    @RequestParam(value = "status", required = false) Appointment.AppointmentStatus status,
-                                                    @RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                    @RequestParam(value = "limit", defaultValue = "10") Integer limit) {
+            @RequestParam(value = "date", required = false) LocalDate date,
+            @RequestParam(value = "status", required = false) Appointment.AppointmentStatus status,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "limit", defaultValue = "10") Integer limit) {
         Pageable pageable = Pageable.ofSize(limit).withPage(page - 1);
         return ResponseEntity.ok(
-                new ApiResponse<>(appointmentService.findByPhone(filter, date, status, pageable), "success")
-        );
+                new ApiResponse<>(appointmentService.findByPhone(filter, date, status, pageable), "success"));
     }
 
     @GetMapping("/me")
@@ -60,8 +57,15 @@ public class AppointmentController {
             @RequestParam(value = "limit", defaultValue = "10") Integer limit) {
         Pageable pageable = Pageable.ofSize(limit).withPage(page - 1);
         return ResponseEntity.ok(
-                new ApiResponse<>(appointmentService.findMyAppointment(date, status, pageable), "success")
-        );
+                new ApiResponse<>(appointmentService.findMyAppointment(date, status, pageable), "success"));
+    }
+
+    @GetMapping("/invalid-services")
+    public ResponseEntity<?> getInvalidServices(@RequestParam(value = "date", required = false) LocalDate date,
+            @RequestParam(value = "time", required = false) LocalTime time,
+            @RequestParam(value = "serviceId", required = false) Integer serviceId) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(appointmentService.getInvalidServices(date, time, serviceId), "success"));
     }
 
     @PutMapping("/confirm")
@@ -69,22 +73,21 @@ public class AppointmentController {
         appointmentService.changeStatusAppointment(appointmentRequest);
         System.out.println("a");
         return ResponseEntity.ok(
-                new ApiResponse<>("", "Appointment confirmed successfully")
-        );
+                new ApiResponse<>("", "Appointment confirmed successfully"));
     }
 
     @GetMapping("/check-payment/{id}")
     public ResponseEntity<?> checkPaymentStatus(@PathVariable Integer id) {
         Appointment appointment = appointmentService.findById(id);
         return ResponseEntity.ok(
-                new ApiResponse<>(appointmentService.checkPayment(id), "Payment status retrieved successfully")
-        );
+                new ApiResponse<>(appointmentService.checkPayment(id), "Payment status retrieved successfully"));
     }
+
     @PostMapping("/send-email-success/{id}")
     public ResponseEntity<?> sendEmailSuccess(@PathVariable Integer id) {
         appointmentService.sendEmailAppointmentSuccess(id);
         return ResponseEntity.ok(
-                new ApiResponse<>("", "Payment status retrieved successfully")
-        );
+                new ApiResponse<>("", "Payment status retrieved successfully"));
     }
+
 }
