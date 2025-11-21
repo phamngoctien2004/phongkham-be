@@ -4,7 +4,7 @@ spring:
   application:
     name: demo
   datasource:
-    url: jdbc:mysql://${DB_HOST:127.0.0.1}:3306/datn
+    url: jdbc:mysql://${DB_HOST:127.0.0.1}:3306/omaica
     username: ${MYSQL_USERNAME:root}
     password: ${MYSQL_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver

@@ -247,7 +247,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return false;
     }
 
-    @Scheduled(cron = "0 0 8 * * *", zone = "Asia/Ho_Chi_Minh")
+    @Scheduled(cron = "0 30 16 * * *", zone = "Asia/Ho_Chi_Minh")
     public void sendReminderAppointments() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         List<Appointment> appointments = repository.findByDate(tomorrow);
