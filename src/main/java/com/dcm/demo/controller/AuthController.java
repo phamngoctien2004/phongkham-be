@@ -56,6 +56,7 @@ public class AuthController {
 
     @PostMapping("/dashboard/login")
     public ResponseEntity<?> dashboardLogin(@RequestBody LoginRequest loginRequest) {
+        System.out.println("s");
         return ResponseEntity.ok(
                 new ApiResponse<>(authService.loginDashboard(loginRequest), "Login successful")
         );
