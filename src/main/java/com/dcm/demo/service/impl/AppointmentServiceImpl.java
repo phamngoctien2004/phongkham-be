@@ -50,6 +50,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     public AppointmentResponse createAppointment(AppointmentRequest request) {
         Appointment appointment = mapper.toEntity(request);
         //
+        System.out.println("ij");
         if (request.getHealthPlanId() != null) {
             HealthPlan healthPlan = healthPlanService.findById(request.getHealthPlanId());
             appointment.setTotalAmount(healthPlan.getPrice());
