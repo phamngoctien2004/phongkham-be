@@ -29,7 +29,7 @@ public class SendMessage {
         Random random = new Random();
         Integer number = 100000 + random.nextInt(900000);
         System.out.println("Random 6 digits: " + number);
-        String message = "you code is " + number;
+        String message = "Your code is " + number;
         Map<String, Object> payload = new HashMap<>();
         payload.put("to", request.getTo());
         payload.put("message", message);
