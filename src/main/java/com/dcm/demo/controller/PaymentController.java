@@ -29,7 +29,7 @@ public class PaymentController {
     public void handleWebhook(@RequestBody WebhookRequest webhookRequest) {
         // Logic to handle webhook notifications
 //        medicalRecordService.webhookPayosForCheckStatus(webhookRequest);
-        System.out.println("sdf");
+        System.out.println("sdfdsafdsf");
     }
 
     //     loi o day nhe
