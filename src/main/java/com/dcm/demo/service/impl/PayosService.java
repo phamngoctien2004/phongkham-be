@@ -30,9 +30,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class PayosService {
-    private final String apiKey = "06eac658-bada-4cee-92a3-48626b520aab";
-    private final String clientId = "355718b7-5f38-44ea-b31e-3e269705aa5b";
-    private final String checksumKey = "91e022cb0777e5700cfe57d541e778bf9c744170c957423ac53cbf8e4d40448a";
+    private final String apiKey = "4b77777d-dc01-4aa4-856c-873414b23ae3";
+    private final String clientId = "cc203012-d56d-4dc7-bccc-4894befa5591";
+    private final String checksumKey = "876c6d0687b6fbb15463f2c522511f8c572c8d68918b16dbc46bd4301584889f";
 
     private final InvoiceService invoiceService;
     private final MedicalRecordService medicalRecordService;
