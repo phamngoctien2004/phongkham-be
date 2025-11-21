@@ -101,22 +101,6 @@
 
 ---
 
-## 🔬 QUẢN LÝ XÉT NGHIỆM (Lab Orders)
-| STT | Phương thức | Endpoint | Mô tả |
-|-----|------------|----------|-------|
-| 1 | GET | `/api/lab-orders` | Lấy tất cả phiếu xét nghiệm |
-| 2 | GET | `/api/lab-orders/doctor` | Lấy phiếu xét nghiệm theo bác sĩ |
-| 3 | GET | `/api/lab-orders/{id}` | Lấy phiếu xét nghiệm theo ID |
-| 4 | GET | `/api/lab-orders/code/{code}` | Lấy phiếu xét nghiệm theo mã |
-| 5 | GET | `/api/lab-orders/{id}/params` | Lấy thông số xét nghiệm |
-| 6 | GET | `/api/lab-orders/processing/{id}` | Lấy và đánh dấu xét nghiệm đang xử lý |
-| 7 | POST | `/api/lab-orders` | Tạo phiếu xét nghiệm |
-| 8 | PUT | `/api/lab-orders` | Cập nhật phiếu xét nghiệm |
-| 9 | PUT | `/api/lab-orders/status` | Cập nhật trạng thái xét nghiệm |
-| 10 | PUT | `/api/lab-orders/complete` | Hoàn thành phiếu xét nghiệm |
-| 11 | DELETE | `/api/lab-orders/{id}` | Xóa phiếu xét nghiệm |
-
----
 
 ## 💰 THANH TOÁN (Payment)
 | STT | Phương thức | Endpoint | Mô tả |
@@ -187,10 +171,3 @@
 
 ---
 
-## 📝 GHI CHÚ
-
-- **Base URL**: `http://localhost:8080`
-- **Authentication**: Bearer Token (JWT)
-- **Content-Type**: `application/json`
-- **Tổng số API**: **127 endpoints**
-- **Ngày tạo**: 20/11/2025
