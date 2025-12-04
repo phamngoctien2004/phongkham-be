@@ -34,7 +34,7 @@ public class ChatController {
                     "/topic/chat/" + newMessage.getConversationId(),
                     newMessage);
         } catch (Exception e) {
-            log.error("❌ Error processing chat message: {}", e.getMessage(), e);
+            log.error("❌ Error processing chat message:fffff {}", e.getMessage(), e);
             throw e; // Re-throw để Spring WebSocket xử lý
         }
     }

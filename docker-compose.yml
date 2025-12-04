@@ -7,7 +7,7 @@ x-image:
 services:
   backend:
     image: *backend_image
-    container_name: API Service
+    container_name: api
     restart: unless-stopped
     env_file:
       - .env
