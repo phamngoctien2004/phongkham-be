@@ -33,6 +33,7 @@ public class ChatController {
             messagingTemplate.convertAndSend(
                     "/topic/chat/" + newMessage.getConversationId(),
                     newMessage);
+                    system.out.println("ok");
         } catch (Exception e) {
             log.error("❌ Error processing chat message: {}", e.getMessage(), e);
             throw e; // Re-throw để Spring WebSocket xử lý
