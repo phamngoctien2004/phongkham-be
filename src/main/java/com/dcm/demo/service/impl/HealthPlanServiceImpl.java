@@ -67,8 +67,10 @@ public class HealthPlanServiceImpl implements HealthPlanService {
         return repository.findAll(keyword, priceFrom, priceTo, type, pageable)
                 .map(it -> {
                     HealthPlanResponse response = mapper.toResponse(it);
-                    response.setRoomNumber(it.getRoom().getRoomNumber());
-                    response.setRoomName(it.getRoom().getRoomName());
+                    if(it.getRoom() != null){
+                        response.setRoomNumber(it.getRoom().getRoomNumber());
+                        response.setRoomName(it.getRoom().getRoomName());
+                    }
                     return response;
                 });
     }
@@ -87,8 +89,11 @@ public class HealthPlanServiceImpl implements HealthPlanService {
         return repository.findAll(spec, Sort.by("code")).stream()
                 .map(it -> {;
                     HealthPlanResponse response = mapper.toResponse(it);
-                    response.setRoomNumber(it.getRoom().getRoomNumber());
-                    response.setRoomName(it.getRoom().getRoomName());
+                    if(it.getRoom() != null){
+                        response.setRoomNumber(it.getRoom().getRoomNumber());
+                        response.setRoomName(it.getRoom().getRoomName());
+                    }
+                 
                     return response;
                 })
                 .toList();
