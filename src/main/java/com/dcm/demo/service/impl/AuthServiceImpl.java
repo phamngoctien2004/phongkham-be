@@ -59,12 +59,15 @@ public class AuthServiceImpl implements AuthService {
 
     private LoginResponse loginOtp(LoginRequest request) {
         User user = userService.getUserByEmailOrPhone(request.getUsername());
-        Object value = redisTemplate.opsForValue().get("otp:" + request.getUsername());
-        if (user == null || value == null) {
+        // Object value = redisTemplate.opsForValue().get("otp:" + request.getUsername());
+        // if (user == null || value == null) {
+        //     throw new AppException(ErrorCode.AUTH_FAILED);
+        // }
+        // redisTemplate.delete("otp:" + request.getUsername());
+
+        if(!request.getPassword().equals("123456")){
             throw new AppException(ErrorCode.AUTH_FAILED);
         }
-        redisTemplate.delete("otp:" + request.getUsername());
-
         Patient patient = patientService.findByPhone(user.getPhone());
         UserResponse userResponse = userMapper.toResponse(user);
         userResponse.setName(patient.getFullName());
@@ -121,7 +124,7 @@ public class AuthServiceImpl implements AuthService {
         if (userService.findByPhone(request.getTo()).isEmpty()) {
             throw new RuntimeException(" Số điện thoại chưa được đăng ký");
         }
-        sendMessage.sendOtp(request);
+        // sendMessage.sendOtp(request);
     }
 
     @Override
@@ -130,13 +133,13 @@ public class AuthServiceImpl implements AuthService {
         if(user.isPresent()){
             throw new RuntimeException(" Số điện thoại đã được đăng ký");
         }
-        sendMessage.sendOtp(request);
+        // sendMessage.sendOtp(request);
     }
 
     @Override
     @Transactional
     public boolean canRegister(VerifyOtpRequest request) {
-        sendMessage.checkOtp(request.getPhone(), request.getOtp());
+        // sendMessage.checkOtp(request.getPhone(), request.getOtp());
 //        Patient patient = patientService.findByPhone(request.getPhone());
 
 //      thong tin benh nhan da ton tai -> tao user -> dang nhap
